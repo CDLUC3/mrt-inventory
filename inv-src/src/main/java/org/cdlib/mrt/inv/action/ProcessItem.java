@@ -1,0 +1,261 @@
+/******************************************************************************
+Copyright (c) 2005-2012, Regents of the University of California
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+ *
+- Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+- Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimer in the
+  documentation and/or other materials provided with the distribution.
+- Neither the name of the University of California nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+*******************************************************************************/
+package org.cdlib.mrt.inv.action;
+
+import java.sql.Connection;
+import java.util.Properties;
+
+import org.cdlib.mrt.zoo.ItemInfo;
+import org.cdlib.mrt.queue.DistributedQueue;
+import org.cdlib.mrt.queue.Item;
+import org.cdlib.mrt.core.ServiceStatus;
+import org.cdlib.mrt.core.ProcessStatus;
+import org.cdlib.mrt.zoo.ZooManager;
+import org.cdlib.mrt.zoo.ZooQueue;
+import org.cdlib.mrt.inv.utility.DPRFileDB;
+import org.cdlib.mrt.utility.LoggerInf;
+import org.cdlib.mrt.utility.TException;
+import org.cdlib.mrt.utility.ZooCodeUtil;
+
+/**
+ * Run fixity
+ * @author dloy
+ */
+public class ProcessItem
+        extends InvActionAbs
+        implements Runnable
+{
+
+    protected static final String NAME = "ProcessItem";
+    protected static final String MESSAGE = NAME + ": ";
+    protected static final boolean DEBUG = false;
+    protected static final boolean STATUS = true;
+ 
+    protected ZooQueue zooQueue = null;
+    protected ZooManager zooManager = null;
+    protected Item item = null;
+    protected ItemInfo info = null;
+    protected TException saveTex = null;
+    protected ProcessStatus processStatus = null;
+    protected Properties prop = null;
+    protected String manifestURLS = null;
+    protected DPRFileDB db = null;
+    protected Connection connection = null;
+    protected boolean shutdown = false;
+    protected long ijob = 0;
+    protected SaveObject saveObject = null;
+ 
+     
+    public static ProcessItem getShutdownProcessItem()
+        throws TException
+    {
+        return new ProcessItem(true);
+    } 
+    
+    protected ProcessItem(boolean shutdown)
+        throws TException
+    {
+        super(null, null);
+        this.shutdown = shutdown;
+    }
+    
+    public static ProcessItem getProcessItem(
+            long ijob,
+            ZooQueue zooQueue,
+            DPRFileDB db,
+            Item item)
+        throws TException
+    {
+        LoggerInf logger = zooQueue.getLogger();
+        return new ProcessItem(ijob, zooQueue, db, item, logger);
+    }
+    
+    protected ProcessItem(
+            long ijob,
+            ZooQueue zooQueue,
+            DPRFileDB db,
+            Item item,
+            LoggerInf logger)
+        throws TException
+    {
+        super(null, logger);
+        this.ijob = ijob;
+        this.zooQueue = zooQueue;
+        this.item = item;
+        this.db = db;
+        validate();
+        if (zooQueue.getZooManager().getZookeeperStatus() == ServiceStatus.shutdown) {
+            this.shutdown = true;
+        }
+    }
+    
+    private void validate()
+        throws TException
+    {
+        if (zooQueue == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "zooQueue null");
+        if (item == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "item null");
+        info = new ItemInfo();
+        info.setWithItem(zooQueue.getZooNode(), item.getId(), item);
+        byte[] bytes = item.getData();
+        prop = ZooCodeUtil.decodeItem(bytes);
+        manifestURLS = prop.getProperty("manifestURL");
+        if (manifestURLS == null) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "manifestURL null");
+        }
+        connection = getNewConnection();
+        if (connection == null) return;
+        if (DEBUG) System.out.println(MESSAGE + "connection returned");
+        saveObject = SaveObject.getSaveObject(manifestURLS, connection, logger);
+        
+    }
+
+    public void run()
+    {
+            try {
+                process();
+                String threadName = Thread.currentThread().getName();
+                String pmsg = "ProcessItem(" + ijob + " - " + threadName + "):"
+                    + " - id:" + item.getId()
+                    + " - manifestURLS:" + manifestURLS
+                    + " - status:" + processStatus;
+                logger.logMessage(pmsg, 1, true);
+                if (DEBUG) System.out.println(pmsg);
+                
+            } catch (TException tex) {
+                saveTex = tex;
+                processStatus = ProcessStatus.exception;
+            }
+
+    }
+   
+    public void process()
+       throws TException
+    {
+        try {
+            if (connection == null) return;
+            if (DEBUG) System.out.println(MESSAGE + "begin process");
+            saveObject.process();
+            processStatus = ProcessStatus.completed;
+            setQueue(Item.COMPLETED);
+            
+        } catch (TException tex) {
+            resetQueue();
+            
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex) { }
+            if (STATUS) System.out.println(MESSAGE + "process "
+                    + " - manifestURLS=" + manifestURLS
+                    + " - processStatus=" + processStatus
+                    );
+        }
+    }
+   
+    public void resetQueue()
+       throws TException
+    {
+        try {
+            setQueue(Item.FAILED);
+            processStatus = ProcessStatus.failed;
+            
+        } catch (Exception ex) {
+            throw new TException(ex);
+        }
+    }
+   
+    public void setQueue(byte itemStatus)
+       throws TException
+    {
+        //CONSUMED = (byte) 1;
+        //DELETED  = (byte) 2;
+        //FAILED   = (byte) 3;
+        //COMPLETED= (byte) 4;
+        try {
+            DistributedQueue queue = zooQueue.getQueue();
+            queue.updateStatus(item.getId(), item.getStatus(), itemStatus);
+            
+        } catch (Exception ex) {
+            throw new TException(ex);
+        }
+    }
+
+    public ProcessStatus getProcessStatus() {
+        return processStatus;
+    }
+
+    public String getManifestURLS() {
+        return manifestURLS;
+    }
+
+    public boolean isShutdown() {
+        return shutdown;
+    }
+        
+    protected Connection getNewConnection()
+        throws TException
+    {
+        
+        Connection connection = null;
+        long sleep = 60000;
+        boolean sleepConnection = false;
+        for (int i=0; i<300; i++) {
+            try {
+                connection = db.getConnection(false);
+                if (connection.isValid(3)) return connection;
+                System.out.println("Connection not valid");
+                try {
+                    connection.close();
+                } catch (Exception ex) {}    
+                if (DEBUG) System.out.println("Invalid connection sleep");
+                sleepConnection = true;
+
+            } catch (Exception connEx) {
+                sleepConnection = true;
+            }
+            if (sleepConnection) {
+                if (zooQueue.getZooManager().getZookeeperStatus() == ServiceStatus.shutdown) {
+                    return null;
+                }   
+                sleepConnection = false;
+                try {   
+                    if (DEBUG) System.out.println("Connection sleep:" + sleep);
+                    Thread.sleep(sleep);
+                } catch (Exception ex) {}
+            }
+            String msg = "Attempt reconnect:" + i;
+            System.out.println(msg);
+            logger.logError(msg, 1);
+        }
+        throw new TException.SQL_EXCEPTION("Database unavailable");
+    }
+    
+}
+
