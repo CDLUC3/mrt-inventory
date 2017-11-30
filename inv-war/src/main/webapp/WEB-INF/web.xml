@@ -30,12 +30,8 @@
             <param-value>resources/Mysql.properties</param-value>
         </init-param>
         <init-param>
-            <param-name>localProperties</param-name>
-            <param-value>resources/InvLocal.properties</param-value>
-        </init-param>
-        <init-param>
-            <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-            <param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value>
+            <param-name>org.glassfish.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>org.glassfish.jersey.api.container.filter.LoggingFilter</param-value>
         </init-param>
     </servlet>
     
