@@ -32,6 +32,7 @@ package org.cdlib.mrt.inv.app.jersey.inv;
 import org.cdlib.mrt.inv.app.InvServiceInit;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Properties;
 
 
 import javax.servlet.ServletConfig;
@@ -63,11 +64,14 @@ import org.cdlib.mrt.inv.service.PrimaryLocalState;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.inv.service.VersionsState;
 import org.cdlib.mrt.core.Identifier;
+import org.cdlib.mrt.inv.service.InvProcessState;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.TFrame;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
+import org.cdlib.mrt.zoo.ZooManager;
+import org.cdlib.mrt.zoo.ZooQueue;
 
 /**
  * Thin Jersey layer for inv handling
@@ -394,6 +398,51 @@ public class JerseyInv
             boolean doCheckVersion = setBool(doCheckVersionS, true, true, true);
             logger = invService.getLogger();
             StateInf responseState = invService.add(url, doCheckVersion);
+            return getStateResponse(responseState, formatType, logger, cs, sc);
+
+        } catch (TException tex) {
+            return getExceptionResponse(tex, formatType, logger);
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+
+    @POST
+    @Path("addzoo")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response addMultipartZoo(
+            @DefaultValue("") @FormDataParam("zoourl") String manifestUrl,
+            @DefaultValue("xhtml") @FormDataParam("responseForm") String formatType,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        
+        LoggerInf logger = defaultLogger;
+        try {
+            log("addMultipartZoo process:"
+                    + " - manifestUrl=" + manifestUrl
+                    + " - formatType=" + formatType
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            Properties loadProp = new Properties();
+            loadProp.setProperty("manifestURL", manifestUrl);
+            ZooManager zooManager = invService.getZooManager();
+            ZooQueue zooQueue = ZooQueue.getZooQueue(zooManager);
+            for (int b=0; b<4; b++) {
+                try {
+                    zooQueue.getQueue().cleanup((byte)b);
+                    System.out.println("cleanup:" + b);
+                } catch (Exception e) { 
+                    System.out.println("exception:" + b);
+                }
+            }
+            invService.addZoo(loadProp, zooQueue);
+            logger = invService.getLogger();
+            InvProcessState responseState = new InvProcessState(manifestUrl, "addMultiPartZoo");
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {
