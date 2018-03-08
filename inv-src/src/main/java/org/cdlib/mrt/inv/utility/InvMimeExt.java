@@ -214,7 +214,7 @@ public class InvMimeExt
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<KeyContent> list = new ArrayList();
+        ArrayList<KeyContent> list = new ArrayList<>();
         for (Properties prop : propArray) {
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
             list.add(new KeyContent(mimeType, fileExtension, prop));

@@ -128,7 +128,7 @@ public class VersionsState
     
     public Set<String> retrieveKeys() 
     {
-        HashMap<String,String>  map = new HashMap();
+        HashMap<String,String>  map = new HashMap<>();
         try {
             for (Version version : versions) {
                 List<VFile> vFiles = version.getFiles();

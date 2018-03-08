@@ -1004,7 +1004,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<InvFile> files = new ArrayList();
+        ArrayList<InvFile> files = new ArrayList<>();
         for (int f = 0; f<propArray.length; f++) {
             InvFile invFile =  new InvFile(propArray[f], logger);
             files.add(invFile);
@@ -1121,7 +1121,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<InvGCopy> copiesList = new ArrayList(propArray.length);
+        ArrayList<InvGCopy> copiesList = new ArrayList<>(propArray.length);
         
         for (Properties prop : propArray) {
             InvGCopy copy = new InvGCopy(prop, logger);
@@ -1322,7 +1322,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<InvFile> list = new ArrayList();
+        ArrayList<InvFile> list = new ArrayList<>();
         for (Properties prop : propArray) {
             System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
             String billableSizeS = prop.getProperty("billable_size");
@@ -1363,7 +1363,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<InvFile> list = new ArrayList();
+        ArrayList<InvFile> list = new ArrayList<>();
         for (Properties prop : propArray) {
             //System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
             InvFile file = new InvFile(prop, logger);
@@ -1393,7 +1393,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<InvNodeObject> list = new ArrayList();
+        ArrayList<InvNodeObject> list = new ArrayList<>();
         for (Properties prop : propArray) {
             log(PropertiesUtil.dumpProperties("***out dump***", prop));
             InvNodeObject nodeObject = new InvNodeObject(prop, logger);
@@ -1429,7 +1429,7 @@ public class InvDBUtil
             System.out.println("sql:" + sql);
             return null;
         }
-        ArrayList<InvNodeObject> list = new ArrayList();
+        ArrayList<InvNodeObject> list = new ArrayList<>();
         for (Properties prop : propArray) {
             System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
             InvNodeObject nodeObject = new InvNodeObject(prop, logger);
@@ -1499,7 +1499,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<Integer> list = new ArrayList();
+        ArrayList<Integer> list = new ArrayList<>();
         for (Properties prop : propArray) {
             System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
             String nodeS = prop.getProperty("number");
@@ -1549,7 +1549,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<Long> list = new ArrayList();
+        ArrayList<Long> list = new ArrayList<>();
         for (Properties prop : propArray) {
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***id dump***", prop));
             String nodeS = prop.getProperty("inv_node_id");
@@ -1644,7 +1644,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<Long> list = new ArrayList();
+        ArrayList<Long> list = new ArrayList<>();
         for (Properties prop : propArray) {
             String nodeseqS = prop.getProperty("inv_node_id");
             if (nodeseqS == null) continue;
@@ -1758,7 +1758,7 @@ public class InvDBUtil
         String sql = "select * from " + ContentAbs.LOCALS 
                 + " where inv_object_ark='" + objectID.getValue() + "'"
                 + ";";
-        ArrayList<InvLocalID> localList = new ArrayList();
+        ArrayList<InvLocalID> localList = new ArrayList<>();
         log("sql:" + sql);
         Properties[] propArray = DBUtil.cmd(connection, sql, logger);
         
@@ -1890,7 +1890,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<Properties> list = new ArrayList();
+        ArrayList<Properties> list = new ArrayList<>();
         for (Properties prop : propArray) {
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
             list.add(prop);
@@ -1917,7 +1917,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        ArrayList<Properties> list = new ArrayList();
+        ArrayList<Properties> list = new ArrayList<>();
         for (Properties prop : propArray) {
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
             list.add(prop);

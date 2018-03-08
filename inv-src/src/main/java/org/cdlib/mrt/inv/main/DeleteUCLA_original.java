@@ -353,7 +353,7 @@ public class DeleteUCLA_original
             System.out.println("sql:" + objectSql);
             return null;
         }
-        ArrayList<Long> list = new ArrayList();
+        ArrayList<Long> list = new ArrayList<>();
         for (Properties prop : propArray) {
             String objectSeqS = prop.getProperty("inv_object_id");
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***getbjectNodesUCLA***", prop));

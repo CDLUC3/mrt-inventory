@@ -118,7 +118,7 @@ public class LocalMap
             if (DEBUG) System.out.println("Set exists:" + lcs.isExists());
             List<String> listLocal = getLocalIDs(localIDs);
             DBAdd dbAdd = new DBAdd(connection, logger);
-            ArrayList<InvLocalID> invLocalIDList = new ArrayList();
+            ArrayList<InvLocalID> invLocalIDList = new ArrayList<>();
             for (String localID : listLocal) {
                 InvLocalID invLocalID = getInvLocalID(objectIDS, ownerIDS, localID, logger);
                 long localid = dbAdd.replace(invLocalID);
@@ -249,7 +249,7 @@ public class LocalMap
         try {
             List<String> listLocal = getLocalIDs(localIDs);
             connection.setAutoCommit(true);
-            ArrayList<InvLocalID> invLocalIDList = new ArrayList();
+            ArrayList<InvLocalID> invLocalIDList = new ArrayList<>();
             Identifier currentObjectID = null;
             Identifier primaryID = null;
             boolean match = true;

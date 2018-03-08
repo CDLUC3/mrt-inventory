@@ -59,7 +59,7 @@ public class TestServicePrimary
     {
 
         TFrame tFrame = null;
-        ArrayList<String> list = new ArrayList();
+        ArrayList<String> list = new ArrayList<>();
         try {
             String propertyList[] = {
                 "resources/InvLogger.properties",

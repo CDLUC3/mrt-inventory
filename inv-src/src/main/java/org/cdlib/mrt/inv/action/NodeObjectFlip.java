@@ -70,7 +70,7 @@ public class NodeObjectFlip
     protected InvObject invObject = null;
     protected InvNodeObject newPrimary = null;
     protected List<InvNodeObject> nodeObjects = null;
-    protected ArrayList<InvNodeObject> flipObjects = new ArrayList();
+    protected ArrayList<InvNodeObject> flipObjects = new ArrayList<>();
     protected boolean commit = false;
     protected DBAdd dbAdd = null;
     protected DateState replicatedDate = null;

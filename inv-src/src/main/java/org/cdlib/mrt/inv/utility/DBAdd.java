@@ -56,7 +56,7 @@ public class DBAdd
     private static final boolean DEBUG = false;
     
 
-    protected ArrayList<ContentAbs> addArray = new ArrayList();
+    protected ArrayList<ContentAbs> addArray = new ArrayList<>();
     protected LoggerInf logger = null;
     protected Connection connection = null;
     

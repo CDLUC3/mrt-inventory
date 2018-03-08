@@ -148,7 +148,7 @@ public class StoreCollections
     }
 
 
-    public static ArrayList extractCollections(String erc)
+    public static ArrayList<String> extractCollections(String erc)
         throws TException
     {
         ArrayList<String> list = new ArrayList<String>();

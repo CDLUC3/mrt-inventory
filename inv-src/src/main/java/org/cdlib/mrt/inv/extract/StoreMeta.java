@@ -157,7 +157,7 @@ public class StoreMeta
         return metaComponents.size();
     }
     
-    public List getMetaComponents()
+    public List<MatchMeta> getMetaComponents()
     {
         return metaComponents;
     }

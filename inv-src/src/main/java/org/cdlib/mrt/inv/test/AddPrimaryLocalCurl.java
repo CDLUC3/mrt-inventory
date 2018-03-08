@@ -72,7 +72,7 @@ public class AddPrimaryLocalCurl
     {
 
         TFrame tFrame = null;
-        ArrayList<String> list = new ArrayList();
+//        ArrayList<String> list = new ArrayList();
         try {
             String propertyList[] = {
                 "resources/InvLogger.properties",
@@ -295,12 +295,12 @@ public class AddPrimaryLocalCurl
         }
     }
     
-    private ArrayList getLocalList(String localIDs)
+    private ArrayList<String> getLocalList(String localIDs)
         throws TException
     {
         try {
             String [] ids = localIDs.split("\\s*\\;\\s*");
-            ArrayList<String> list = new ArrayList();
+            ArrayList<String> list = new ArrayList<>();
             boolean first = true;
             for (String id : ids) {
                 if (first) {

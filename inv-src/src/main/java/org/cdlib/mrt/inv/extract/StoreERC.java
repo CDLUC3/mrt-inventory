@@ -204,7 +204,7 @@ public class StoreERC
     }
     
 
-    public static LinkedHashList extractERC(String erc)
+    public static LinkedHashList<String, String> extractERC(String erc)
         throws TException
     {
         LinkedHashList<String, String> list = new LinkedHashList<String, String>();
@@ -262,7 +262,7 @@ public class StoreERC
         }
     }
     
-    public List getWList(String w)
+    public List<String> getWList(String w)
         throws TException
     {
         try {

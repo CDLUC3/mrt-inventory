@@ -57,7 +57,7 @@ public class LocalContainerState
     protected Long deleteCnt = null;
     protected Boolean match = null;
     protected Boolean exists = null;
-    protected Vector<PrimaryLocalState> localList = new Vector();
+    protected Vector<PrimaryLocalState> localList = new Vector<>();
     protected Vector<PrimaryLocalState> local = null;
     
     public static LocalContainerState retrieveEmptyLocalContainerState()
@@ -152,7 +152,7 @@ public class LocalContainerState
         throws TException
     {
         if (invLocalIDList == null) {
-            localList = new Vector();
+            localList = new Vector<>();
             return;
         }
          

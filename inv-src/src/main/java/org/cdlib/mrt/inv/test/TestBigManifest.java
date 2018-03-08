@@ -65,7 +65,7 @@ public class TestBigManifest
     
     private LoggerInf logger = null;
     
-    private HashMap<String, Integer> map = new HashMap();
+    private HashMap<String, Integer> map = new HashMap<>();
     private File inFile = null;
     protected int lineCnt = 0;
     

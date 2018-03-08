@@ -233,7 +233,7 @@ public class TestNodeObjectFlip
     {
         try {
             String [] ids = localIDs.split("\\s*\\;\\s*");
-            ArrayList<String> list = new ArrayList();
+            ArrayList<String> list = new ArrayList<>();
             boolean first = true;
             for (String id : ids) {
                 if (first) {

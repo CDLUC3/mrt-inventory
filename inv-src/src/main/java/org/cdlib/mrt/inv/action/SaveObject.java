@@ -113,7 +113,7 @@ public class SaveObject
     protected String storageBase = null;
     protected DBAdd dbAdd = null;
     protected Tika tika = null;
-    protected HashMap<String,String> mimeList = new HashMap();
+    protected HashMap<String,String> mimeList = new HashMap<>();
     protected InvObject invObject = null;
     protected String ingestURL = null;
     protected Role role = null;
