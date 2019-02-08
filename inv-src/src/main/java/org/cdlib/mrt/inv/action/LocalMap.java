@@ -104,7 +104,7 @@ public class LocalMap
                 if (primaryID.getValue().equals(objectIDS)) {
                     lcs.setExists(true);
                     if (DEBUG) System.out.println("Exists:" + primaryID.getValue());
-                    return lcs;
+                    //return lcs;
                 } else {
                     throw new TException.REQUEST_INVALID(MESSAGE
                         + " objectID already exists and does not match add objectID"
@@ -113,20 +113,23 @@ public class LocalMap
                         + "  - connection=" + connection.getAutoCommit()
                     );
                 }
+            } else {
+                primaryID = new Identifier(objectIDS);
+                lcs.setExists(false);
             }
-            lcs.setExists(false);
             if (DEBUG) System.out.println("Set exists:" + lcs.isExists());
             List<String> listLocal = getLocalIDs(localIDs);
             DBAdd dbAdd = new DBAdd(connection, logger);
             ArrayList<InvLocalID> invLocalIDList = new ArrayList<>();
             for (String localID : listLocal) {
+                if (DEBUG) System.out.println("LocalMap Add:" + localID);
                 InvLocalID invLocalID = getInvLocalID(objectIDS, ownerIDS, localID, logger);
                 long localid = dbAdd.replace(invLocalID);
                 invLocalID.setId(localid);
                 invLocalIDList.add(invLocalID);
             }
             connection.commit();
-            primaryID = new Identifier(objectIDS);
+            //primaryID = new Identifier(objectIDS);
             
             
             LocalContainerState state
@@ -136,7 +139,7 @@ public class LocalMap
                                 localIDs,
                                 true,
                                 invLocalIDList);
-            state.setExists(false);
+            state.setExists(lcs.isExists());
             if (DEBUG) System.out.println(state.dump("Test"));
             return state;
             
