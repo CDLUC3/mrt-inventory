@@ -53,6 +53,7 @@ public class VersionsState
     protected DateState reportDate = new DateState();
     protected String container = null;
     protected String bucketProperty = null;
+    protected String cloudType = null;
     protected Long node = null;
     protected long currentVersion = 0;
     protected ArrayList<Version> versions = new ArrayList<Version>();
@@ -124,6 +125,14 @@ public class VersionsState
 
     public void setBucketProperty(String bucketProperty) {
         this.bucketProperty = bucketProperty;
+    }
+
+    public String getCloudType() {
+        return cloudType;
+    }
+
+    public void setCloudType(String cloudType) {
+        this.cloudType = cloudType;
     }
     
     public Set<String> retrieveKeys() 

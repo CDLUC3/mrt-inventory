@@ -29,11 +29,13 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.action;
 
+import org.cdlib.mrt.inv.utility.NodeIOInv;
 import java.io.File;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Properties;
 import org.cdlib.mrt.core.Identifier;
+import static org.cdlib.mrt.inv.utility.NodeIOInv.getCloudNode;
 import org.cdlib.mrt.inv.content.InvFile;
 import org.cdlib.mrt.inv.content.InvNode;
 import org.cdlib.mrt.inv.content.InvObject;
@@ -116,7 +118,8 @@ public class Versions
     {
         Properties versionsProp = InvDBUtil.getVersionsStuff(objectID, connection, logger);
         String nodeS = versionsProp.getProperty("number");
-        String bucket = versionsProp.getProperty("logical_volume");
+        long node = Long.parseLong(nodeS);
+        String bucket = getContainer(versionsProp);
         String ext = versionsProp.getProperty("md5_3");
         int pos = bucket.lastIndexOf("__");
         if ((pos >= 0) && (bucket.length() - pos == 2)) {
@@ -128,10 +131,38 @@ public class Versions
             containerProp = bucket.substring(posProp+1);
             bucket = bucket.substring(0, posProp);
         }
-        long node = Long.parseLong(nodeS);
         state.setContainer(bucket);
         state.setBucketProperty(containerProp);
         state.setNode(node);
+    }
+    
+    private String getContainer(Properties versionsProp)
+        throws TException
+    {
+        NodeIOInv.AccessNode accessNode = null;
+        String bucket = versionsProp.getProperty("logical_volume");
+        if (bucket == null) return null;
+        
+        if (!bucket.startsWith("nodes")) {
+            return bucket;
+        }
+        
+        String[] parts = bucket.split("\\s*\\|\\s*");
+        if (parts.length != 2) {
+            return bucket;
+        }
+        
+        //form nodeIOName|nodeNumber
+        String nodeIOName = parts[0];
+        String nodeS = parts[1];
+        int nodeNumber = Integer.parseInt(nodeS);
+        System.out.println("Versions NodeIOInv: "
+                + " - nodeIOName:" + nodeIOName
+                + " - nodeNumber:" + nodeNumber
+        );
+        accessNode = NodeIOInv.getCloudNode(nodeIOName, nodeNumber, logger);
+        state.setCloudType(accessNode.serviceType);
+        return accessNode.container;
     }
     
     protected void addVersions()

@@ -64,6 +64,7 @@ import org.cdlib.mrt.zoo.ZooQueue;
 import org.cdlib.mrt.queue.Item;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
+import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.URLEncoder;
 
@@ -191,7 +192,11 @@ public class InvService
     {
         if (DEBUG) System.out.print("setFileNode entered:" + nodeNum);
         Connection connection = invServiceProperties.getConnection(false);
-        SaveNode saveNode = SaveNode.getSaveNode(nodeNum, connection, logger);
+        
+        
+        SaveNode saveNode = SaveNode.getSaveNode(nodeNum, connection, 
+                invServiceProperties.getStorageBase(),
+                logger);
         saveNode.resetInvNode();
         InvSelectState state = new InvSelectState(saveNode.getCanProp());
         return state;

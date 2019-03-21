@@ -58,17 +58,24 @@ public class VersionsTest3
         try {
             String propertyList[] = {
                 "resources/InvLogger.properties",
+                "resources/VersionTest.properties",
                 "resources/Inv.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties invProp  = tFrame.getProperties();
             LoggerInf logger = new TFileLogger("testFormatter", 10, 10);
             db = new DPRFileDB(logger, invProp);
             Connection connect = db.getConnection(true);
-            Identifier objectID = new Identifier("ark:/99999/fk4x92x0c");
+            Identifier objectID = new Identifier("ark:/99999/fk4x92x0c"); // stg
+            objectID = new Identifier("ark:/99999/fk42n5jrg"); //dev
+            objectID = new Identifier("ark:/99999/fk4h71nh38"); //dev 5001
+            objectID = new Identifier("ark:/99999/testinv9502"); //stg 9502
+            objectID = new Identifier("ark:/99999/fk4xs60c0j"); //dev 9001
+            objectID = new Identifier("ark:/99999/fk4h71nh38"); //dev 5001
+            Long testVersion = null; //3L;
             //Identifier objectID = new Identifier("ark:/99999/xxxxx");
             
             
-            test(objectID, null, connect, logger);
+            test(objectID, testVersion, connect, logger);
 
         } catch(Exception e) {
                 e.printStackTrace();

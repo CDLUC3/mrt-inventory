@@ -57,6 +57,7 @@ public class SaveNode
     protected InvNode canInvNode = null;
     protected int nodeNumber = 0;
     protected DBAdd dbAdd = null;
+    protected String storageBase = null;
     
     public static SaveNode getSaveNode(
             int nodeNumber,
@@ -64,18 +65,30 @@ public class SaveNode
             LoggerInf logger)
         throws TException
     {
-        return new SaveNode(nodeNumber, connection, logger);
+        return new SaveNode(nodeNumber, connection, null, logger);
+    }
+    
+    public static SaveNode getSaveNode(
+            int nodeNumber,
+            Connection connection,
+            String storageBase,
+            LoggerInf logger)
+        throws TException
+    {
+        return  new SaveNode(nodeNumber, connection, storageBase, logger);
     }
     
     protected SaveNode(
             int nodeNumber,
             Connection connection,
+            String storageBase,
             LoggerInf logger)
         throws TException
     {
         super(connection, logger);
         try {
             this.nodeNumber = nodeNumber;
+            this.storageBase = storageBase;
             dbAdd = new DBAdd(connection, logger);
             validate();
         
@@ -122,8 +135,14 @@ public class SaveNode
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "Existing db invNode required for this process");
             }
             
-            System.out.println(PropertiesUtil.dumpProperties("sourceInvNode", sourceInvNode.retrieveProp()));
-            String baseUrl = sourceInvNode.getBaseURL();
+            String baseUrl = storageBase;
+            if (baseUrl == null) {
+                baseUrl = sourceInvNode.getBaseURL();
+            }
+            System.out.println("***SaveNode:"
+                    + " - baseUrl=" + baseUrl
+                    + " - nodeNumber=" + nodeNumber
+            );
             StoreState storeState = StoreState.getStoreState(baseUrl, nodeNumber, logger);
             canInvNode = new InvNode(logger);
             canInvNode.setState(storeState);
@@ -174,6 +193,6 @@ public class SaveNode
         }
         return canInvNode.retrieveProp();
     }
-    
+
 }
 
