@@ -101,6 +101,9 @@ public class Versions
         }
         try {
             this.invObject = InvDBUtil.getObject(objectID, connection, logger);
+            if (this.invObject == null) {
+                throw new TException.REQUESTED_ITEM_NOT_FOUND("Versions - unable to locate:" + objectID.getValue());
+            }
             state.setCurrentVersion(invObject.getVersionNumber());
             setStateStuff();
             addVersions();
