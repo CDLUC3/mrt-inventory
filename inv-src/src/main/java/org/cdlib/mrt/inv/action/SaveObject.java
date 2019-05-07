@@ -1550,8 +1550,8 @@ public class SaveObject
             if (StringUtil.isEmpty(key)) {
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "setBillable empty key");
             }
-            String [] parts = key.split("\\s*\\|\\s*");
-            if (parts.length != 3) {
+            String [] parts = key.split("\\s*\\|\\s*", 3);
+            if (parts.length < 3) {
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "setBillable parts invalid=" + parts.length
                         + " - key=" + key
                         + " - objectID=" + objectID.getValue()
