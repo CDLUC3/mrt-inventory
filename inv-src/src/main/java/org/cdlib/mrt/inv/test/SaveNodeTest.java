@@ -50,14 +50,19 @@ public class SaveNodeTest
         try {
             String propertyList[] = {
                 "resources/InvLogger.properties",
-                "resources/InvTest.properties",
-                "resources/Inv.properties"};
+                "resources/SaveNodeTest.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties invProp  = tFrame.getProperties();
+            System.out.println(PropertiesUtil.dumpProperties("invProp", invProp));
             LoggerInf logger = new TFileLogger("testFormatter", 10, 10);
             db = new DPRFileDB(logger, invProp);
+            String storageBase=
+                    "http://uc3-mrtreplic2-dev:35121";
             
-            test(db, 910, logger, true);
+            //test(db, 9513, logger, storageBase, false);
+            test(db, 9513, logger, storageBase, true);
+            //test(db, 9513, logger, null, true);
+            //test(db, 9666, logger, storageBase, true);
             //test(db, 8001, logger, true);
             //test(db, 7001, logger, true);
 
@@ -80,17 +85,18 @@ public class SaveNodeTest
             DPRFileDB db,
             int nodeNumber,
             LoggerInf logger,
+            String storageBase,
             boolean reset
             )
         throws TException
     {
         Connection connect = null;
         try {
-            connect = db.getConnection(true);
+            connect = db.getConnection(false);
             System.out.println(MESSAGE + "TEST"
                     + " - nodeNumber=" + nodeNumber + "\n"
             );
-            SaveNode saveNode = SaveNode.getSaveNode(nodeNumber, connect, logger);
+            SaveNode saveNode = SaveNode.getSaveNode(nodeNumber, connect, storageBase, logger);
             if (reset) {
                 saveNode.resetInvNode();
             }

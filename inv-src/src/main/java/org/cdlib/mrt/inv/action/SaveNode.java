@@ -131,24 +131,38 @@ public class SaveNode
     {
         try {
             sourceInvNode = InvDBUtil.getNode(nodeNumber, connection, logger);
-            if (sourceInvNode == null) {
-                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "Existing db invNode required for this process");
-            }
             
             String baseUrl = storageBase;
             if (baseUrl == null) {
+                if (sourceInvNode == null) {
+                    throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "Unable to locate baseUrl for processing node " + nodeNumber);
+                }
                 baseUrl = sourceInvNode.getBaseURL();
             }
             System.out.println("***SaveNode:"
                     + " - baseUrl=" + baseUrl
                     + " - nodeNumber=" + nodeNumber
             );
-            StoreState storeState = StoreState.getStoreState(baseUrl, nodeNumber, logger);
+            StoreState storeState = null;
+            try {
+                storeState = StoreState.getStoreState(baseUrl, nodeNumber, logger);
+            } catch (TException  tx) {
+                if (tx.toString().contains("REQUESTED_ITEM_NOT_FOUND")) {
+                    throw new TException.REQUESTED_ITEM_NOT_FOUND(MESSAGE + "Storage node not found:" + nodeNumber);
+                }
+                throw tx;
+            }
             canInvNode = new InvNode(logger);
             canInvNode.setState(storeState);
             canInvNode.setBaseURL(baseUrl);
-            canInvNode.setId(sourceInvNode.getId());
+            if (sourceInvNode != null) {
+                canInvNode.setId(sourceInvNode.getId());
+            }
             System.out.println(PropertiesUtil.dumpProperties("canInvNode", canInvNode.retrieveProp()));
+            
+        } catch (TException tex) {
+            tex.printStackTrace();
+            throw tex;
             
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -162,7 +176,7 @@ public class SaveNode
     {
         try {
             System.out.println("resetInvNode entered");
-            dbAdd.update(canInvNode);
+            dbAdd.insert(canInvNode);
             this.connection.commit();
 
         } catch (Exception ex) {
