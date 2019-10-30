@@ -207,6 +207,7 @@ public class InvService
      * @param objectID object identifier
      * @return manifest.xml URL
      */
+    @Override
     public InvManifestUrl getManifestUrl(
             Identifier objectID)
         throws TException
@@ -226,6 +227,8 @@ public class InvService
      * @return access content information
      * @throws TException 
      */
+    
+    @Override
     public VersionsState getVersions(
             Identifier objectID,
             Long version)
@@ -254,12 +257,50 @@ public class InvService
     }
     
     /**
+     * Get access version information for cloud content
+     * @param objectID object identifier
+     * @param version version number to be selected: null=all; 0=current
+     * @param fileID data file identifier
+     * @return access content information
+     * @throws TException 
+     */
+    @Override
+    public VersionsState getVersions(
+            Identifier objectID,
+            Long version,
+            String fileID)
+        throws TException
+    {
+        if (DEBUG) System.out.print("getVersions entered");
+        Connection connection = null;
+        try {
+            connection = invServiceProperties.getConnection(false);
+            Versions versions = Versions.getVersions(objectID, version, connection, logger);
+            VersionsState state = versions.process(fileID);
+            return state;
+        
+        } catch (TException tex) {
+            throw tex;
+            
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                    connection = null;
+                } catch (Exception ex) { }
+            }
+        }
+        
+    }
+    
+    /**
      * Get the single primary-local map
      * @param ownerID owner ar
      * @param collectionID collection ark
      * @param localID local identifier
      * @return primary id or null if not found
      */
+    @Override
     public LocalContainerState addPrimary(
             Identifier objectID,
             Identifier ownerID,
@@ -279,6 +320,7 @@ public class InvService
      * @return
      * @throws TException 
      */
+    @Override
     public LocalAfterToState addLocalFromTo(
             Long after,
             Long to)
@@ -291,6 +333,7 @@ public class InvService
         return state;
     }
     
+    @Override
     public LocalContainerState deletePrimary(
             Identifier objectID)
         throws TException
@@ -307,6 +350,7 @@ public class InvService
      * @param localID local identifier
      * @return primary id or null if not found
      */
+    @Override
     public LocalContainerState getPrimary(
             Identifier ownerID,
             String localID)
@@ -323,6 +367,7 @@ public class InvService
      * @param objectID
      * @return 
      */
+    @Override
     public LocalContainerState getLocal(
             Identifier objectID)
         throws TException

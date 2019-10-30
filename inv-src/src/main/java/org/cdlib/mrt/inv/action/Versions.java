@@ -47,6 +47,7 @@ import org.cdlib.mrt.inv.utility.DBAdd;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
+import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 
 /**
@@ -115,6 +116,33 @@ public class Versions
         
     }
     
+    public VersionsState process(String fileID)
+        throws TException
+    {
+        if (objectID == null) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "objectID missing");
+        }
+        if (StringUtil.isAllBlank(fileID)) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "fileID missing");
+        }
+        if (connection == null) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "connection missing");
+        }
+        if (specifiedVersion == null) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "required versionID missing");
+        }
+        if (specifiedVersion < 0) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "specified version invalid:" + specifiedVersion);
+        }
+        try {
+            long versionID = specifiedVersion;
+            setFile(objectID, versionID, fileID);
+            return state;
+            
+        } catch (Exception ex) {
+            throw new TException(ex);
+        }
+    }
     
     protected void setStateStuff()
         throws TException
@@ -137,6 +165,66 @@ public class Versions
         state.setContainer(bucket);
         state.setBucketProperty(containerProp);
         state.setNode(node);
+    }
+    
+    protected void setFile(Identifier objectID, long versionID, String fileID)
+        throws TException
+    {
+        Properties versionsProp =  InvDBUtil.getVersionsFileStuff(
+            objectID,
+            versionID,
+            fileID,
+            connection,
+            logger);
+        if (versionsProp == null) {
+            throw new TException.REQUESTED_ITEM_NOT_FOUND("Unable to locate:" 
+                    + " - objectID:" + objectID.getValue() 
+                    + " - version:" + versionID
+                    + " - fileID:" + fileID
+            );
+        }
+        
+        String currentVersionS = versionsProp.getProperty("version_number");
+        long currentVersion = Long.parseLong(currentVersionS);
+        if (currentVersion < versionID) {
+            throw new TException.REQUESTED_ITEM_NOT_FOUND("Requested version exceeds current:" 
+                    + " - objectID:" + objectID.getValue() 
+                    + " - current version:" + currentVersion
+                    + " - request version:" + versionID
+            );
+        }
+        state.setCurrentVersion(currentVersion);
+        
+        String nodeS = versionsProp.getProperty("node");
+        long node = Long.parseLong(nodeS);
+        
+        String billableSizeS = versionsProp.getProperty("billable_size");
+        long length = Long.parseLong(billableSizeS);
+        
+        String keyVersionS = versionsProp.getProperty("key_version");
+        long keyVersion = Long.parseLong(keyVersionS);
+        
+        String bucket = getContainer(versionsProp);
+        String ext = versionsProp.getProperty("md5_3");
+        int pos = bucket.lastIndexOf("__");
+        if ((pos >= 0) && (bucket.length() - pos == 2)) {
+            bucket += ext;
+        }
+        String containerProp = null;
+        int posProp = bucket.indexOf('|');
+        if (posProp >= 0) {
+            containerProp = bucket.substring(posProp+1);
+            bucket = bucket.substring(0, posProp);
+        }
+        state.setContainer(bucket);
+        state.setBucketProperty(containerProp);
+        state.setNode(node);
+        
+        Version version = new Version(versionID);
+        String key =  objectID.getValue() + "|" + keyVersion + "|" + fileID;
+        VFile file = new VFile(key, length);
+        version.addVFile(file);
+        state.addVersion(version);
     }
     
     private String getContainer(Properties versionsProp)

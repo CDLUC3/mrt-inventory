@@ -1077,6 +1077,56 @@ public class InvDBUtil
         log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
         return propArray[0];
     }
+
+    public static Properties getVersionsFileStuff(
+            Identifier objectID,
+            long version,
+            String fileID,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        if (objectID == null) {
+            throw new TException.INVALID_OR_MISSING_PARM("getObjectUrl - objectID required");
+        }
+        String arkS = objectID.getValue();
+        log("getVersionsStuff entered:" + arkS);
+        String versionsql = "";
+        if (version > 0) {
+            versionsql = " AND v.number <= " + version;
+        }
+        
+        String sql = "SELECT n.NUMBER AS node, n.logical_volume, o.version_number, o.md5_3, f.billable_size, v.ark, v.NUMBER AS key_version, f.pathname "
+           + " FROM inv_versions AS v,"
+           + " inv_nodes_inv_objects AS NO,"
+           + " inv_nodes AS n,"
+           + " inv_files AS f,"
+           + " inv_objects AS o"
+           + " WHERE v.ark='" + arkS + "'"
+           + versionsql
+           + " AND f.pathname='" + fileID + "'"
+           + " AND o.id=v.inv_object_id"
+           + " AND NO.role='primary'"
+           + " AND f.inv_version_id=v.id"
+           + " AND NO.inv_object_id=v.inv_object_id"
+           + " AND n.id=NO.inv_node_id"
+           + " AND f.billable_size > 0"
+           + ";" ;        
+        
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        
+        return propArray[propArray.length-1];
+    }
     
     public static InvGCopy getFromFileKey(
             String fileKey,

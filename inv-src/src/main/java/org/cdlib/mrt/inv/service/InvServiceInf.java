@@ -119,6 +119,20 @@ public interface InvServiceInf
         throws TException;
     
     /**
+     * Get access version information for cloud content
+     * @param objectID object identifier
+     * @param version version number to be selected: null=all; 0=current
+     * @param fileID data file identifier
+     * @return access content information
+     * @throws TException 
+     */
+    public VersionsState getVersions(
+            Identifier objectID,
+            Long version,
+            String fileID)
+        throws TException;
+    
+    /**
      * add a single primary-local map
      * @param objectID object ark
      * @param ownerID owner ark
