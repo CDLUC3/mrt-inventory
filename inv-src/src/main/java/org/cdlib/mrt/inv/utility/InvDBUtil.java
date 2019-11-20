@@ -1096,6 +1096,10 @@ public class InvDBUtil
             versionsql = " AND v.number <= " + version;
         }
         
+        if (fileID.contains("'")) {
+            fileID = fileID.replace("'", "''");
+        }
+        
         String sql = "SELECT n.NUMBER AS node, n.logical_volume, o.version_number, o.md5_3, f.billable_size, v.ark, v.NUMBER AS key_version, f.pathname "
            + " FROM inv_versions AS v,"
            + " inv_nodes_inv_objects AS NO,"
