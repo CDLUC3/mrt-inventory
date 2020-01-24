@@ -132,7 +132,7 @@ public class ProcessItem
         connection = getNewConnection();
         if (connection == null) return;
         if (DEBUG) System.out.println(MESSAGE + "connection returned");
-        saveObject = SaveObject.getSaveObject(manifestURLS, connection, logger);
+        getSaveObjectRetry404(3);
         
     }
 
@@ -161,7 +161,8 @@ public class ProcessItem
         try {
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
-            saveObject.process();
+            //saveObject.process();
+            saveObjectRetry404(4);
             processStatus = ProcessStatus.completed;
             setQueue(Item.COMPLETED);
             
@@ -178,7 +179,73 @@ public class ProcessItem
                     );
         }
     }
-   
+    
+    public void saveObjectRetry404(int retry)
+       throws TException
+    {
+        for (int doit=1; true; doit++) {
+            try {
+                saveObject.process();
+                return;
+            
+            } catch (TException.REQUESTED_ITEM_NOT_FOUND tex) {
+                if (doit > retry) {
+                    throw tex;
+                }
+                
+                try {
+                    if (connection.isClosed()) {
+                        System.out.println("saveObjectRetry404 Connection reset");
+                        connection = getNewConnection();
+                    }
+                } catch (Exception ex) { 
+                    throw new TException(ex);
+                }
+                int sleep = (1000*doit) + 5000;
+
+                System.out.println(MESSAGE + "saveObjectRetry404 retry(" + doit + "):"
+                        + " - sleep=" + sleep
+                        + " - Exception=" + tex);
+                try {
+                    Thread.sleep(sleep);
+                } catch (Exception ex) { }
+            }
+        } 
+    }
+    
+    public void getSaveObjectRetry404(int retry)
+       throws TException
+    {
+        for (int doit=1; true; doit++) {
+            try {
+                saveObject = SaveObject.getSaveObject(manifestURLS, connection, logger);
+                return;
+            
+            } catch (TException.REQUESTED_ITEM_NOT_FOUND tex) {
+                if (doit > retry) {
+                    throw tex;
+                }
+                int sleep = (1000*doit) + 5000;
+                
+                try {
+                    if (connection.isClosed()) {
+                        System.out.println("getSaveObjectRetry404 Connection reset");
+                        connection = getNewConnection();
+                    }
+                } catch (Exception ex) { 
+                    throw new TException(ex);
+                }
+               
+                System.out.println(MESSAGE + "getSaveObjectRetry404 retry(" + doit + "):"
+                        + " - sleep=" + sleep
+                        + " - Exception=" + tex);
+                try {
+                    Thread.sleep(sleep);
+                } catch (Exception ex) { }
+            }
+        } 
+    }
+    
     public void resetQueue()
        throws TException
     {
