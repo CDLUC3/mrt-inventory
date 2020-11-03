@@ -27,6 +27,7 @@ import org.cdlib.mrt.inv.service.InvDeleteState;
 import org.cdlib.mrt.inv.service.InvService;
 import org.cdlib.mrt.formatter.FormatterAbs;
 import org.cdlib.mrt.formatter.FormatterInf;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.utility.TFrame;
 import org.cdlib.mrt.utility.PropertiesUtil;
 /**
@@ -56,7 +57,7 @@ public class InvMainDelete
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            InvService service = InvService.getInvService(storeLoadProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             String objectIDS = get(storeLoadProp, "deleteObjectID");
             Identifier objectID = new Identifier(objectIDS);
             InvDeleteState response = service.delete(objectID);

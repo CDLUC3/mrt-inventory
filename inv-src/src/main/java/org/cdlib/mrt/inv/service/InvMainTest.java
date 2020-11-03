@@ -59,7 +59,7 @@ public class InvMainTest
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            InvService service = InvService.getInvService(storeLoadProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             String objectIDS = get(storeLoadProp, "objectID");
             Identifier objectID = new Identifier(objectIDS);
             String nodeS = get(storeLoadProp, "node");

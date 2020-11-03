@@ -36,6 +36,8 @@ import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.StateInf;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Format container class for Fixity Service
@@ -57,9 +59,9 @@ public class InvServiceState
     
     public InvServiceState() { }
 
-    public InvServiceState(Properties prop)
+    public InvServiceState(JSONObject jState)
     {
-        setValues(prop);
+        setValues(jState);
     }
 
     /**
@@ -160,12 +162,17 @@ public class InvServiceState
      * Set all entry values based on Properties
      * @param prop 
      */
-    public void setValues(Properties prop)
+    public void setValues(JSONObject jState)
     {
-        setName(prop.getProperty("name"));
-        setIdentifier(prop.getProperty("id"));
-        setDescription(prop.getProperty("description"));
-        setBaseURI(prop.getProperty("baseURI"));
+        try {
+            setName(jState.getString("name"));
+            setIdentifier(jState.getString("id"));
+            setDescription(jState.getString("description"));
+            setBaseURI(jState.getString("baseURI"));
+        } catch (Exception ex) {
+            System.out.println("WARNING: basic values InvServiceState not set");
+        }
+        
     }
 
     public DateState getCurrentReportDate()

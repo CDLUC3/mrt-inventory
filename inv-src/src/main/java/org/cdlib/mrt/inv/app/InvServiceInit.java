@@ -37,21 +37,22 @@ import javax.servlet.ServletContext;
 
 import org.cdlib.mrt.inv.service.InvService;
 import org.cdlib.mrt.inv.service.InvServiceInf;
-import org.cdlib.mrt.inv.service.InvServiceProperties;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.utility.TException;
 /**
  * Initialize handling for storage service in servlet
  * @author dloy
  */
 public class InvServiceInit
-        extends TFrameInit
+        //extends TFrameInit
 {
     private static final String serviceName = "InvService";
 
     private enum Type {
         Regular, Default
     }
-    protected volatile InvServiceProperties invServiceProperties = null;
+    protected volatile InventoryConfig inventoryConfig = null;
+    protected ServletConfig servletConfig = null;
 
     /**
      * Get resolved storage service
@@ -60,11 +61,11 @@ public class InvServiceInit
     public InvServiceInf getInvService()
         throws TException
     {
-        return InvService.getInvService(invServiceProperties);
+        return InvService.getInvService(inventoryConfig);
     }
 
     /**
-     * Factory: StorageServiceInit
+     * Factory: InvServiceInit
      * @param servletConfig servlet configuration object
      * @return StorageServiceInit
      * @throws TException
@@ -80,6 +81,27 @@ public class InvServiceInit
             servletContext.setAttribute(serviceName, InvServiceInit);
         }
 
+        return InvServiceInit;
+    }
+
+    /**
+     * Factory: InvServiceInit
+     * @param servletConfig servlet configuration object
+     * @return StorageServiceInit
+     * @throws TException
+     */
+    public static synchronized InvServiceInit resetInvServiceInit(
+            ServletConfig servletConfig)
+            throws TException
+    {
+        ServletContext servletContext = servletConfig.getServletContext();
+        InvServiceInit InvServiceInit  = (InvServiceInit)servletContext.getAttribute(serviceName);
+        if (InvServiceInit != null) {
+            servletContext.removeAttribute(serviceName);
+        }
+
+        InvServiceInit = new InvServiceInit(Type.Regular, servletConfig, serviceName);
+        servletContext.setAttribute(serviceName, InvServiceInit);
         return InvServiceInit;
     }
 
@@ -112,14 +134,15 @@ public class InvServiceInit
     protected InvServiceInit(Type type, ServletConfig servletConfig, String serviceName)
             throws TException
     {
-        super(servletConfig, serviceName);
+        this.servletConfig = servletConfig;
+        //super(servletConfig, serviceName);
         if (type == Type.Regular) {
-            invServiceProperties =
-                    InvServiceProperties.getInvServiceProperties(tFrame.getProperties());
+            inventoryConfig =
+                    InventoryConfig.useYaml();
         }
         if (type == Type.Default) {
-            invServiceProperties =
-                    InvServiceProperties.getInvServiceProperties(tFrame.getProperties());
+            inventoryConfig =
+                    InventoryConfig.useYaml();
         }
     }
 }

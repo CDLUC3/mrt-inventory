@@ -32,6 +32,7 @@ import org.cdlib.mrt.zoo.ZooManager;
 import org.cdlib.mrt.zoo.ZooQueue;
 import org.cdlib.mrt.zoo.ZooUtil;
 import org.cdlib.mrt.inv.service.InvService;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.queue.Item;
 import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TFileLogger;
@@ -68,7 +69,7 @@ public class InvMainZooAdd
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            service = InvService.getInvService(storeLoadProp);
+            service = InvService.getInvService(InventoryConfig.useYaml());
             ZooManager zooManager = service.getZooManager();
             ZooQueue zooQueue = ZooQueue.getZooQueue(zooManager);
             for (int b=0; b<4; b++) {
