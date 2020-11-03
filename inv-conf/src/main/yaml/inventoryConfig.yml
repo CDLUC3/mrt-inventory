@@ -1,0 +1,32 @@
+which-inv-info: "{!ENV: MERRITT_INV_INFO !DEFAULT: inv-info}"
+  
+inv-info:
+  storageBase: "{!SSM: store/config/baseURI}"
+  state:
+    id: inv
+    name: UC3
+    description: "UC3 inventory micro-service"
+    baseURI: "{!SSM: inventory/config/baseURI}"
+  
+  zooserver:
+    queueService: "{!SSM: inventory/zoo/queueService}"
+    queueName: "{!SSM: inventory/zoo/queueName}"
+
+  zooclient:
+    zooPollMilli: "{!SSM: inventory/config/zoo/pollMilli !DEFAULT: 60000}"
+    zooThreadCount: "{!SSM: inventory/config/zoo/threadCount !DEFAULT: 5}"
+
+  fileLogger:
+    messageMaximumLevel: "{!SSM: inventory/config/log/messageMaximumLevel !DEFAULT: 5}"
+    messageMaximumError: "{!SSM: inventory/config/log/messageMaximumError !DEFAULT: 10}"
+    path: "{!SSM: inventory/config/log/path}"
+    name: inv
+    qualifier: yyMMdd
+    trace: 5
+
+  db:
+    user: "{!SSM: inv/readwrite/db-user}"
+    password: "{!SSM: inv/readwrite/db-password}"
+    url: "{!SSM: inv/db-host}"
+    name: "{!SSM: inv/db-name}"
+    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
