@@ -27,6 +27,6 @@ inv-info:
   db:
     user: "{!SSM: inv/readwrite/db-user}"
     password: "{!SSM: inv/readwrite/db-password}"
-    url: "{!SSM: inv/db-host}"
+    host: "{!SSM: inv/db-host}"
     name: "{!SSM: inv/db-name}"
     encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
