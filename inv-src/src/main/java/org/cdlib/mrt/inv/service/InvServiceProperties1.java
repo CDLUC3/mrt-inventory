@@ -54,7 +54,7 @@ import org.cdlib.mrt.utility.TFileLogger;
  * @author  dloy
  */
 
-public class InvServiceProperties
+public class InvServiceProperties1
 {
     private static final String NAME = "InvServiceProperties";
     private static final String MESSAGE = NAME + ": ";
@@ -76,10 +76,10 @@ public class InvServiceProperties
     protected String storageBase = null;
     protected InvServiceState serviceState = null;
 
-    public static InvServiceProperties getInvServiceProperties(Properties prop)
+    public static InvServiceProperties1 getInvServiceProperties(Properties prop)
         throws TException
     {
-        return new InvServiceProperties(prop);
+        return new InvServiceProperties1(prop);
     }
 
     /**
@@ -88,7 +88,7 @@ public class InvServiceProperties
      * @param setupProp properties included in the configuration files
      * @throws TException 
      */
-    protected InvServiceProperties(Properties setupProp)
+    protected InvServiceProperties1(Properties setupProp)
         throws TException
     {
         try {
@@ -292,6 +292,7 @@ public class InvServiceProperties
         else return ServiceStatus.running;
     }
     
+    /*
     public InvServiceState getInvServiceState()
     {
         InvServiceState serviceState = new InvServiceState(serviceProperties);
@@ -300,7 +301,7 @@ public class InvServiceProperties
         serviceState.setSystemStatus(getSystemStatus());
         return serviceState;
     }
-    
+    */
     public ServiceStatus getSystemStatus() {
         if (getDbStatus() == ServiceStatus.running) {
             if (getZookeeperStatus() == ServiceStatus.running) return ServiceStatus.running;

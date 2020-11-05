@@ -83,32 +83,19 @@ public class InvService
     private static final boolean THREADDEBUG = false;
     protected LoggerInf logger = null;
     protected Exception exception = null;
-    protected InvServiceProperties invServiceProperties = null;
+    protected InventoryConfig inventoryConfig = null;
 
-    public static InvService getInvService(InvServiceProperties invServiceProperties)
+    public static InvService getInvService(InventoryConfig inventoryConfig)
             throws TException
     {
-        return new InvService(invServiceProperties);
+        return new InvService(inventoryConfig);
     }
 
-    public static InvService getInvService(Properties prop)
-            throws TException
-    {
-        return new InvService(prop);
-    }
-
-    protected InvService(InvServiceProperties invServiceProperties)
+    protected InvService(InventoryConfig inventoryConfig)
         throws TException
     {
-        this.invServiceProperties = invServiceProperties;
-        this.logger = invServiceProperties.getLogger();
-    }
-
-    protected InvService(Properties prop)
-        throws TException
-    {
-        this.invServiceProperties = new InvServiceProperties(prop);
-        this.logger = invServiceProperties.getLogger();
+        this.inventoryConfig = inventoryConfig;
+        this.logger = inventoryConfig.getLogger();
     }
     
     @Override
@@ -118,8 +105,8 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("add entered");
-        Connection connection = invServiceProperties.getConnection(false);
-        String storageBase = invServiceProperties.getStorageBase();
+        Connection connection = inventoryConfig.getConnection(false);
+        String storageBase = inventoryConfig.getStorageBase();
         AddObject addObject = AddObject.getAddObject(
                 storageBase, 
                 node, 
@@ -138,8 +125,8 @@ public class InvService
         Connection connection = null;
         try {
             if (DEBUG) System.out.print("add entered");
-            connection = invServiceProperties.getConnection(false);
-            String storageBase = invServiceProperties.getStorageBase();
+            connection = inventoryConfig.getConnection(false);
+            String storageBase = inventoryConfig.getStorageBase();
             AddObject addObject = AddObject.getAddObject(
                     manifestURL,
                     connection, 
@@ -191,11 +178,11 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("setFileNode entered:" + nodeNum);
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         
         
         SaveNode saveNode = SaveNode.getSaveNode(nodeNum, connection, 
-                invServiceProperties.getStorageBase(),
+                inventoryConfig.getStorageBase(),
                 logger);
         saveNode.resetInvNode();
         InvSelectState state = new InvSelectState(saveNode.getCanProp());
@@ -213,7 +200,7 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("getManifestUrl entered");
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         InvManifestUrl manifestUrl = InvManifestUrl.getInvManifestUrl(objectID, connection, logger);
         manifestUrl.process();
         return manifestUrl;
@@ -237,7 +224,7 @@ public class InvService
         if (DEBUG) System.out.print("getVersions entered");
         Connection connection = null;
         try {
-            connection = invServiceProperties.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             Versions versions = Versions.getVersions(objectID, version, connection, logger);
             VersionsState state = versions.process();
             return state;
@@ -274,7 +261,7 @@ public class InvService
         if (DEBUG) System.out.print("getVersions entered");
         Connection connection = null;
         try {
-            connection = invServiceProperties.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             Versions versions = Versions.getVersions(objectID, version, connection, logger);
             VersionsState state = versions.process(fileID);
             return state;
@@ -308,7 +295,7 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("addPrimaryLocal entered");
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.addLocal(objectID, ownerID, localIDs, connection, logger);
         return state;
     }
@@ -327,7 +314,7 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("addPrimaryLocal entered");
-        DPRFileDB db = invServiceProperties.getNewDb();
+        DPRFileDB db = inventoryConfig.startDB(logger);
         AddLocalAfterTo alat = AddLocalAfterTo.getAddLocalAfterTo(after, to, db, this, logger);
         LocalAfterToState state =  alat.process();
         return state;
@@ -339,7 +326,7 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("deletePrimary entered");
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.deletePrimary(objectID, connection, logger);
         return state;
     }
@@ -357,7 +344,7 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("getPrimary entered");
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.getPrimaryClose(ownerID, localID, connection, logger);
         return state;
     }
@@ -373,7 +360,7 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("getPrimary entered");
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.getLocalsClose(objectID, connection, logger);
         return state;
     }
@@ -384,12 +371,11 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("processItem entered");
-        if (invServiceProperties.getZookeeperStatus() == ServiceStatus.shutdown) return ProcessStatus.shutdown;
-        Connection connection = invServiceProperties.getConnection(false);
-        ProcessItem  processItem = ProcessItem.getProcessItem(
-                1,
+        if (inventoryConfig.getZookeeperStatus() == ServiceStatus.shutdown) return ProcessStatus.shutdown;
+        Connection connection = inventoryConfig.getConnection(false);
+        ProcessItem  processItem = ProcessItem.getProcessItem(1,
             queue,
-            invServiceProperties.getDb(),
+            inventoryConfig.getDb(),
             item);
         processItem.process();
         return processItem.getProcessStatus();
@@ -413,7 +399,7 @@ public class InvService
         Connection connection = null;
         try {
             if (DEBUG) System.out.print("process entered");
-            connection = invServiceProperties.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             ProcessObject processObject = ProcessObject.getProcessObject(
                     Role.primary,
                     copyRole,
@@ -449,7 +435,7 @@ public class InvService
         BuildAudits buildAudits = null;
         try {
             if (DEBUG) System.out.print("process entered");
-            connection = invServiceProperties.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             buildAudits = BuildAudits.getBuildAudits(
                 storageBase,
                 objectID,
@@ -481,7 +467,7 @@ public class InvService
         throws TException
     {
         if (DEBUG) System.out.print("delete entered");
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         DeleteObject deleteObject = DeleteObject.getDeleteObject(
                 objectID, 
                 connection, 
@@ -497,7 +483,7 @@ public class InvService
         if (StringUtil.isEmpty(sql)) {
             throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "select sql required");
         }
-        Connection connection = invServiceProperties.getConnection(false);
+        Connection connection = inventoryConfig.getConnection(false);
         InvSelect invSelectSQL = InvSelect.getInvSelect(
             sql,
             connection,
@@ -510,7 +496,7 @@ public class InvService
     public InvServiceState getInvServiceState()
         throws TException
     {
-        InvServiceState invServiceState = invServiceProperties.getInvServiceState();
+        InvServiceState invServiceState = inventoryConfig.getInvServiceState();
         return invServiceState;
     }
     
@@ -518,8 +504,8 @@ public class InvService
     public InvServiceState shutdownZoo()
         throws TException
     {
-        invServiceProperties.zooHandlerShutDown();
-        InvServiceState invServiceState = invServiceProperties.getInvServiceState();
+        inventoryConfig.zooHandlerShutDown();
+        InvServiceState invServiceState = inventoryConfig.getInvServiceState();
         return invServiceState;
     }
 
@@ -527,11 +513,11 @@ public class InvService
     public InvServiceState startupZoo()
         throws TException
     {
-        if (invServiceProperties.getDbStatus() == ServiceStatus.shutdown) {
+        if (inventoryConfig.getDbStatus() == ServiceStatus.shutdown) {
             throw new TException.REQUEST_INVALID("Zookeeper startup requested but DB shutdown");
         }
-        invServiceProperties.zooHandlerStartup();
-        InvServiceState invServiceState = invServiceProperties.getInvServiceState();
+        inventoryConfig.zooHandlerStartup();
+        InvServiceState invServiceState = inventoryConfig.getInvServiceState();
         return invServiceState;
     }
 
@@ -539,9 +525,9 @@ public class InvService
     public InvServiceState shutdown()
         throws TException
     {
-        invServiceProperties.zooHandlerShutDown();
-        invServiceProperties.dbShutDown();
-        InvServiceState invServiceState = invServiceProperties.getInvServiceState();
+        inventoryConfig.zooHandlerShutDown();
+        inventoryConfig.dbShutDown();
+        InvServiceState invServiceState = inventoryConfig.getInvServiceState();
         return invServiceState;
     }
 
@@ -549,9 +535,9 @@ public class InvService
     public InvServiceState startup()
         throws TException
     {
-        invServiceProperties.dbStartup();
-        invServiceProperties.zooHandlerStartup();
-        InvServiceState invServiceState = invServiceProperties.getInvServiceState();
+        inventoryConfig.dbStartup();
+        inventoryConfig.zooHandlerStartup();
+        InvServiceState invServiceState = inventoryConfig.getInvServiceState();
         return invServiceState;
     }
 
@@ -593,15 +579,15 @@ public class InvService
     
     public ZooManager getZooManager()
     {
-        return invServiceProperties.getZooManager();
+        return inventoryConfig.getZooManager();
     }
 
     public LoggerInf getLogger() {
         return logger;
     }
 
-    public InvServiceProperties getInvServiceProperties() {
-        return invServiceProperties;
+    public InventoryConfig getInvServiceProperties() {
+        return inventoryConfig;
     }
     
 

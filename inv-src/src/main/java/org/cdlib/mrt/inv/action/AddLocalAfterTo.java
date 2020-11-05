@@ -37,6 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.content.InvAddLocalID;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.service.LocalAfterToState;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
@@ -102,7 +103,7 @@ public class AddLocalAfterTo
                 invProp.load(new FileInputStream(localInfo));
             }
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", invProp));
-            InvService service = InvService.getInvService(invProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             service.shutdownZoo();
             
             db = new DPRFileDB(logger, invProp);

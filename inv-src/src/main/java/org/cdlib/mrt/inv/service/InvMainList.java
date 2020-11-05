@@ -60,7 +60,7 @@ public class InvMainList
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            InvService service = InvService.getInvService(storeLoadProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             LoggerInf logger = service.getLogger();
             String runPropS  = null;
             if (args.length == 0) {

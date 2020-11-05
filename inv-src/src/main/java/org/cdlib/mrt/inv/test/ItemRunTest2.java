@@ -15,6 +15,7 @@ import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 
 import org.cdlib.mrt.inv.service.InvService;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.utility.TFileLogger;
 import org.cdlib.mrt.utility.TFrame;
 import org.cdlib.mrt.inv.zoo.ItemRun;
@@ -50,7 +51,7 @@ public class ItemRunTest2
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties invProp  = tFrame.getProperties();
             
-            InvService service = InvService.getInvService(invProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             ItemInfo info = ItemInfo.getItemInfo("", ItemInfo.Status.PENDING, invProp);
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", invProp));
             LoggerInf logger = new TFileLogger("testFormatter", 10, 10);

@@ -132,6 +132,9 @@ public class JerseyInv
         } else if (setType.equals("stopzoo")) {
             return stopZoo(formatType, cs, sc);
 
+        } else if (setType.equals("restart")) {
+            return restartInv(formatType, cs, sc);
+
         } else  {
             throw new TException.REQUEST_ELEMENT_UNSUPPORTED("Set inv state value not recognized:" + setType);
         }
@@ -457,6 +460,45 @@ public class JerseyInv
             invService.addZoo(loadProp, zooQueue);
             logger = invService.getLogger();
             InvProcessState responseState = new InvProcessState(manifestUrl, "addMultiPartZoo");
+            return getStateResponse(responseState, formatType, logger, cs, sc);
+
+        } catch (TException tex) {
+            return getExceptionResponse(tex, formatType, logger);
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+    /**
+     * Retart inv service
+     * @param formatType user provided format type
+     * @param cs on close actions
+     * @param sc ServletConfig used to get system configuration
+     * @return formatted inv service information
+     * @throws TException
+     */
+    public Response restartInv(
+            String formatType,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = defaultLogger;
+        try {
+            log("runFixity entered:"
+                    + " - formatType=" + formatType
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+
+            StateInf responseState = invService.shutdown();
+            
+            invServiceInit = InvServiceInit.resetInvServiceInit(sc);
+            invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+
+            responseState = invService.startup();
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {

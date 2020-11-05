@@ -31,6 +31,7 @@ import org.cdlib.mrt.utility.TFrame;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
 
@@ -61,7 +62,7 @@ public class InvMainState
             tFrame = new TFrame(propertyList, "InvState");
             Properties storeLoadProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            InvService service = InvService.getInvService(storeLoadProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             LoggerInf logger = service.getLogger();
             dump("initial state", service.getInvServiceState(), logger);
             dump("shutdown", service.shutdown(), logger);

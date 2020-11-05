@@ -35,6 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.cdlib.mrt.formatter.FormatterInf;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvFormatter;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -80,7 +81,7 @@ public class InvMainAddPrimaryLocalFailover
             Properties storeLoadProp  = tFrame.getProperties();
             String inFileS = storeLoadProp.getProperty("inFile");
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            InvService service = InvService.getInvService(storeLoadProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             InvMainAddPrimaryLocalFailover pl = new InvMainAddPrimaryLocalFailover(service, logger);
             //File inFile = new File("/replic/test/localid-mapper/t5.txt");
             File inFile = new File(inFileS);

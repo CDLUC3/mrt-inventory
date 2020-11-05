@@ -37,6 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.content.InvAddLocalID;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.inv.utility.InvFormatter;
@@ -86,7 +87,7 @@ public class AddPrimaryLocal
             LoggerInf logger = tFrame.getLogger();
             Properties invProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", invProp));
-            InvService service = InvService.getInvService(invProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             
             db = new DPRFileDB(logger, invProp);
             AddPrimaryLocal pl = new AddPrimaryLocal(0l, db, service, logger);

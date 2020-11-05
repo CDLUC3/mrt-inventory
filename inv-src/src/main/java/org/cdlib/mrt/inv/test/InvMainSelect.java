@@ -24,6 +24,7 @@ import org.cdlib.mrt.inv.service.InvService;
 import org.cdlib.mrt.inv.service.InvSelectState;
 import org.cdlib.mrt.formatter.FormatterAbs;
 import org.cdlib.mrt.formatter.FormatterInf;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.utility.TFrame;
 import org.cdlib.mrt.utility.PropertiesUtil;
 /**
@@ -55,7 +56,7 @@ public class InvMainSelect
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            service = InvService.getInvService(storeLoadProp);
+            service = InvService.getInvService(InventoryConfig.useYaml());
             String sql = storeLoadProp.getProperty("select");
             InvSelectState selectState = service.select(sql);
             dump(MESSAGE, selectState, service.getLogger());

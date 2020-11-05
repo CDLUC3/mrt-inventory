@@ -35,6 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.cdlib.mrt.formatter.FormatterInf;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvFormatter;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -69,7 +70,7 @@ public class TestServicePrimary
             Properties storeLoadProp  = tFrame.getProperties();
             String inFileS = storeLoadProp.getProperty("inFile");
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            InvService service = InvService.getInvService(storeLoadProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             Identifier objectId  = new Identifier("ark:/99999/fk4wm3f50");
             Identifier ownerId  = new Identifier("ark:/13030/j2sb405d");
             String localids = "Indentifier; workspace://SpacesStore/0df0a569-5402-4989-a9b9-ed8c3eef156d";

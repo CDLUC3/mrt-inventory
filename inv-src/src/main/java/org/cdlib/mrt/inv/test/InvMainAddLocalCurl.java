@@ -36,6 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.cdlib.mrt.formatter.FormatterInf;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvFormatter;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -81,7 +82,7 @@ public class InvMainAddLocalCurl
             LoggerInf logger = tFrame.getLogger();
             Properties storeLoadProp  = tFrame.getProperties();
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
-            InvService service = InvService.getInvService(storeLoadProp);
+            InvService service = InvService.getInvService(InventoryConfig.useYaml());
             String urlS = "http://uc3-mrt-inv-dev.cdlib.org:26121/mrtinv/primary";
             InvMainAddLocalCurl pl = new InvMainAddLocalCurl(service, urlS, logger);
             File inFile = new File("/replic/test/localid-mapper/t5.txt");
