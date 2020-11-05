@@ -204,7 +204,7 @@ public class InventoryConfig
             String  password = jdb.getString("password");
             String  user = jdb.getString("user");
             
-            String server = jdb.getString("url");
+            String server = jdb.getString("host");
             String encoding = jdb.getString("encoding");
             if (encoding.equals("OPTIONAL")) {
                 encoding = "";
