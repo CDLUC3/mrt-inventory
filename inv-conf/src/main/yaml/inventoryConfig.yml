@@ -58,7 +58,7 @@ inv-info-docker: &docker
   db:
     adapter: mysql2
     host: db-container
-    database: db-name
+    name: db-name
     user: user
     password: password
     encoding: utf8   # schema won't load if it's utf8mb4
