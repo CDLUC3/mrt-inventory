@@ -27,7 +27,7 @@ inv-info:
   db:
     user: "{!SSM: inv/readwrite/db-user}"
     password: "{!SSM: inv/readwrite/db-password}"
-    url: "{!SSM: inv/db-host}"
+    host: "{!SSM: inv/db-host}"
     name: "{!SSM: inv/db-name}"
     encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
 
@@ -57,10 +57,9 @@ inv-info-docker: &docker
 
   db:
     adapter: mysql2
-    url: db-container
     host: db-container
     database: db-name
-    username: user
+    user: user
     password: password
     encoding: utf8   # schema won't load if it's utf8mb4
 
@@ -70,6 +69,6 @@ inv-info-docker-dev:
   db:
     user: "{!SSM: inv/readwrite/db-user}"
     password: "{!SSM: inv/readwrite/db-password}"
-    url: "{!SSM: inv/db-host}"
+    host: "{!SSM: inv/db-host}"
     name: "{!SSM: inv/db-name}"
     encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
