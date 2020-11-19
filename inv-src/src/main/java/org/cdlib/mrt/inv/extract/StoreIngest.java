@@ -46,6 +46,7 @@ import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.URLEncoder;
 import org.cdlib.mrt.core.Tika;
+import org.cdlib.mrt.utility.LoggerAbs;
 /**
  * Container class for Storage ERC content
  * @author dloy
@@ -156,6 +157,7 @@ public class StoreIngest
             }
             
             inStream = HTTPUtil.getObject(urlS,  EXTRACT_TIMEOUT, 3);
+            inStream = cleanup(inStream);
             ingestProp.load(inStream);
             
         } catch (TException tex) {
@@ -173,9 +175,45 @@ public class StoreIngest
             }
         }
     }
+    
+    protected InputStream cleanup(InputStream inStream) 
+        throws TException
+    {
+        try {
+            String val = StringUtil.streamToString(inStream, "utf-8");
+            String remove = val.replace("\\", "");
+            if (!val.equals(remove)) {
+                System.out.println("###before:" + val);
+                System.out.println("###after :" + remove);
+            }
+            return StringUtil.stringToStream(remove, "utf8");
+            
+        }  catch (Exception ex) {
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+    }
 
     public Properties getIngestProp() {
         return ingestProp;
+    }
+    
+    
+        public static void main(String[] argv) {
+    	
+    	try {
+            LoggerInf logger = LoggerAbs.getTFileLogger("testFormatter", 10, 10);
+            StoreIngest storeIngest = new StoreIngest(
+                    "http://storage.cdlib.org:35121/content/9501/ark%3A%2F13030%2Fm5r269bc/1/system%2fmrt-ingest.txt",
+                    "system/mrt-ingest.txt",
+                    logger
+            );
+            
+            
+        } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
     }
 
 }
