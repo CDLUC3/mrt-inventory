@@ -7,6 +7,9 @@ This microservice is part of the [Merritt Preservation System](https://github.co
 This microservice records information about new files and new objects that have been ingested into the Merritt Preservation System.
 Information is recorded into the Merritt Inventory Database (MySQL).
 
+The work performed by this service is driven from a Zookeeper Queue.  
+This service also provides an API to resolve local identifiers submitted with Merritt content.
+
 ## Component Diagram
 ![Flowchart](https://github.com/CDLUC3/mrt-doc/raw/master/diagrams/inventory.mmd.svg)
 
