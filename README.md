@@ -17,6 +17,8 @@ This service also provides an API to resolve local identifiers submitted with Me
 
 This code depends on the following Merritt Libraries.
 - [Merritt Core Library](https://github.com/CDLUC3/mrt-core2)
+- [CDL Zookeeper Library](https://github.com/CDLUC3/cdl-zk-queue)
+- [Merritt Inventory Zookeeper Library](https://github.com/CDLUC3/mrt-zoo)
 
 ## For external audiences
 This code is not intended to be run apart from the Merritt Preservation System.
