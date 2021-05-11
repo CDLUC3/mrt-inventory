@@ -11,7 +11,7 @@ The work performed by this service is driven from a Zookeeper Queue.
 This service also provides an API to resolve local identifiers submitted with Merritt content.
 
 ## Component Diagram
-![Flowchart](https://github.com/CDLUC3/mrt-doc/raw/main/diagrams/inventory.mmd.svg)
+[![Flowchart](https://github.com/CDLUC3/mrt-doc/raw/main/diagrams/inventory.mmd.svg)](https://cdluc3.github.io/mrt-doc/diagrams/inventory)
 
 ## Dependencies
 
