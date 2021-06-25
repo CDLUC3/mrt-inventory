@@ -10,6 +10,9 @@ Information is recorded into the Merritt Inventory Database (MySQL).
 The work performed by this service is driven from a Zookeeper Queue.  
 This service also provides an API to resolve local identifiers submitted with Merritt content.
 
+## Original System Specifications
+- [Merritt Inventory Service](https://github.com/CDLUC3/mrt-doc/blob/main/doc/Merritt-inventory-latest.pdf)
+
 ## Component Diagram
 [![Flowchart](https://github.com/CDLUC3/mrt-doc/raw/main/diagrams/inventory.mmd.svg)](https://cdluc3.github.io/mrt-doc/diagrams/inventory)
 
