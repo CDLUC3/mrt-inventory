@@ -56,6 +56,7 @@ import org.cdlib.mrt.inv.content.InvNode;
 import org.cdlib.mrt.inv.content.InvNodeObject;
 import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
+import org.cdlib.mrt.inv.content.InvStorageMaint;
 import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.LoggerInf;
@@ -195,6 +196,63 @@ public class InvDBUtil
         boolean works = DBUtil.exec(connection, sql, logger);
         return works;
     }
+
+    public static InvStorageMaint getStorageMaint(
+            long nodeid,
+            String key,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String keymd5 = InvStorageMaint.buildMd5(key, logger);
+        String sql = "select * from " + ContentAbs.STORAGE_MAINTS 
+                + " where keymd5 = '" + keymd5 + "'"
+                + " and inv_node_id=" + nodeid
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvStorageMaint(propArray[0], logger);
+    }
+
+    public static InvStorageMaint getStorageMaintAdmin(
+            long nodeNum,
+            
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "select sm.*" 
+                + " FROM inv_nodes n,"
+                + " inv_storage_maints sm"
+                + " WHERE n.number=" + nodeNum
+                + " AND sm.inv_node_id=n.id"
+                + " AND sm.maint_type='admin'"
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvStorageMaint(propArray[0], logger);
+    }
+
     
     public static InvCollection getCollectionFromMnemonic(
             String mnemonic,
@@ -1708,7 +1766,7 @@ public class InvDBUtil
         }
         return list;
     }
-    
+
     public static InvCollectionNode getCollectionNode(
             long collectionseq,
             long nodeseq,
