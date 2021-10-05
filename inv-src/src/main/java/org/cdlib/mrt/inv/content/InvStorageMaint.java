@@ -45,42 +45,44 @@ import org.cdlib.mrt.utility.MessageDigestValue;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
+import org.cdlib.mrt.utility.StateInf;
 /**
  * Container class for inv Object content
  * @author dloy
  * CREATE TABLE `inv_storage_maints` (
-	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`id` INT(10) NOT NULL AUTO_INCREMENT,
+	`inv_storage_scan_id` INT(10) NOT NULL,
 	`inv_node_id` SMALLINT(5) UNSIGNED NOT NULL,
-        `keymd5` CHAR(32) NOT NULL,
+	`keymd5` CHAR(32) NOT NULL COLLATE 'utf8_general_ci',
 	`size` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-	`created` TIMESTAMP NULL,
-	`logged` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`removed` TIMESTAMP NULL,
-	`maint_status` ENUM('review','hold','delete','removed','objremoved','error','unknown') NOT NULL DEFAULT 'unknown',
-	`maint_type` ENUM('non-ark','missing-ark','missing-file','unknown') NOT NULL DEFAULT 'unknown',
-	`key` LONGTEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
-	`note` TEXT(65535) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
+	`file_created` TIMESTAMP NULL,
+	`created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`file_removed` TIMESTAMP NULL,
+	`maint_status` ENUM('review','hold','delete','removed','objremoved','admin','note','error','unknown') NOT NULL DEFAULT unknown COLLATE 'utf8_general_ci',
+	`maint_type` ENUM('non-ark','missing-ark','missing-file','unknown') NOT NULL DEFAULT unknown COLLATE 'utf8_general_ci',
+	`s3key` MEDIUMTEXT NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`note` MEDIUMTEXT NULL COLLATE 'utf8_general_ci',
 	PRIMARY KEY (`id`) USING BTREE,
-	UNIQUE INDEX `inv_node_id` (`inv_node_id`) USING BTREE,
-	INDEX `keymd5_idx` (`keymd5`) USING BTREE,
+	UNIQUE INDEX `keymd5_idx` (`inv_node_id`, `keymd5`) USING BTREE,
 	INDEX `type_idx` (`maint_type`) USING BTREE,
 	INDEX `status_idx` (`maint_status`) USING BTREE,
-	CONSTRAINT `inv_scans_ibfk_1` FOREIGN KEY (`inv_node_id`) REFERENCES `inv`.`inv_nodes` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION
+	CONSTRAINT `inv_scans_ibfk_2` FOREIGN KEY (`inv_node_id`) REFERENCES `inv`.`inv_nodes` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ROW_FORMAT=DYNAMIC
 ;
+* 
  */
 public class InvStorageMaint
         extends ContentAbs
+        implements StateInf
 {
     private static final String NAME = "InvStorageMaint";
     private static final String MESSAGE = NAME + ": ";
+    private static final boolean DEBUG = false;
     
     public enum MaintStatus {review, hold, delete, removed, objremoved, note, admin, error, unknown};
-    
-    public enum MaintAdmin {none, run, stop, eof};
     
     public enum MaintType
     {
@@ -89,8 +91,7 @@ public class InvStorageMaint
         mrtMissFile("missing-file"),
         mrtObject("object-delete"),
         mrtOK("OK"),
-        mrtUnknown("unknown"),
-        mrtAdmin("admin")
+        mrtUnknown("unknown")
         ;
 
         protected final String dispMaintType;
@@ -114,6 +115,7 @@ public class InvStorageMaint
     }
     
     protected long id = 0;
+    protected long storageScanId = 0;
     protected long nodeid = 0;
     protected String key = null;
     protected String keyMd5 = null;
@@ -123,7 +125,6 @@ public class InvStorageMaint
     protected DateState removed = null;
     protected MaintStatus maintStatus = MaintStatus.unknown;
     protected MaintType maintType = MaintType.mrtUnknown;
-    protected MaintAdmin maintAdmin = MaintAdmin.none;
     protected String note = null;
     protected boolean newEntry = false;
     
@@ -142,7 +143,7 @@ public class InvStorageMaint
         setProp(prop);
     }
     
-    public InvStorageMaint(long nodeID, InvStorageMaint.MaintType type, CloudList.CloudEntry entry, LoggerInf logger)
+    public InvStorageMaint(long nodeID, long storageScanId, InvStorageMaint.MaintType type, CloudList.CloudEntry entry, LoggerInf logger)
        throws TException
     {
         super(logger);
@@ -151,25 +152,12 @@ public class InvStorageMaint
         this.key = entry.getKey();
         this.size = entry.getSize();
         this.nodeid = nodeID;
+        this.storageScanId = storageScanId;
         String lastModifiedS = entry.getLastModified();
         DateState lastModified = new DateState(lastModifiedS);
         this.fileCreated = lastModified;
         this.created = new DateState();
         buildKeyMd5();
-    }
-    
-    public void setAdmin(long nodeid)
-        throws TException
-    {
-        this.nodeid = nodeid;
-        this.maintType = MaintType.mrtAdmin;
-        this.maintStatus = MaintStatus.admin;
-        this.maintAdmin = MaintAdmin.stop;
-        this.fileCreated = new DateState();
-        this.created = new DateState();
-        this.key = " ";
-        this.keyMd5 = "00000000000000000000000000000000";
-        
     }
 
     /**
@@ -185,6 +173,7 @@ public class InvStorageMaint
         try {
             setId(prop.getProperty("id"));
             setNodeid(prop.getProperty("inv_node_id"));
+            setStorageScanId(prop.getProperty("inv_storage_scan_id"));
             setKey(prop.getProperty("s3key"));
             setKeyMd5(prop.getProperty("keymd5"));
             setFileCreatedDB(prop.getProperty("file_created"));
@@ -192,7 +181,6 @@ public class InvStorageMaint
             setRemovedDB(prop.getProperty("file_removed"));
             setMaintStatusDB(prop.getProperty("maint_status"));
             setMaintTypeDB(prop.getProperty("maint_type"));
-            setMaintAdminDB(prop.getProperty("maint_admin"));
             setNote(prop.getProperty("note"));
             setSize(prop.getProperty("size"));
         } catch (Exception ex) {
@@ -210,6 +198,7 @@ public class InvStorageMaint
         Properties prop = new Properties();
         if (getId() != 0) prop.setProperty("id", "" + getId());
         if (getNodeid() != 0) prop.setProperty("inv_node_id", "" + getNodeid());
+        if (getStorageScanId() != 0) prop.setProperty("inv_storage_scan_id", "" + getStorageScanId());
         if (getKey() != null) prop.setProperty("s3key", getKey());
         if (getKeyMd5() != null) prop.setProperty("keymd5", getKeyMd5());
         if (getFileCreated() != null) prop.setProperty("file_created", getFileCreatedDB());
@@ -218,7 +207,6 @@ public class InvStorageMaint
         if (getSize() != null) prop.setProperty("size", "" + getSize());
         prop.setProperty("maint_status", "" + getMaintStatus());
         prop.setProperty("maint_type", "" + getMaintType());
-        prop.setProperty("maint_admin", "" + getMaintAdmin());
         if (getNote() != null) prop.setProperty("note", getNote());
         else prop.setProperty("note", "");
         return prop;
@@ -261,6 +249,19 @@ public class InvStorageMaint
         this.nodeid = setNum(nodeidS);
     }
 
+    public long getStorageScanId() {
+        return storageScanId;
+    }
+
+    public void setStorageScanId(long storageScanId) {
+        this.storageScanId = storageScanId;
+    }
+
+    public void setStorageScanId(String storageScanIdS) 
+    {
+        this.storageScanId = setNum(storageScanIdS);
+    }
+
     public DateState getFileCreated() {
         return fileCreated;
     }
@@ -274,8 +275,15 @@ public class InvStorageMaint
         this.fileCreated = created;
     }
 
+    public void setFileCreated() {
+        setFileCreated((String)null);
+    }
+
     public void setFileCreated(String fileCreatedS) {
-        if (StringUtil.isAllBlank(fileCreatedS)) this.fileCreated = new DateState();
+        if (StringUtil.isAllBlank(fileCreatedS)) {
+            this.fileCreated = new DateState();
+            return;
+        }
         this.fileCreated = new DateState(fileCreatedS);
     }
 
@@ -387,22 +395,6 @@ public class InvStorageMaint
             return;
         }
         this.maintType = MaintType.getMaintType(maintTypeS);
-    }
-
-    public MaintAdmin getMaintAdmin() {
-        return maintAdmin;
-    }
-
-    public void setMaintAdmin(MaintAdmin maintAdmin) {
-        this.maintAdmin = maintAdmin;
-    }
-
-    public void setMaintAdminDB(String maintAdminS) {
-        if (StringUtil.isEmpty(maintAdminS)) {
-            this.maintAdmin = null;
-            return;
-        }
-        this.maintAdmin = MaintAdmin.valueOf(maintAdminS);
     }
 
     public String getKey() {
