@@ -56,6 +56,8 @@ import org.cdlib.mrt.inv.content.InvNode;
 import org.cdlib.mrt.inv.content.InvNodeObject;
 import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
+import org.cdlib.mrt.inv.content.InvStorageMaint;
+import org.cdlib.mrt.inv.content.InvStorageScan;
 import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.LoggerInf;
@@ -195,6 +197,290 @@ public class InvDBUtil
         boolean works = DBUtil.exec(connection, sql, logger);
         return works;
     }
+
+    public static InvStorageMaint getStorageMaint(
+            long nodeid,
+            String key,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String keymd5 = InvStorageMaint.buildMd5(key, logger);
+        String sql = "select * from " + ContentAbs.STORAGE_MAINTS 
+                + " where keymd5 = '" + keymd5 + "'"
+                + " and inv_node_id=" + nodeid
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvStorageMaint(propArray[0], logger);
+    }
+
+    public static InvStorageMaint getStorageMaintAdmin(
+            long nodeNum,
+            
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "select sm.*" 
+                + " FROM inv_nodes n,"
+                + " inv_storage_maints sm"
+                + " WHERE n.number=" + nodeNum
+                + " AND sm.inv_node_id=n.id"
+                + " AND sm.maint_type='admin'"
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvStorageMaint(propArray[0], logger);
+    }
+
+    public static InvStorageMaint getStorageMaintsFromId(
+            long id,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "select *" 
+                + " FROM inv_storage_maints "
+                + " WHERE id=" + id
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        InvStorageMaint storageMaint = new InvStorageMaint(propArray[0], logger);
+        return storageMaint;
+    }
+
+    public static InvStorageMaint[] getStorageMaints(
+            long storageScanId,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "select *" 
+                + " FROM inv_storage_maints "
+                + " WHERE inv_storage_scan_id=" + storageScanId
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        InvStorageMaint[] storageMaints = new InvStorageMaint[propArray.length];
+        for (int i=0; i < propArray.length; i++) {
+            storageMaints[i] = new InvStorageMaint(propArray[i], logger);
+        }
+        return storageMaints;
+    }
+
+    public static InvStorageMaint[] getDeleteStorageMaints(
+            long lastDelete,
+            int maxout,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "select *" 
+                + " FROM inv_storage_maints "
+                + " WHERE maint_status='delete'" 
+                + " AND id > " + lastDelete 
+                + " LIMIT " + maxout
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        InvStorageMaint[] storageMaints = new InvStorageMaint[propArray.length];
+        for (int i=0; i < propArray.length; i++) {
+            storageMaints[i] = new InvStorageMaint(propArray[i], logger);
+        }
+        return storageMaints;
+    }
+
+    public static InvStorageScan getStorageScan(
+            long storageScanId,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "select *" 
+                + " FROM inv_storage_scans "
+                + " WHERE id=" + storageScanId
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvStorageScan(propArray[0], logger);
+    }
+
+    public static InvStorageScan getStorageScanStarted(
+            long nodeNum,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "SELECT ss.* "
+               + " FROM inv_storage_scans ss,"
+               + " inv_nodes n"
+               + " WHERE n.number=" + nodeNum
+               + " AND ss.inv_node_id=n.id"
+               + " AND ss.scan_status='started'"
+               + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvStorageScan(propArray[0], logger);
+    }
+
+    public static ArrayList<InvStorageScan> getStorageScanStatus(
+            long nodeNum,
+            String status,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+        String sql = "SELECT ss.* "
+               + " FROM inv_storage_scans ss,"
+               + " inv_nodes n"
+               + " WHERE n.number=" + nodeNum
+               + " AND ss.inv_node_id=n.id"
+               + " AND ss.scan_status='" + status + "'"
+               + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        ArrayList<InvStorageScan> list = new ArrayList<>();
+        for (Properties prop : propArray) {
+            InvStorageScan scan = new InvStorageScan(prop, logger);
+            list.add(scan);
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return list;
+    }
+
+    public static ArrayList<InvStorageScan> getDeleteStorageScan(
+            String status,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        
+        log("getStorageMaint entered");
+        String sql = "SELECT * "
+               + " FROM inv_storage_scans "
+               + " WHERE scan_type='delete' "
+               + " AND scan_status='" + status + "' "
+               + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        ArrayList<InvStorageScan> list = new ArrayList<>();
+        for (Properties prop : propArray) {
+            InvStorageScan scan = new InvStorageScan(prop, logger);
+            list.add(scan);
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return list;
+    }
+
+    public static InvStorageScan getStorageScanId(
+            int scanId,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getStorageMaint entered");
+         String sql = "SELECT * "
+               + " FROM inv_storage_scans "
+               + " WHERE id=" + scanId + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvStorageScan(propArray[0], logger);
+    }
+
     
     public static InvCollection getCollectionFromMnemonic(
             String mnemonic,
@@ -266,6 +552,32 @@ public class InvDBUtil
         Long nodeSeq = Long.parseLong(nodeSeqS);
         log("nodeSeq:" + nodeSeq);
         return nodeSeq;
+    }
+    
+    public static Long getNodeNumber(
+            Long nodeSeq,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getCollection entered");
+        if (nodeSeq == null) return null;
+        String sql = "select number from " + ContentAbs.NODES + " where id = \'" + nodeSeq + "\';";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        String nodeNumS = propArray[0].getProperty("number");
+        if (StringUtil.isAllBlank(nodeNumS)) return null;
+        Long nodeNum = Long.parseLong(nodeNumS);
+        log("nodeNum:" + nodeNum);
+        return nodeNum;
     }
             
     public static InvObject updateObject(
@@ -1708,7 +2020,7 @@ public class InvDBUtil
         }
         return list;
     }
-    
+
     public static InvCollectionNode getCollectionNode(
             long collectionseq,
             long nodeseq,

@@ -66,6 +66,7 @@ public abstract class ContentAbs
     public static final String AUDITS = "inv_audits";
     public static final String LOCALS = "inv_localids";
     public static final String EMBARGOES = "inv_embargoes";
+    public static final String STORAGE_MAINTS = "inv_storage_maints";
     public static final String METADATAS = "inv_metadatas";
     public static final String NODES = "inv_nodes";
     public static final String NODES_OBJECTS = "inv_nodes_inv_objects";
