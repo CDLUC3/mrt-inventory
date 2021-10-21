@@ -82,16 +82,16 @@ public class InvStorageMaint
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
     
-    public enum MaintStatus {review, hold, delete, removed, objremoved, note, admin, error, unknown};
+    public enum MaintStatus {review, hold, delete, removed, note, error, unknown};
     
     public enum MaintType
     {
         mtNonArk("non-ark"),
         mtMissArk("missing-ark"),
+        mtOrphanCopy("orphan-copy"),
         mrtMissFile("missing-file"),
-        mrtObject("object-delete"),
-        mrtOK("OK"),
-        mrtUnknown("unknown")
+        mtOK("OK"),
+        mtUnknown("unknown")
         ;
 
         protected final String dispMaintType;
@@ -124,7 +124,7 @@ public class InvStorageMaint
     protected DateState created = null;
     protected DateState removed = null;
     protected MaintStatus maintStatus = MaintStatus.unknown;
-    protected MaintType maintType = MaintType.mrtUnknown;
+    protected MaintType maintType = MaintType.mtUnknown;
     protected String note = null;
     protected boolean newEntry = false;
     
