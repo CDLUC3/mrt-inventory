@@ -350,10 +350,14 @@ public class InvStorageMaint
 
     public void setRemovedDB(String removedS) {
         if (StringUtil.isAllBlank(removedS)) {
-            this.removed = new DateState();
+            this.removed = null;
             return;
         }
         this.removed = InvUtil.setDBDate(removedS);
+    }
+
+    public void setRemoved() {
+        this.removed = new DateState();
     }
 
     public void setMaintStatus(MaintStatus maintStatus) {
