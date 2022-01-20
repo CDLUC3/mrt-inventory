@@ -9,6 +9,7 @@ pipeline {
       BRANCH_CORE = 'java-refactor'
       BRANCH_CLOUD = 'java-refactor'
       BRANCH_ZK = 'java-refactor'
+      BRANCH_MRTZOO = 'master'
 
       //working vars
       m2dir = "${HOME}/.m2-inventory"
@@ -60,6 +61,17 @@ pipeline {
             steps {
                 dir('cdl-zk-queue') {
                   git branch: "${env.BRANCH_ZK}", url: 'https://github.com/CDLUC3/cdl-zk-queue.git'
+                  sh "git remote get-url origin >> ../build.current.txt"
+                  sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
+                  sh "git log --pretty=full -n 1 >> ../build.current.txt"
+                  sh "mvn -Dmaven.repo.local=${m2dir} -s ${MAVEN_HOME}/conf/settings.xml clean install -DskipTests"
+                }
+            }
+        }
+        stage('Build MRT ZOO') {
+            steps {
+                dir('mrt-zoo') {
+                  git branch: "${env.BRANCH_MRTZOO}", url: 'https://github.com/CDLUC3/mrt-zoo.git'
                   sh "git remote get-url origin >> ../build.current.txt"
                   sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
                   sh "git log --pretty=full -n 1 >> ../build.current.txt"
