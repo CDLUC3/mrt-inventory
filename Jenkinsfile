@@ -8,6 +8,7 @@ pipeline {
       //Branch/tag names to incorporate into the build.  Create one var for each repo.
       BRANCH_CORE = 'java-refactor'
       BRANCH_CLOUD = 'java-refactor'
+      BRANCH_ZK = 'java-refactor'
 
       //working vars
       m2dir = "${HOME}/.m2-inventory"
@@ -55,6 +56,17 @@ pipeline {
                 }
             }
         }
+        stage('Build CDL ZK') {
+            steps {
+                dir('cdl-zk-queue') {
+                  git branch: "${env.BRANCH_ZK}", url: 'https://github.com/CDLUC3/cdl-zk-queue.git'
+                  sh "git remote get-url origin >> ../build.current.txt"
+                  sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
+                  sh "git log --pretty=full -n 1 >> ../build.current.txt"
+                  sh "mvn -Dmaven.repo.local=${m2dir} -s ${MAVEN_HOME}/conf/settings.xml clean install -DskipTests"
+                }
+            }
+        }
         stage('Build Inventory') {
             steps {
                 dir('mrt-inventory'){
@@ -75,7 +87,7 @@ pipeline {
             steps {
                 script {
                   sh "cp build.current.txt ${tagname}"
-                  archiveArtifacts artifacts: "${tagname}, build.current.txt, mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war", onlyIfSuccessful: true
+                  archiveArtifacts artifacts: "${tagname}, build.current.txt, mrt-inventory/inv-war/target/mrt-invwar-1.0-SNAPSHOT.war", onlyIfSuccessful: true
                 } 
             }
         }
