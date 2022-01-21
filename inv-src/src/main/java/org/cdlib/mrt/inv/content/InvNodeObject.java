@@ -49,15 +49,20 @@ public class InvNodeObject
     private static final String NAME = "InvNodeObject";
     private static final String MESSAGE = NAME + ": ";
     
-
-    public long id = 0;
-    public long nodesid = 0;
-    public long objectsid = 0;
-    public Role role = null;
-    public DateState created = null;
-    public DateState replicated = null;
-    public Long versionNumber = null;
-    public boolean newEntry = true;
+    public enum CompletionStatus {ok, fail, partial, unknown};
+    
+    protected long id = 0;
+    protected long nodesid = 0;
+    protected long objectsid = 0;
+    protected Role role = null;
+    protected DateState created = null;
+    protected DateState replicated = null;
+    protected Long versionNumber = null;
+    protected boolean newEntry = true;
+    protected DateState start = null;
+    protected Long size = null;
+    protected String note = null;
+    protected CompletionStatus completionStatus = null;
     
     public InvNodeObject(LoggerInf logger)
         throws TException
@@ -89,6 +94,10 @@ public class InvNodeObject
             setCreatedDB(prop.getProperty("created"));
             setReplicatedDB(prop.getProperty("replicated"));
             setVersionNumber(prop.getProperty("version_number"));
+            setStartDB(prop.getProperty("replic_start"));
+            setSize(prop.getProperty("replic_size"));
+            setNote(prop.getProperty("note"));
+            setCompletionStatus(prop.getProperty("completion_status"));
         } catch (Exception ex) {
             throw new TException(ex);
         }
@@ -107,8 +116,16 @@ public class InvNodeObject
         if (getObjectsid() != 0) prop.setProperty("inv_object_id", "" + getObjectsid());
         if (getRole() != null) prop.setProperty("role", getRole().toString());
         if (getCreated() != null) prop.setProperty("created", getCreatedDB());
-        prop.setProperty("version_number", "" + getVersionNumberDB());
+        if (getVersionNumber() == null) {
+            prop.setProperty("version_number", ""); // set null
+        } else {
+            prop.setProperty("version_number", "" + getVersionNumberDB());
+        }
         prop.setProperty("replicated", getReplicatedDB());
+        if (getStart() != null) prop.setProperty("replic_start", getStartDB());
+        if (getSize() != null) prop.setProperty("replic_size", "" + getSize());
+        if (getNote() != null) prop.setProperty("note", getNote());
+        if (getCompletionStatus() != null) prop.setProperty("completion_status", getCompletionStatus().toString());
         return prop;
     }
     
@@ -246,6 +263,65 @@ public class InvNodeObject
     public void setVersionNumber(String versionNumberS) {
         this.versionNumber = setNumLong(versionNumberS);
     }
+
+    public DateState getStart() {
+        return start;
+    }
+
+    public String getStartDB() {
+        if (start == null) return "";
+        return InvUtil.getDBDate(start);
+    }
+
+    public void setStart(DateState start) {
+        this.start = start;
+    }
+
+    public void setStart(String startS) {
+        if (StringUtil.isAllBlank(startS)) this.replicated = null;
+        else this.start = new DateState(startS);
+    }
+
+    public void setStartDB(String startS) {
+        if (StringUtil.isAllBlank(startS)) this.replicated = null;
+        else this.start = InvUtil.setDBDate(startS);
+    }
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(String sizeS) {
+        this.size = setNumLong(sizeS);
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public CompletionStatus getCompletionStatus() {
+        return completionStatus;
+    }
+
+    public void setCompletionStatus(CompletionStatus completionStatus) {
+        this.completionStatus = completionStatus;
+    }
     
+
+    public void setCompletionStatus(String completionStatusS) {
+        if (StringUtil.isEmpty(completionStatusS)) {
+            this.completionStatus = null;
+            return;
+        }
+        this.completionStatus = InvNodeObject.CompletionStatus.valueOf(completionStatusS);
+    }
 }
 

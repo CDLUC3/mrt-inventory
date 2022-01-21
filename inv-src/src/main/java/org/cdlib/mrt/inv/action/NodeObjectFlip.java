@@ -245,7 +245,7 @@ public class NodeObjectFlip
                     + objectID.getValue());
             }
             for (InvNodeObject nodeObject : nodeObjects) {
-                long nodeseq = nodeObject.nodesid;
+                long nodeseq = nodeObject.getNodesid();
                 InvNodeObject flipNodeObject = flipBuild(nodeObject);
                 addFlip(flipNodeObject);
             }
@@ -315,8 +315,8 @@ public class NodeObjectFlip
             int primaryCnt = 0;
             int secondaryCnt = 0;
             for (InvNodeObject nodeObject : flipObjects) {
-                if (nodeObject.role == Role.primary) primaryCnt++;
-                else if (nodeObject.role == Role.secondary) secondaryCnt++;
+                if (nodeObject.getRole() == Role.primary) primaryCnt++;
+                else if (nodeObject.getRole() == Role.secondary) secondaryCnt++;
             }
             if (primaryCnt != 1) {
                 throw new TException.INVALID_DATA_FORMAT(MESSAGE 
