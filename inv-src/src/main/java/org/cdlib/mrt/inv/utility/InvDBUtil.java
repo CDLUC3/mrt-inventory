@@ -665,7 +665,7 @@ public class InvDBUtil
             log("InvDBUtil - length == 0");
             return null;
         }
-        if (DEBUG) System.out.println("DUMP getNode" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        log("DUMP getNode" + PropertiesUtil.dumpProperties("prop", propArray[0]));
         return new InvNode(propArray[0], logger);
     }
     
@@ -1632,7 +1632,7 @@ public class InvDBUtil
                 + " SET " + key + " = ?"
                 + " WHERE id=" + content.getId() + ";";
         try {
-            if (DEBUG) System.out.println(MESSAGE + "updateText sql=" + sql);         
+            log(MESSAGE + "updateText sql=" + sql);         
             pst = connection.prepareStatement(sql);  
             pst.setBytes(1, value.getBytes("utf-8"));
             pst.execute(); 
@@ -1690,7 +1690,7 @@ public class InvDBUtil
         }
         ArrayList<InvFile> list = new ArrayList<>();
         for (Properties prop : propArray) {
-            System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
+            log(PropertiesUtil.dumpProperties("***out dump***", prop));
             String billableSizeS = prop.getProperty("billable_size");
             if (StringUtil.isAllBlank(billableSizeS)) {
                 continue;
@@ -1797,7 +1797,7 @@ public class InvDBUtil
         }
         ArrayList<InvNodeObject> list = new ArrayList<>();
         for (Properties prop : propArray) {
-            System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
+            log(PropertiesUtil.dumpProperties("***out dump***", prop));
             InvNodeObject nodeObject = new InvNodeObject(prop, logger);
             list.add(nodeObject);
         }
@@ -1867,7 +1867,7 @@ public class InvDBUtil
         }
         ArrayList<Integer> list = new ArrayList<>();
         for (Properties prop : propArray) {
-            System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
+            log(PropertiesUtil.dumpProperties("***out dump***", prop));
             String nodeS = prop.getProperty("number");
             if (StringUtil.isAllBlank(nodeS)) continue;
             Integer ival = Integer.parseInt(nodeS);
@@ -1917,7 +1917,7 @@ public class InvDBUtil
         }
         ArrayList<Long> list = new ArrayList<>();
         for (Properties prop : propArray) {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***id dump***", prop));
+            log(PropertiesUtil.dumpProperties("***id dump***", prop));
             String nodeS = prop.getProperty("inv_node_id");
             if (StringUtil.isAllBlank(nodeS)) continue;
             Long ival = Long.parseLong(nodeS);
@@ -1950,7 +1950,7 @@ public class InvDBUtil
         }
         
         for (Properties prop : propArray) {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***ver dump***", prop));
+            log(PropertiesUtil.dumpProperties("***ver dump***", prop));
             String nodeS = prop.getProperty("max(number)");
             if (StringUtil.isAllBlank(nodeS)) continue;
             return Integer.parseInt(nodeS);
@@ -1979,7 +1979,7 @@ public class InvDBUtil
         }
         
         for (Properties prop : propArray) {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***ver dump***", prop));
+            log(PropertiesUtil.dumpProperties("***ver dump***", prop));
             String retValue = prop.getProperty(column);
             if (StringUtil.isAllBlank(retValue)) continue;
             FileUtil.string2File(outFile, retValue);
@@ -2014,7 +2014,7 @@ public class InvDBUtil
         for (Properties prop : propArray) {
             String nodeseqS = prop.getProperty("inv_node_id");
             if (nodeseqS == null) continue;
-            System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
+            log(PropertiesUtil.dumpProperties("***out dump***", prop));
             Long nodeseq = Long.parseLong(nodeseqS);
             list.add(nodeseq);
         }
@@ -2168,7 +2168,7 @@ public class InvDBUtil
         }
         
         for (Properties prop : propArray) {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***ver dump***", prop));
+            log(PropertiesUtil.dumpProperties("***ver dump***", prop));
             String nodeS = prop.getProperty("inv_node_id");
             if (StringUtil.isAllBlank(nodeS)) continue;
             return Integer.parseInt(nodeS);
@@ -2258,7 +2258,7 @@ public class InvDBUtil
         }
         ArrayList<Properties> list = new ArrayList<>();
         for (Properties prop : propArray) {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
+            log(PropertiesUtil.dumpProperties("***out dump***", prop));
             list.add(prop);
         }
         return list;
@@ -2285,7 +2285,7 @@ public class InvDBUtil
         }
         ArrayList<Properties> list = new ArrayList<>();
         for (Properties prop : propArray) {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
+            log(PropertiesUtil.dumpProperties("***out dump***", prop));
             list.add(prop);
         }
         return list;
@@ -2386,7 +2386,7 @@ public class InvDBUtil
                     + " and inv_object_id=" + objectseq;
             
             int delCnt= DBDelete.delete(connection, sql, logger);
-            if (DEBUG) System.out.println(MESSAGE + "delete:" 
+            log(MESSAGE + "delete:" 
                     + " - sql=" + sql
                     + " - delCnt=" + delCnt
                     );

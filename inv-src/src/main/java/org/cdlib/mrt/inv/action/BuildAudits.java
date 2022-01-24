@@ -232,7 +232,7 @@ public class BuildAudits
                     + " - files.size=" + files.size()
                     );
             for (InvNodeObject nodeObject : nodeObjects) {
-                long nodeseq = nodeObject.nodesid;
+                long nodeseq = nodeObject.getNodesid();
                 for (InvFile file : files) {
                     long billableSize = file.getBillableSize();
                     if (billableSize > 0) addAudit(nodeObject, file);
