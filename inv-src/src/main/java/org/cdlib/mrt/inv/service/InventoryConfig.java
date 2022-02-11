@@ -67,6 +67,10 @@ public class InventoryConfig
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
 
+    // Hack for creating locks
+    public static String qService = null;
+    public static String lockName = null;
+
     protected Properties zooProperties = null;
     protected JSONObject stateJsonObject = null;
     protected JSONObject jdb = null;
@@ -233,6 +237,11 @@ public class InventoryConfig
             
             zooProperties = new Properties();
             String  queueService = jzooServer.getString("queueService");
+
+	    // Locks not using ZooManager
+            qService = queueService;
+            lockName = jzooServer.getString("lockName");
+
             zooProperties.setProperty("QueueService", queueService);
             
             String  queueName = jzooServer.getString("queueName");
