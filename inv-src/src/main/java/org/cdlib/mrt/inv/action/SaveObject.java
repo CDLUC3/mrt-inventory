@@ -37,6 +37,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+import org.apache.zookeeper.data.Stat;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
+
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FileComponent;
 import org.cdlib.mrt.core.Identifier;
@@ -78,6 +84,9 @@ import org.cdlib.mrt.inv.service.InvProcessState;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.core.Tika;
 import static org.cdlib.mrt.inv.action.InvActionAbs.getVersionMap;
+import org.cdlib.mrt.queue.DistributedLock;
+import org.cdlib.mrt.queue.DistributedLock.Ignorer;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.inv.utility.InvUtil;
 import org.cdlib.mrt.utility.LinkedHashList;
@@ -88,6 +97,8 @@ import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.URLEncoder;
 import org.cdlib.mrt.utility.XMLUtil;
+import org.json.JSONObject;
+
 
 /**
  * Run fixity
@@ -122,6 +133,13 @@ public class SaveObject
     protected long addNodeseq = 0;
     protected String method = null;
     protected InvNode inputNode = null;
+
+    // Support lock
+    private ZooKeeper zooKeeper;
+    private String zooConnectString = null;
+    private String zooLockNode = null;
+    private DistributedLock distributedLock;
+
     
     public static SaveObject getSaveObject(
             String ingestURL,
@@ -167,13 +185,17 @@ public class SaveObject
             if (DEBUG) {
                 System.out.println(msg);
             }
+
+	    boolean lock = getLock(objectID.getValue(), ingestURL);
+
             logger.logMessage(msg, 2, true);
             //isValidNode(node, objectID, connection, logger);
             versionMap = getVersionMap(storageBase, node, objectID, logger);
             dbAdd = new DBAdd(connection, logger);
             tika = new Tika(logger);
             versionMap.setNode(this.node);
-        
+
+	    releaseLock();
         } catch (Exception ex) {
             try {
                 if (connection != null) {
@@ -1713,5 +1735,64 @@ public class SaveObject
         InvProcessState state = new InvProcessState(ingestURL, method);
         return state;
     }
-    
+
+    /**
+     * Lock on primary identifier.  Will loop unitil lock obtained.
+     *
+     * @param String primary ID of object (ark)
+     * @param String jobID
+     * @return Boolean result of obtaining lock
+     */
+    private boolean getLock(String primaryID, String payload) {
+    try {
+
+       // SSM vars
+       String zooConnectString = InventoryConfig.qService;
+       String zooLockNode = InventoryConfig.lockName;
+
+       // Zookeeper treats slashes as nodes
+       String lockID = primaryID.replace(":", "").replace("/", "-");
+
+       zooKeeper = new ZooKeeper(zooConnectString, DistributedLock.sessionTimeout, new Ignorer());
+       distributedLock = new DistributedLock(zooKeeper, zooLockNode, lockID, null);
+       boolean locked = false;
+
+        while (! locked) {
+            try {
+               System.out.println("[info] " + MESSAGE + " Attempting to gain lock");
+               locked = distributedLock.submit(payload);
+            } catch (Exception e) {
+              if (DEBUG) System.err.println("[debug] " + MESSAGE + " Exception in gaining lock: " + lockID);
+            }
+            if (locked) break;
+            System.out.println("[info] " + MESSAGE + " UNABLE to Gain lock for ID: " + lockID + " Waiting 15 seconds before retry");
+            Thread.currentThread().sleep(15 * 1000);    // Wait 15 seconds before attempting to gain lock for ID
+        }
+        System.out.println("[debug] " + MESSAGE + " Gained lock for ID: " + lockID + " -- " + payload);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    return true;
+    }
+
+    /**
+     * Release lock
+     *
+     * @param none needed inputs are global
+     * @return void
+     */
+    private void releaseLock() {
+        try {
+
+                this.distributedLock.cleanup();
+                this.distributedLock = null;
+                this.zooKeeper = null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

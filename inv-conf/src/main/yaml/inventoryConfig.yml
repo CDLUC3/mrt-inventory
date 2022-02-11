@@ -11,6 +11,7 @@ inv-info:
   zooserver:
     queueService: "{!SSM: inventory/zoo/queueService}"
     queueName: "{!SSM: inventory/zoo/queueName}"
+    lockName: "{!SSM: inventory/zoo/lockName}"
 
   zooclient:
     zooPollMilli: "{!SSM: inventory/config/zoo/pollMilli !DEFAULT: 60000}"
@@ -42,6 +43,7 @@ inv-info-docker: &docker
   zooserver:
     queueService: zoo:2181
     queueName: /mrt.inventory.full
+    lockName: /mrt.InvLock
 
   zooclient:
     zooPollMilli: 60000
