@@ -194,8 +194,6 @@ public class SaveObject
             dbAdd = new DBAdd(connection, logger);
             tika = new Tika(logger);
             versionMap.setNode(this.node);
-
-	    releaseLock();
         } catch (Exception ex) {
             try {
                 if (connection != null) {
@@ -207,6 +205,9 @@ public class SaveObject
                 throw (TException) ex;
             }
             else throw new TException(ex);
+        } finally {
+            System.out.println("[debug] " + MESSAGE + " Releasing Zookeeper lock: " + objectID.getValue());
+            releaseLock();
         }
     }
     
