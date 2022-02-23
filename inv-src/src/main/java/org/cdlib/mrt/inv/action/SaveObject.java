@@ -186,8 +186,6 @@ public class SaveObject
                 System.out.println(msg);
             }
 
-	    boolean lock = getLock(objectID.getValue(), ingestURL);
-
             logger.logMessage(msg, 2, true);
             //isValidNode(node, objectID, connection, logger);
             versionMap = getVersionMap(storageBase, node, objectID, logger);
@@ -205,10 +203,7 @@ public class SaveObject
                 throw (TException) ex;
             }
             else throw new TException(ex);
-        } finally {
-            System.out.println("[debug] " + MESSAGE + " Releasing Zookeeper lock: " + objectID.getValue());
-            releaseLock();
-        }
+	}
     }
     
     public static SaveObject getSaveObject(
@@ -390,6 +385,7 @@ public class SaveObject
         throws TException
     {
         try {
+            boolean lock = getLock(objectID.getValue(), ingestURL);
             if (method.equals("copy")) {
                copy();
                return;
@@ -426,6 +422,8 @@ public class SaveObject
 
         } finally {
             try {
+            System.out.println("[debug] " + MESSAGE + " Releasing Zookeeper lock: " + objectID.getValue());
+            releaseLock();
                 connection.close();
             } catch (Exception ex) { }
         }

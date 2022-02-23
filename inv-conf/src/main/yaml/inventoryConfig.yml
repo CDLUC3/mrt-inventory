@@ -43,7 +43,7 @@ inv-info-docker: &docker
   zooserver:
     queueService: zoo:2181
     queueName: /mrt.inventory.full
-    lockName: /mrt.InvLock
+    lockName: /mrt.lock
 
   zooclient:
     zooPollMilli: 60000
