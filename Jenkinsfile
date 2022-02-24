@@ -17,7 +17,7 @@ pipeline {
       BRANCH_MRTZOO = 'master'
 
       //working vars
-      M2DIR = "${HOME}/.m2-store"
+      M2DIR = "${HOME}/.m2-inventory"
       DEF_BRANCH = "master"
     }
     agent any
