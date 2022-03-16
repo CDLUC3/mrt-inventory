@@ -37,6 +37,7 @@ import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.inv.utility.InvUtil;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.utility.LoggerInf;
+import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 /**
@@ -75,7 +76,7 @@ public class InvNodeObject
     {
         super(logger);
         setProp(prop);
-    }
+        }
 
     /**
      * From a Properties container set the local values for the nodes table
@@ -221,8 +222,8 @@ public class InvNodeObject
     public void setReplicatedDB(String replicatedS) {
         if (StringUtil.isAllBlank(replicatedS)) this.replicated = null;
         else this.replicated = InvUtil.setDBDate(replicatedS);
-    }
-
+        }
+            
     public boolean isNewEntry() {
         return newEntry;
     }
@@ -278,12 +279,12 @@ public class InvNodeObject
     }
 
     public void setStart(String startS) {
-        if (StringUtil.isAllBlank(startS)) this.replicated = null;
+        if (StringUtil.isAllBlank(startS)) this.start = null;
         else this.start = new DateState(startS);
     }
 
     public void setStartDB(String startS) {
-        if (StringUtil.isAllBlank(startS)) this.replicated = null;
+        if (StringUtil.isAllBlank(startS)) this.start = null;
         else this.start = InvUtil.setDBDate(startS);
     }
 
