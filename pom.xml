@@ -9,7 +9,6 @@
   <name>UC3-mrtInventory</name>
   <url>http://uc3.cdlib.org</url>
 
-  <!-- let profiles determine which conf module to run -->
   <profiles>
     <profile>
       <id>uc3</id>
