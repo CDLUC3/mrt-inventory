@@ -59,27 +59,6 @@
   </build>
 
   <dependencies>
-
-    <!-- Internal dependencies -->
-    <dependency>
-      <groupId>org.cdlib.mrt</groupId>
-      <artifactId>mrt-inventoryconf</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.cdlib.mrt</groupId>
-      <artifactId>mrt-inventorysrc</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.cdlib.mrt</groupId>
-      <artifactId>cdl-zk-queue</artifactId>
-      <version>0.2-SNAPSHOT</version>
-    </dependency>
-
-    <!-- 3rd party dependencies -->
     <dependency>
       <groupId>ant</groupId>
       <artifactId>ant</artifactId>
@@ -166,6 +145,24 @@
     </dependency>
 
     <dependency>
+      <groupId>org.cdlib.mrt</groupId>
+      <artifactId>mrt-inventoryconf</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.cdlib.mrt</groupId>
+      <artifactId>mrt-inventorysrc</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.cdlib.mrt</groupId>
+      <artifactId>cdl-zk-queue</artifactId>
+      <version>0.2-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
       <version>2.11.0</version>
@@ -176,7 +173,6 @@
       <artifactId>xml-apis</artifactId>
       <version>1.4.01</version>
     </dependency> 
-
   </dependencies>
 
 </project>
