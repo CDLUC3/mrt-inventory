@@ -31,11 +31,14 @@
   </build>
 
   <dependencies>
+
+<!--
     <dependency>
       <groupId>com.jolbox</groupId>
       <artifactId>bonecp</artifactId>
       <version>0.8.0.RELEASE</version>
     </dependency>
+-->
 
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -63,17 +66,28 @@
       <scope>test</scope>
     </dependency>
 
+<!--
+Downloading: https://repo.maven.apache.org/maven2/javax/jms/jms/1.1/jms-1.1.jar
+Downloading: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar
+Downloading: https://repo.maven.apache.org/maven2/com/sun/jdmk/jmxtools/1.2.1/jmxtools-1.2.1.jar
+Downloading: https://repo.maven.apache.org/maven2/com/sun/jmx/jmxri/1.2.1/jmxri-1.2.1.jar
+Downloaded: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar (32 KB at 48.0 KB/sec)
+[ERROR] Failed to execute goal on project mrt-inventorysrc: Could not resolve dependencies for project org.cdlib.mrt:mrt-inventorysrc:jar:1.0-SNAPSHOT: The following artifacts could not be resolved: javax.jms:jms:jar:1.1, com.sun.jdmk:jmxtools:jar:1.2.1, com.sun.jmx:jmxri:jar:1.2.1: Could not transfer artifact javax.jms:jms:jar:1.1 from/to java.net (https://maven-repository.dev.java.net/nonav/repository): No connector available to access repository java.net (https://maven-repository.dev.java.net/nonav/repository) of type legacy using the available factories WagonRepositoryConnectorFactory -> [Help 1]
+
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.16</version>
     </dependency>
+-->
 
+<!--
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.38</version>
     </dependency>
+-->
 
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -91,13 +105,32 @@
       <groupId>org.apache.zookeeper</groupId>
       <artifactId>zookeeper</artifactId>
       <version>3.3.3</version>
+      <!-- we can drop these exclusions if we update version to 3.4.9 or higher -->
+      <!-- https://crunchify.com/maven-artifacts-error-jms-jmxtools-jmxri-dependencies -->
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.jmx</groupId>
+          <artifactId>jmxri</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jdmk</groupId>
+          <artifactId>jmxtools</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.jms</groupId>
+          <artifactId>jms</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
+<!-- Should this live in inv-war instead>
     <dependency>
       <groupId>org.cdlib.mrt</groupId>
       <artifactId>mrt-cloudconf</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <scope>runtime</scope>
     </dependency>
+-->
 
     <dependency>
       <groupId>org.cdlib.mrt</groupId>
@@ -105,11 +138,14 @@
       <version>2.0-SNAPSHOT</version>
     </dependency>
 
+<!-- Should this live in inv-war instead>
     <dependency>
       <groupId>org.cdlib.mrt</groupId>
       <artifactId>mrt-inventoryconf</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <scope>runtime</scope>
     </dependency>
+-->
 
     <dependency>
       <groupId>org.cdlib.mrt</groupId>
@@ -117,11 +153,13 @@
       <version>2.0-SNAPSHOT</version>
     </dependency>
 
+<!--
     <dependency>
       <groupId>org.cdlib.mrt</groupId>
       <artifactId>mrt-jena</artifactId>
       <version>2.0-SNAPSHOT</version>
     </dependency>
+-->
 
     <dependency>
       <groupId>org.cdlib.mrt</groupId>
@@ -141,6 +179,7 @@
       <version>1.0-SNAPSHOT</version>
     </dependency>
 
+<!--  Should these live in inv-war?
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet</artifactId>
@@ -152,6 +191,7 @@
       <artifactId>jersey-client</artifactId>
       <version>2.25.1</version>
     </dependency>
+-->
 
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
@@ -165,11 +205,14 @@
       <version>2.25.1</version>
     </dependency>
 
+<!--
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
       <version>2.11.0</version>
     </dependency>
+-->
+
   </dependencies>
   
   <reporting>
@@ -184,6 +227,22 @@
   </reporting>
 
 </project>
+
+
+
+<!--
+[INFO] - maven-dependency-plugin:2.1:analyze (default-cli) @ mrt-inventorysrc -
+[WARNING] Unused declared dependencies found:
+[WARNING]    com.jolbox:bonecp:jar:0.8.0.RELEASE:compile
+[WARNING]    log4j:log4j:jar:1.2.16:compile
+[WARNING]    mysql:mysql-connector-java:jar:5.1.38:compile
+[WARNING]    org.cdlib.mrt:mrt-cloudconf:jar:1.0-SNAPSHOT:compile
+[WARNING]    org.cdlib.mrt:mrt-inventoryconf:jar:1.0-SNAPSHOT:compile
+[WARNING]    org.cdlib.mrt:mrt-jena:jar:2.0-SNAPSHOT:compile
+[WARNING]    org.glassfish.jersey.containers:jersey-container-servlet:jar:2.25.1:compile
+[WARNING]    org.glassfish.jersey.core:jersey-client:jar:2.25.1:compile
+[WARNING]    xerces:xercesImpl:jar:2.11.0:compile
+-->
 
 
 <!-- commented out dependencies
