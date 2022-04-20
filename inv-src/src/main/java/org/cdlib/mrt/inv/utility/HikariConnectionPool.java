@@ -82,7 +82,7 @@ public class HikariConnectionPool
             }
             HikariConfig config=new HikariConfig();
             
-            config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+            config.setDataSourceClassName("com.mysql.cj.jdbc.MysqlDataSource");
             config.addDataSourceProperty("URL",url);
             config.addDataSourceProperty("user",user);
             config.addDataSourceProperty("password",password);

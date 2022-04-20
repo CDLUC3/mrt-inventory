@@ -240,6 +240,19 @@ public class JerseyInv
         return getVersions(objectIDS, versionS, fileID, formatType, cs, sc);
     }
     
+    @GET
+    @Path("current/{objectIDS}")
+    public Response callCurrent(
+            @PathParam("objectIDS") String objectIDS,
+            @DefaultValue("xhtml") @QueryParam(KeyNameHttpInf.RESPONSEFORM) String formatType,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        return getCurrent(objectIDS, formatType, cs, sc);
+    }
+    
+    
     @POST
     @Path("primary/{objectIDS}/{ownerIDS}/{localIDs}")
     public Response callAddPrimary(
@@ -771,6 +784,37 @@ public class JerseyInv
                 version = Long.parseLong(versionS);
             }
             VersionsState responseState  = invService.getVersions(objectID, version, fileID);
+            return getStateResponse(responseState, formatType, logger, cs, sc);
+
+        } catch (TException tex) {
+            System.out.println("getVersions Exception:" + tex);
+            tex.printStackTrace();
+            return getExceptionResponse(tex, formatType, logger);
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+    
+    public Response getCurrent(
+            String objectIDS,
+            String formatType,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = defaultLogger;
+        try {
+            log("getManifestUrl entered:"
+                    + " - objectIDS=" + objectIDS
+                    + " - formatType=" + formatType
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            Identifier objectID = new Identifier(objectIDS);
+            VersionsState responseState  = invService.getCurrent(objectID);
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {

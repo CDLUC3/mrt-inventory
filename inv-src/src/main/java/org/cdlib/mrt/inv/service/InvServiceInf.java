@@ -107,6 +107,16 @@ public interface InvServiceInf
         throws TException;
     
     /**
+     * Return the current version number
+     * @param objectID
+     * @return versionState with only ark and ersion number
+     * @throws TException 
+     */
+    public VersionsState getCurrent(
+            Identifier objectID)
+        throws TException;
+    
+    /**
      * Get access version information for cloud content
      * @param objectID object identifier
      * @param version version number to be selected: null=all; 0=current

@@ -903,6 +903,32 @@ public class InvDBUtil
         return new InvVersion(propArray[0], logger);
     }
 
+    public static InvVersion getLastVersion(
+            Identifier objectID,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getVersion entered");
+        if (objectID == null) return null;
+        String objectS = objectID.getValue();
+        String sql = "select * from " + ContentAbs.VERSIONS + " where ark = \'" + objectS + "\' "
+                + "ORDER BY NUMBER DESC "
+                + ";";
+        log("sql:" + sql);
+        Properties[] propArray = DBUtil.cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        log("DUMP" + PropertiesUtil.dumpProperties("prop", propArray[0]));
+        return new InvVersion(propArray[0], logger);
+    }
+
     public static InvVersion getVersionFromId(
             long versionseq,
             Connection connection,
