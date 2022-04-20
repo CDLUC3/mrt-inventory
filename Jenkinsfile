@@ -18,7 +18,7 @@ pipeline {
 
       //working vars
       M2DIR = "${HOME}/.m2-inventory"
-      DEF_BRANCH = "master"
+      DEF_BRANCH = "main"
     }
     agent any
 
