@@ -11,7 +11,7 @@ inv-info:
   zooserver:
     queueService: "{!SSM: inventory/zoo/queueService}"
     queueName: "{!SSM: inventory/zoo/queueName}"
-    lockName: "{!SSM: inventory/zoo/lockName}"
+    lockName: "{!SSM: inventory/zoo/lockName !DEFAULT: /mrt.lock}"
 
   zooclient:
     zooPollMilli: "{!SSM: inventory/config/zoo/pollMilli !DEFAULT: 60000}"
@@ -20,7 +20,7 @@ inv-info:
   fileLogger:
     messageMaximumLevel: "{!SSM: inventory/config/log/messageMaximumLevel !DEFAULT: 5}"
     messageMaximumError: "{!SSM: inventory/config/log/messageMaximumError !DEFAULT: 10}"
-    path: "{!SSM: inventory/config/log/path}"
+    path: "{!ENV: LOG_INV !DEFAULT: /dpr2/mrtHomes/inv}"
     name: inv
     qualifier: yyMMdd
     trace: 5
@@ -31,7 +31,7 @@ inv-info:
     host: "{!SSM: inv/db-host}"
     name: "{!SSM: inv/db-name}"
     encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
-
+  
 inv-info-docker: &docker
   storageBase: http://store:8080/store
   state:
@@ -64,7 +64,7 @@ inv-info-docker: &docker
     user: user
     password: password
     encoding: utf8   # schema won't load if it's utf8mb4
-
+  
 inv-info-docker-dev: 
   <<: *docker
 

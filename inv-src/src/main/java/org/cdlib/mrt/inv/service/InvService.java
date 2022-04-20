@@ -58,7 +58,9 @@ import org.cdlib.mrt.inv.action.ProcessItem;
 import org.cdlib.mrt.inv.action.ProcessObject;
 import org.cdlib.mrt.inv.action.SaveNode;
 import org.cdlib.mrt.inv.action.Versions;
+import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
+import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.zoo.ZooManager;
 import org.cdlib.mrt.zoo.ZooQueue;
 import org.cdlib.mrt.queue.Item;
@@ -67,6 +69,7 @@ import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.URLEncoder;
+import org.cdlib.mrt.inv.service.VersionsState;
 
 /**
  * Inv Service
@@ -265,6 +268,44 @@ public class InvService
             Versions versions = Versions.getVersions(objectID, version, connection, logger);
             VersionsState state = versions.process(fileID);
             return state;
+        
+        } catch (TException tex) {
+            throw tex;
+            
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                    connection = null;
+                } catch (Exception ex) { }
+            }
+        }
+        
+    }
+   
+    /**
+     * Return the current version number
+     * @param objectID
+     * @return versionState with only ark and ersion number
+     * @throws TException 
+     */
+    @Override
+    public VersionsState getCurrent(
+            Identifier objectID)
+        throws TException
+    {
+        if (DEBUG) System.out.print("getVersions entered");
+        Connection connection = null;
+        try {
+            connection = inventoryConfig.getConnection(true);
+            VersionsState versionsState = new VersionsState(objectID);
+            InvVersion lastVersion = InvDBUtil.getLastVersion(objectID, connection,logger);
+            if (lastVersion == null) {
+                versionsState.setCurrentVersion(0);
+                return versionsState;
+            }
+            versionsState.setCurrentVersion(lastVersion.getNumber());
+            return versionsState;
         
         } catch (TException tex) {
             throw tex;
