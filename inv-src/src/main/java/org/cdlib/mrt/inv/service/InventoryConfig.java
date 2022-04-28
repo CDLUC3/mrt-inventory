@@ -464,6 +464,7 @@ public class InventoryConfig
                     + " - zooStatus:" + zooStatus + "\n"
                     + " - dbStatus:" + dbStatus + "\n"
             );
+            inventoryConfig.dbStartup();
             inventoryConfig.zooHandlerStartup();
             System.out.println("Startup zooStatus:" + inventoryConfig.getZookeeperStatus());
             inventoryConfig.zooHandlerShutDown();
