@@ -6,7 +6,7 @@ inv-info:
     id: inv
     name: UC3
     description: "UC3 inventory micro-service"
-    baseURI: "http://it-server:8080/inventory"
+    baseURI: "http://it-server:8080/mrtinv"
   
   zooserver:
     queueService: zoo:2181

@@ -107,6 +107,12 @@
                             <name>network</name>
                             <alias>mrt-it-database</alias>
                           </network>
+                          <env>
+                            <MYSQL_DATABASE>inv</MYSQL_DATABASE>
+                            <MYSQL_USER>user</MYSQL_USER>
+                            <MYSQL_PASSWORD>password</MYSQL_PASSWORD>
+                            <MYSQL_ROOT_PASSWORD>root-password</MYSQL_ROOT_PASSWORD>
+                          </env>
                         </run>
                       </image>
                       <image>

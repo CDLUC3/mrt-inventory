@@ -52,7 +52,7 @@ public class ServiceDriverIT {
         private DocumentBuilder db;
         private XPathFactory xpathfactory;
 
-        public ServiceDriverIT() throws ParserConfigurationException {
+        public ServiceDriverIT() throws ParserConfigurationException, HttpResponseException, IOException, JSONException {
                 try {
                         port = Integer.parseInt(System.getenv("it-server.port"));
                 } catch (NumberFormatException e) {
@@ -60,6 +60,19 @@ public class ServiceDriverIT {
                 }
                 db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 xpathfactory = new XPathFactoryImpl();
+
+                String url = String.format("http://localhost:%d/%s/service/start?t=json", port, cp);
+                System.out.println(url);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                        HttpPost post = new HttpPost(url);
+                        HttpResponse response = client.execute(post);
+                        assertEquals(200, response.getStatusLine().getStatusCode());
+                        String s = new BasicResponseHandler().handleResponse(response).trim();
+                        assertFalse(s.isEmpty());
+
+                        System.out.println(s);
+                        JSONObject json =  new JSONObject(s);
+                }
         }
 
         public String getContent(String url, int status) throws HttpResponseException, IOException {
@@ -111,5 +124,6 @@ public class ServiceDriverIT {
                 String url = String.format("http://localhost:%d/%s/state?t=json", port, cp);
                 JSONObject json = getJsonContent(url, 200);
                 assertTrue(json.has("invsv:invServiceState"));
+                assertEquals("running", json.getJSONObject("invsv:invServiceState").get("invsv:systemStatus"));
         }
 }
