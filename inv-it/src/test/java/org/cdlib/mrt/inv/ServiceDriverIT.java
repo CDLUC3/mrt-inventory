@@ -48,6 +48,8 @@ import static org.junit.Assert.*;
 
 public class ServiceDriverIT {
         private int port = 8080;
+        private int primaryNode = 7777;
+        private int replNode = 8888;
         private String cp = "mrtinv";
         private DocumentBuilder db;
         private XPathFactory xpathfactory;
@@ -125,5 +127,31 @@ public class ServiceDriverIT {
                 JSONObject json = getJsonContent(url, 200);
                 assertTrue(json.has("invsv:invServiceState"));
                 assertEquals("running", json.getJSONObject("invsv:invServiceState").get("invsv:systemStatus"));
+        }
+
+        public JSONObject setFileNode(int node) throws IOException, JSONException {
+                String url = String.format("http://localhost:%d/%s/filenode/%d?t=json", port, cp, node);
+                System.out.println(url);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                        HttpPost post = new HttpPost(url);
+                        HttpResponse response = client.execute(post);
+                        assertEquals(200, response.getStatusLine().getStatusCode());
+                        String s = new BasicResponseHandler().handleResponse(response).trim();
+                        assertFalse(s.isEmpty());
+
+                        return new JSONObject(s);
+                }
+        }
+
+        @Test
+        public void SetPrimaryFileNodeTest() throws IOException, JSONException {
+                JSONObject json =  setFileNode(primaryNode);
+                System.out.println(json.toString());
+        }
+
+        @Test
+        public void SetReplFileNodeTest() throws IOException, JSONException {
+                JSONObject json =  setFileNode(replNode);
+                System.out.println(json.toString());
         }
 }

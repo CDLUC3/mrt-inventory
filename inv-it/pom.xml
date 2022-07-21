@@ -116,6 +116,19 @@
                         </run>
                       </image>
                       <image>
+                        <name>${itDockerRegistry}/mock-merritt-it:dev</name>
+                        <alias>mock-merritt-it</alias>
+                        <run>
+                          <network>
+                            <name>network</name>
+                            <alias>mock-merritt-it</alias>
+                          </network>
+                          <ports>
+                            <port>mock-merritt-it.port:8081</port>
+                          </ports>
+                        </run>
+                      </image>
+                      <image>
                         <name>tomcat:8-jre8</name>
                         <alias>it-server</alias>
                         <run>
@@ -141,11 +154,11 @@
                       </image>
                       <image>
                         <name>zookeeper:3.4</name>
-                        <alias>zoo</alias>
+                        <alias>zoo-it</alias>
                         <run>
                           <network>
                             <name>network</name>
-                            <alias>zoo</alias>
+                            <alias>zoo-it</alias>
                           </network>
                         </run>
                       </image>
@@ -179,6 +192,7 @@
                 </includes>
                 <environmentVariables>
                   <it-server.port>${it-server.port}</it-server.port>
+                  <mock-merritt-it.port>${mock-merritt-it.port}</mock-merritt-it.port>
                 </environmentVariables>
               </configuration>
             </plugin>

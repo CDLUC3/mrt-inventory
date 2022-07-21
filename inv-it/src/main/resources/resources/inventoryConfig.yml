@@ -1,7 +1,7 @@
 which-inv-info: inv-info
   
 inv-info:
-  storageBase: http://store:8080/store
+  storageBase: "http://mock-merritt-it:4567/store"
   state:
     id: inv
     name: UC3
@@ -9,7 +9,7 @@ inv-info:
     baseURI: "http://it-server:8080/mrtinv"
   
   zooserver:
-    queueService: zoo:2181
+    queueService: zoo-it:2181
     queueName: /mrt.inventory.full
     lockName: /mrt.lock
 
