@@ -13,6 +13,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.FormBodyPartBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -22,12 +24,15 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,6 +42,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 //https://stackoverflow.com/a/22939742/3846548
 import org.apache.xpath.jaxp.XPathFactoryImpl;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 
@@ -154,4 +161,26 @@ public class ServiceDriverIT {
                 JSONObject json =  setFileNode(replNode);
                 System.out.println(json.toString());
         }
+
+        @Test
+        public void AddObjectTest() throws IOException, JSONException {
+                String manifest = "http://mock-merritt-it:4567/static/storage/manifest/7777/ark%3A%2F1111%2F2222";
+                String url = String.format("http://localhost:%d/%s/add", port, cp);
+                System.out.println(url);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                        HttpPost post = new HttpPost(url);
+                        
+                        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                        builder.addTextBody("url", manifest, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+                        HttpEntity entity = builder.build();
+                        post.setEntity(entity);
+                        HttpResponse response = client.execute(post);
+                        assertEquals(200, response.getStatusLine().getStatusCode());
+                        String s = new BasicResponseHandler().handleResponse(response).trim();
+                        assertFalse(s.isEmpty());
+
+                        System.out.println(s);
+                }
+        }
+
 }
