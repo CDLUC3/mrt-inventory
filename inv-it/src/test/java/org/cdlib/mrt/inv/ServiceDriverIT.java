@@ -1,5 +1,6 @@
 package org.cdlib.mrt.inv;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -70,6 +71,10 @@ public class ServiceDriverIT {
                 db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 xpathfactory = new XPathFactoryImpl();
 
+        }
+
+        @Before
+        public void initServiceAndNodes() throws IOException, JSONException {
                 String url = String.format("http://localhost:%d/%s/service/start?t=json", port, cp);
                 System.out.println(url);
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -82,6 +87,8 @@ public class ServiceDriverIT {
                         System.out.println(s);
                         JSONObject json =  new JSONObject(s);
                 }
+                setFileNode(primaryNode);
+                setFileNode(replNode);
         }
 
         public String getContent(String url, int status) throws HttpResponseException, IOException {
@@ -151,20 +158,10 @@ public class ServiceDriverIT {
         }
 
         @Test
-        public void SetPrimaryFileNodeTest() throws IOException, JSONException {
-                JSONObject json =  setFileNode(primaryNode);
-                System.out.println(json.toString());
-        }
-
-        @Test
-        public void SetReplFileNodeTest() throws IOException, JSONException {
-                JSONObject json =  setFileNode(replNode);
-                System.out.println(json.toString());
-        }
-
-        @Test
         public void AddObjectTest() throws IOException, JSONException {
-                String manifest = "http://mock-merritt-it:4567/static/storage/manifest/7777/ark%3A%2F1111%2F2222";
+                String ark = "ark:/1111/2222";
+                String ark_de = URLEncoder.encode(URLEncoder.encode(ark, StandardCharsets.UTF_8.name()), StandardCharsets.UTF_8.name());
+                String manifest = String.format("http://mock-merritt-it:4567/static/storage/manifest/7777/%s", ark_de);
                 String url = String.format("http://localhost:%d/%s/add", port, cp);
                 System.out.println(url);
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
