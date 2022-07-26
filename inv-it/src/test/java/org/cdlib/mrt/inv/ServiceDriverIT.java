@@ -180,4 +180,29 @@ public class ServiceDriverIT {
                 }
         }
 
+        public void DeleteObjectTest() {
+                //DELETE @Path("object/{objectIDS}")
+        }
+
+        public void SetLocalIdsTest() {
+                //POST @Path("primary/{objectIDS}/{ownerIDS}/{localIDs}")
+
+        }
+
+        public void SetLocalIdsFormParamTest() {
+                //POST @Path("primary")
+                //@DefaultValue("") @FormDataParam("objectid") String objectIDS,
+                //@DefaultValue("") @FormDataParam("ownerid") String ownerIDS,
+                //@DefaultValue("") @FormDataParam("localids") String localIDs,
+        }
+
+        public void getLocalIdsTest() {
+                //@GET @Path("local/{objectIDS}")
+        }
+
+        public void addZookeeperTest() {
+                //POST @Path("addzoo") @Consumes(MediaType.MULTIPART_FORM_DATA)
+
+                //test read from zookeeper
+        }
 }
