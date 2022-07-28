@@ -118,7 +118,7 @@ public class ServiceDriverIT {
 
         public JSONObject addObject(String ark) throws IOException, JSONException {
                 String ark_e = URLEncoder.encode(ark, StandardCharsets.UTF_8.name());
-                String manifest = String.format("http://mock-merritt-it:4567/static/storage/manifest/7777/%s", ark_e);
+                String manifest = String.format("http://mock-merritt-it:4567/storage/manifest/7777/%s", ark_e);
                 String url = String.format("http://localhost:%d/%s/add", port, cp);
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
                         HttpPost post = new HttpPost(url);
@@ -140,7 +140,7 @@ public class ServiceDriverIT {
 
         public JSONObject addUrlToZk(String ark) throws IOException, JSONException {
                 String ark_e = URLEncoder.encode(ark, StandardCharsets.UTF_8.name());
-                String manifest = String.format("http://mock-merritt-it:4567/static/storage/manifest/7777/%s", ark_e);
+                String manifest = String.format("http://mock-merritt-it:4567/storage/manifest/7777/%s", ark_e);
                 String url = String.format("http://localhost:%d/%s/addzoo", port, cp);
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
                         HttpPost post = new HttpPost(url);
@@ -273,7 +273,7 @@ public class ServiceDriverIT {
 
         @Test
         public void AddObjectToZkTest() throws IOException, JSONException, InterruptedException {
-                String ark = "ark:/1111/2222";
+                String ark = "ark:/1111/3333";
                 if (checkArk(ark)) {
                         deleteObject(ark);
                 }
@@ -287,7 +287,7 @@ public class ServiceDriverIT {
 
         @Test
         public void AddObjectWithLocalIdTest() throws IOException, JSONException {
-                String ark = "ark:/1111/2222";
+                String ark = "ark:/1111/4444";
                 String localid = "localid";
                 String owner = "owner";
                 if (checkArk(ark)) {
@@ -310,7 +310,7 @@ public class ServiceDriverIT {
 
         @Test
         public void AddObjectWithLocalIdByFormParamTest() throws IOException, JSONException {
-                String ark = "ark:/1111/2222";
+                String ark = "ark:/1111/5555";
                 String localid = "localid";
                 String owner = "owner";
                 if (checkArk(ark)) {
