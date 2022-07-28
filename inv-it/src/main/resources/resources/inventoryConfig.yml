@@ -14,7 +14,7 @@ inv-info:
     lockName: /mrt.lock
 
   zooclient:
-    zooPollMilli: 60000
+    zooPollMilli: 10000
     zooThreadCount: 5
 
   fileLogger:

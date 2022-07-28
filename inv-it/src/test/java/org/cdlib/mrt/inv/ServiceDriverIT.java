@@ -138,6 +138,28 @@ public class ServiceDriverIT {
                 }
         }
 
+        public JSONObject addUrlToZk(String ark) throws IOException, JSONException {
+                String ark_e = URLEncoder.encode(ark, StandardCharsets.UTF_8.name());
+                String manifest = String.format("http://mock-merritt-it:4567/static/storage/manifest/7777/%s", ark_e);
+                String url = String.format("http://localhost:%d/%s/addzoo", port, cp);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                        HttpPost post = new HttpPost(url);
+                        
+                        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                        builder.addTextBody("responseForm", "json", ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+                        builder.addTextBody("zoourl", manifest, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+                        HttpEntity entity = builder.build();
+                        post.setEntity(entity);
+                        HttpResponse response = client.execute(post);
+                        assertEquals(200, response.getStatusLine().getStatusCode());
+                        String s = new BasicResponseHandler().handleResponse(response).trim();
+                        assertFalse(s.isEmpty());
+                        JSONObject json = new JSONObject(s);
+                        assertTrue(json.has("invp:invProcessState"));
+                        return json;
+                }
+        }
+
         public JSONObject setLocalIdByFormParams(String ark, String owner, String localid) throws IOException, JSONException {
                 String url = String.format("http://localhost:%d/%s/primary", port, cp);
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -245,6 +267,20 @@ public class ServiceDriverIT {
                 }
                 assertFalse(checkArk(ark));
                 addObject(ark);
+                assertTrue(checkArk(ark));
+                deleteObject(ark);
+        }
+
+        @Test
+        public void AddObjectToZkTest() throws IOException, JSONException, InterruptedException {
+                String ark = "ark:/1111/2222";
+                if (checkArk(ark)) {
+                        deleteObject(ark);
+                }
+                assertFalse(checkArk(ark));
+                addUrlToZk(ark);
+                //Allow time for queue entry to be processed
+                Thread.sleep(20000);
                 assertTrue(checkArk(ark));
                 deleteObject(ark);
         }
