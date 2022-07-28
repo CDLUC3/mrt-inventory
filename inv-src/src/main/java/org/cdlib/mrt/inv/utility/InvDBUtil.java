@@ -30,6 +30,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.utility;
 
 import java.io.File;
+import java.sql.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
+import org.cdlib.mrt.utility.SQLUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 
@@ -1193,7 +1195,7 @@ public class InvDBUtil
         return new InvFile(propArray[0], logger);
     }
     
-    public static long getAccessVersionNum(
+    public static long getAccessVersionNumOld(
             Identifier ark,
             long versionNum,
             String pathname,
@@ -1229,6 +1231,53 @@ public class InvDBUtil
         String numberS = prop.getProperty("number");
         if (numberS == null) return 0;
         return Long.parseLong(numberS);
+    }
+    
+    public static Long getAccessVersionNum(
+            Identifier ark,
+            long versionNum,
+            String pathname,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        try {
+            log("getAccessVersionNum entered");
+            if (versionNum == 1L) return 1L;
+            String arkS = ark.getValue();
+            String sql = "select inv_versions.number"
+               + " from inv_objects, inv_files, inv_versions"
+               + " where inv_objects.ark= ?"
+               + " and inv_files.pathname=?"
+               + " and inv_versions.number <= ?"
+               + " and inv_files.billable_size > 0"
+               + " and inv_files.inv_object_id = inv_objects.id"
+               + " and inv_versions.id = inv_files.inv_version_id"
+               + " ORDER BY inv_versions.number DESC"
+               + " LIMIT 1"
+               + ";"   ;
+            PreparedStatement query = connection.prepareStatement(sql);
+            query.setString(1, arkS);
+            query.setString(2, pathname);
+            query.setLong(3, versionNum);
+            Properties[] propArray = cmdQuery(query, logger);
+
+            if ((propArray == null)) {
+                log("InvDBUtil - prop null");
+                return null;
+            } else if (propArray.length == 0) {
+                log("InvDBUtil - length == 0");
+                return 0L;
+            }
+            Properties prop = propArray[0];
+            String numberS = prop.getProperty("number");
+            if (numberS == null) return 0L;
+            return Long.parseLong(numberS);
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
     }
     
     public static String getAccessNodeVersionKey(
@@ -2425,5 +2474,39 @@ public class InvDBUtil
             throw new TException(ex);
         }
     }
+
+    public static Properties[] cmdQuery(
+            PreparedStatement statement,
+            LoggerInf logger)
+        throws TException
+    {
+        if (logger == null) {
+            throw new TException.INVALID_OR_MISSING_PARM("logger not supplied");
+        }
+        ResultSet resultSet = null;
+        try {
+            resultSet = statement.executeQuery();
+            Properties [] results = SQLUtil.getResult(resultSet,logger);
+            if (logger.getMessageMaxLevel() >= 10) {
+                for (Properties result : results) {
+                    logger.logMessage(PropertiesUtil.dumpProperties(MESSAGE + "getOperation", result), 10);
+                }
+            }
+            return results;
+
+        } catch(Exception e) {
+            String msg = "Exception"
+                + " - exception:" + e;
+
+            logger.logError(MESSAGE + "getOperation - " + msg, 0);
+            throw new TException.SQL_EXCEPTION(msg, e);
+            
+        } finally {
+	    try {
+               resultSet.close();
+	    } catch(Exception e) { }
+	}
+     }
+
 }
 
