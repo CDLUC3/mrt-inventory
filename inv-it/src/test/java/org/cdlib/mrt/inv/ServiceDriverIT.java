@@ -20,6 +20,11 @@ import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,24 +40,92 @@ import static org.junit.Assert.*;
 
 public class ServiceDriverIT {
         private int port = 8080;
+        private int dbport = 9999;
         private int primaryNode = 7777;
         private int replNode = 8888;
+
+        //https://github.com/CDLUC3/merritt-docker/blob/main/mrt-inttest-services/mock-merritt-it/data/system/mrt-owner.txt
+        private String owner = "ark:/99999/owner";
+        //https://github.com/CDLUC3/merritt-docker/blob/main/mrt-inttest-services/mock-merritt-it/data/system/mrt-membership.txt
+        private String collection = "ark:/99999/collection";
+        //https://github.com/CDLUC3/merritt-docker/blob/main/mrt-inttest-services/mock-merritt-it/data/system/mrt-erc.txt
+        private String title = "Hello File";
+        //https://github.com/CDLUC3/merritt-docker/blob/main/mrt-inttest-services/mock-merritt-it/data/producer/mrt-dc.xml
+        private String mdfilename = "producer/mrt-dc.xml";
+
         private String cp = "mrtinv";
         private DocumentBuilder db;
         private XPathFactory xpathfactory;
 
-        public ServiceDriverIT() throws ParserConfigurationException, HttpResponseException, IOException, JSONException {
+        private String connstr;
+        private String user = "user";
+        private String password = "password";
+    
+        public ServiceDriverIT() throws ParserConfigurationException, HttpResponseException, IOException, JSONException, SQLException {
                 try {
                         port = Integer.parseInt(System.getenv("it-server.port"));
+                        dbport = Integer.parseInt(System.getenv("mrt-it-database.port"));
                 } catch (NumberFormatException e) {
                         System.err.println("it-server.port not set, defaulting to " + port);
                 }
                 db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 xpathfactory = new XPathFactoryImpl();
+
+                connstr = String.format("jdbc:mysql://localhost:%d/inv?characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&serverTimezone=UTC", dbport);
                 initServiceAndNodes();
+       }
+
+        public void checkInvDatabase(String sql, int n, int value) throws SQLException {
+                try(Connection con = DriverManager.getConnection(connstr, user, password)){
+                        try (PreparedStatement stmt = con.prepareStatement(sql)){
+                                stmt.setInt(1, n);
+                                ResultSet rs=stmt.executeQuery();
+                                while(rs.next()) {
+                                        assertEquals(value, rs.getInt(1));  
+                                }  
+                        }
+                }
         }
 
-        public void initServiceAndNodes() throws IOException, JSONException {
+        public void checkInvDatabase(String sql, String ark, int value) throws SQLException {
+                try(Connection con = DriverManager.getConnection(connstr, user, password)){
+                        try (PreparedStatement stmt = con.prepareStatement(sql)){
+                                stmt.setString(1, ark);
+                                ResultSet rs=stmt.executeQuery();
+                                while(rs.next()) {
+                                        assertEquals(value, rs.getInt(1));  
+                                }  
+                        }
+                }
+        }
+
+        public void checkInvDatabase(String sql, String ark, String ark2, int value) throws SQLException {
+                try(Connection con = DriverManager.getConnection(connstr, user, password)){
+                        try (PreparedStatement stmt = con.prepareStatement(sql)){
+                                stmt.setString(1, ark);
+                                stmt.setString(2, ark2);
+                                ResultSet rs=stmt.executeQuery();
+                                while(rs.next()) {
+                                        assertEquals(value, rs.getInt(1));  
+                                }  
+                        }
+                }
+        }
+
+        public void checkInvDatabase(String sql, String ark, int n, int value) throws SQLException {
+                try(Connection con = DriverManager.getConnection(connstr, user, password)){
+                        try (PreparedStatement stmt = con.prepareStatement(sql)){
+                                stmt.setString(1, ark);
+                                stmt.setInt(2, n);
+                                ResultSet rs=stmt.executeQuery();
+                                while(rs.next()) {
+                                        assertEquals(value, rs.getInt(1));  
+                                }  
+                        }
+                }
+        }
+
+        public void initServiceAndNodes() throws IOException, JSONException, SQLException {
                 String url = String.format("http://localhost:%d/%s/service/start?t=json", port, cp);
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
                         HttpPost post = new HttpPost(url);
@@ -65,7 +138,9 @@ public class ServiceDriverIT {
                         assertNotNull(json);
                 }
                 setFileNode(primaryNode);
+                checkInvDatabase("select count(*) from inv_nodes where number=?", primaryNode, 1);
                 setFileNode(replNode);
+                checkInvDatabase("select count(*) from inv_nodes where number=?", replNode, 1);
         }
 
         public String getContent(String url, int status) throws HttpResponseException, IOException {
@@ -126,6 +201,7 @@ public class ServiceDriverIT {
                         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
                         builder.addTextBody("responseForm", "json", ContentType.TEXT_PLAIN.withCharset("UTF-8"));
                         builder.addTextBody("url", manifest, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+                        builder.addTextBody("checkVersion", "false", ContentType.TEXT_PLAIN.withCharset("UTF-8"));
                         HttpEntity entity = builder.build();
                         post.setEntity(entity);
                         HttpResponse response = client.execute(post);
@@ -260,13 +336,93 @@ public class ServiceDriverIT {
         }
 
         @Test
-        public void AddObjectTest() throws IOException, JSONException {
+        public void AddObjectTest() throws IOException, JSONException, SQLException {
                 String ark = "ark:/1111/2222";
                 if (checkArk(ark)) {
                         deleteObject(ark);
                 }
                 assertFalse(checkArk(ark));
                 addObject(ark);
+                getVersion(ark, primaryNode, 1);
+                assertTrue(checkArk(ark));
+                checkInvDatabase(inv_object_sql(), ark, owner, 1);
+                checkInvDatabase(inv_object_title_sql(), ark, title, 1);
+                checkInvDatabase(inv_dublinkernels_sql(), ark, title, 1);
+                checkInvDatabase(inv_metadatas_sql(), ark, mdfilename, 1);
+                checkInvDatabase(inv_files_sql(), ark, 7);
+                checkInvDatabase(inv_owner_sql(), owner, 1);
+                checkInvDatabase(inv_collection_sql(), collection, 1);
+                checkInvDatabase(inv_collections_inv_objects_sql(), ark, collection, 1);
+                checkInvDatabase(inv_nodes_inv_objects_sql(), ark, primaryNode, 1);
+                checkInvDatabase(inv_audits_sql(), ark, primaryNode, 7);
+                deleteObject(ark);
+        }
+
+        public String inv_object_sql() {
+                return "select count(*) from inv_objects where ark=? and inv_owner_id=" +
+                        "(select id from inv_owners where ark=?)";
+        }
+
+        public String inv_object_title_sql() {
+                return "select count(*) from inv_objects where ark=? and erc_what=?";
+        }
+
+        public String inv_dublinkernels_sql() {
+                return "select count(*) from inv_dublinkernels where inv_object_id=" +
+                        "(select id from inv_objects where ark=?)" +
+                        " and element='what' and value=?";
+        }
+
+        public String inv_metadatas_sql() {
+                return "select count(*) from inv_metadatas where inv_object_id=" +
+                        "(select id from inv_objects where ark=?)" +
+                        " and filename=?";
+        }
+
+        public String inv_files_sql() {
+                return "select count(*) from inv_files where inv_object_id=" +
+                        "(select id from inv_objects where ark=?)";
+        }
+
+        public String inv_owner_sql() {
+                return "select count(*) from inv_owners where ark=?";
+        }
+
+        public String inv_collection_sql() {
+                return "select count(*) from inv_collections where ark=?";
+        }
+
+        public String inv_collections_inv_objects_sql() {
+                return "select count(*) from inv_collections_inv_objects where inv_object_id=" + 
+                        "(select id from inv_objects where ark=?)" +
+                        " and inv_collection_id=" +
+                        "(select id from inv_collections where ark=?)";
+        }
+
+        public String inv_nodes_inv_objects_sql() {
+                return "select count(*) from inv_nodes_inv_objects where inv_object_id=" + 
+                        "(select id from inv_objects where ark=?)" +
+                        " and inv_node_id=" +
+                        "(select id from inv_nodes where number=?)";
+        }
+
+        public String inv_audits_sql() {
+                return "select count(*) from inv_audits where inv_object_id=" + 
+                        "(select id from inv_objects where ark=?)" +
+                        " and inv_node_id=" +
+                        "(select id from inv_nodes where number=?)";
+        }
+
+        @Test
+        public void AddObjectV3Test() throws IOException, JSONException {
+                // The v3 prefix triggers the mock-merritt-it container to return a multi-version manifest
+                String ark = "ark:/v311/2233";
+                if (checkArk(ark)) {
+                        deleteObject(ark);
+                }
+                assertFalse(checkArk(ark));
+                addObject(ark);
+                getVersion(ark, primaryNode, 2);
                 assertTrue(checkArk(ark));
                 deleteObject(ark);
         }
@@ -297,11 +453,48 @@ public class ServiceDriverIT {
                 assertFalse(checkArk(ark));
                 addObject(ark);
                 assertTrue(checkArk(ark));
+                getVersion(ark, primaryNode, 1);
                 getLocalids(localid, owner, false, ark);
                 getLocalidsByArk(ark, false);
                 setLocalId(ark, owner, localid);
                 getLocalids(localid, owner, true, ark);
                 getLocalidsByArk(ark, true);
+                deleteObject(ark);
+                deleteLocalids(ark);
+                getLocalids(localid, owner, false, ark);
+                getLocalidsByArk(ark, false);
+        }
+
+        @Test
+        public void AddObjectWithMultipleLocalIdTest() throws IOException, JSONException {
+                String ark = "ark:/1111/4444";
+                String localid = "localid";
+                String localid_v2 = "localid;localid2";
+                String localid_v3 = "localid;localid3";
+                String owner = "owner";
+                if (checkArk(ark)) {
+                        deleteObject(ark);
+                        deleteLocalids(ark);
+                }
+                assertFalse(checkArk(ark));
+                addObject(ark);
+                assertTrue(checkArk(ark));
+                getVersion(ark, primaryNode, 1);
+                getLocalids(localid, owner, false, ark);
+                getLocalidsByArk(ark, false);
+
+                setLocalId(ark, owner, localid);
+                getLocalids(localid, owner, true, ark);
+                getLocalidsByArk(ark, true);
+
+                setLocalId(ark, owner, localid_v2);
+                getLocalids(localid, owner, true, ark);
+                getLocalidsByArk(ark, true);
+
+                setLocalId(ark, owner, localid_v3);
+                getLocalids(localid, owner, true, ark);
+                getLocalidsByArk(ark, true);
+
                 deleteObject(ark);
                 deleteLocalids(ark);
                 getLocalids(localid, owner, false, ark);
@@ -320,6 +513,7 @@ public class ServiceDriverIT {
                 assertFalse(checkArk(ark));
                 addObject(ark);
                 assertTrue(checkArk(ark));
+                getVersion(ark, primaryNode, 1);
                 getLocalids(localid, owner, false, ark);
                 getLocalidsByArk(ark, false);
                 setLocalIdByFormParams(ark, owner, localid);
@@ -354,18 +548,25 @@ public class ServiceDriverIT {
                 return json;
         }
 
+        public JSONObject getVersion(String ark, int node, int ver) throws HttpResponseException, IOException, JSONException {
+                String url = String.format("http://localhost:%d/%s/versions/%s?t=json", 
+                        port, 
+                        cp, 
+                        URLEncoder.encode(ark, StandardCharsets.UTF_8.name())
+                );
+                JSONObject json = getJsonContent(url, 200);
+                assertTrue(json.has("invv:versionsState"));
+                assertEquals(node, json.getJSONObject("invv:versionsState").getInt("invv:bucketProperty"));
+                assertEquals(ver, json.getJSONObject("invv:versionsState").getInt("invv:currentVersion"));
+                return json;
+        }
+
         public void verifyLocalIdResponse(JSONObject json, boolean expectToFind, String ark) throws JSONException {
                 assertTrue(json.has("invloc:localContainerState"));
                 assertEquals(expectToFind, json.getJSONObject("invloc:localContainerState").getBoolean("invloc:exists"));
                 if (expectToFind) {
                         assertEquals(ark, json.getJSONObject("invloc:localContainerState").get("invloc:primaryIdentifier"));
                 }
-        }
-
-        public void addZookeeperTest() {
-                //POST @Path("addzoo") @Consumes(MediaType.MULTIPART_FORM_DATA)
-
-                //test read from zookeeper
         }
 
 }

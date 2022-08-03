@@ -10,6 +10,9 @@ services:
       MYSQL_USER: 'user'
       MYSQL_PASSWORD: 'password'
       MYSQL_ROOT_PASSWORD: 'root-password'
+    ports:
+    - published: 9999
+      target: 3306
     networks:
       merrittnet:
   it-server:
