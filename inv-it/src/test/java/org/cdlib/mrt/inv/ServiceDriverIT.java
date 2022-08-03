@@ -15,6 +15,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +26,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -345,17 +349,31 @@ public class ServiceDriverIT {
                 addObject(ark);
                 getVersion(ark, primaryNode, 1);
                 assertTrue(checkArk(ark));
+
+                //the following will not be deleted after the test
+                checkInvDatabase(inv_owner_sql(), owner, 1);
+                checkInvDatabase(inv_collection_sql(), collection, 1);
+
+                //the following will be deleted after the test
                 checkInvDatabase(inv_object_sql(), ark, owner, 1);
                 checkInvDatabase(inv_object_title_sql(), ark, title, 1);
                 checkInvDatabase(inv_dublinkernels_sql(), ark, title, 1);
                 checkInvDatabase(inv_metadatas_sql(), ark, mdfilename, 1);
                 checkInvDatabase(inv_files_sql(), ark, 7);
-                checkInvDatabase(inv_owner_sql(), owner, 1);
-                checkInvDatabase(inv_collection_sql(), collection, 1);
                 checkInvDatabase(inv_collections_inv_objects_sql(), ark, collection, 1);
                 checkInvDatabase(inv_nodes_inv_objects_sql(), ark, primaryNode, 1);
                 checkInvDatabase(inv_audits_sql(), ark, primaryNode, 7);
+
                 deleteObject(ark);
+
+                checkInvDatabase(inv_object_sql(), ark, owner, 0);
+                checkInvDatabase(inv_object_title_sql(), ark, title, 0);
+                checkInvDatabase(inv_dublinkernels_sql(), ark, title, 0);
+                checkInvDatabase(inv_metadatas_sql(), ark, mdfilename, 0);
+                checkInvDatabase(inv_files_sql(), ark, 0);
+                checkInvDatabase(inv_collections_inv_objects_sql(), ark, collection, 0);
+                checkInvDatabase(inv_nodes_inv_objects_sql(), ark, primaryNode, 0);
+                checkInvDatabase(inv_audits_sql(), ark, primaryNode, 0);
         }
 
         public String inv_object_sql() {
@@ -436,7 +454,7 @@ public class ServiceDriverIT {
                 assertFalse(checkArk(ark));
                 addUrlToZk(ark);
                 //Allow time for queue entry to be processed
-                Thread.sleep(20000);
+                Thread.sleep(25000);
                 assertTrue(checkArk(ark));
                 deleteObject(ark);
         }
@@ -481,24 +499,36 @@ public class ServiceDriverIT {
                 assertTrue(checkArk(ark));
                 getVersion(ark, primaryNode, 1);
                 getLocalids(localid, owner, false, ark);
-                getLocalidsByArk(ark, false);
+                Set<String> set = getLocalidsByArk(ark, false);
+                assertEquals(0, set.size());
 
                 setLocalId(ark, owner, localid);
                 getLocalids(localid, owner, true, ark);
-                getLocalidsByArk(ark, true);
-
+                set = getLocalidsByArk(ark, true);
+                assertEquals(1, set.size());
+                assertTrue(set.contains(localid));
+                
                 setLocalId(ark, owner, localid_v2);
                 getLocalids(localid, owner, true, ark);
-                getLocalidsByArk(ark, true);
-
+                set = getLocalidsByArk(ark, true);
+                assertEquals(2, set.size());
+                for(String s: localid_v2.split(";")) {
+                        assertTrue(set.contains(s));
+                }
+                
                 setLocalId(ark, owner, localid_v3);
                 getLocalids(localid, owner, true, ark);
-                getLocalidsByArk(ark, true);
+                set = getLocalidsByArk(ark, true);
+                assertEquals(3, set.size());
+                for(String s: localid_v3.split(";")) {
+                        assertTrue(set.contains(s));
+                }
 
                 deleteObject(ark);
                 deleteLocalids(ark);
                 getLocalids(localid, owner, false, ark);
-                getLocalidsByArk(ark, false);
+                set = getLocalidsByArk(ark, false);
+                assertEquals(0, set.size());
         }
 
         @Test
@@ -537,7 +567,7 @@ public class ServiceDriverIT {
                 return json;
         }
 
-        public JSONObject getLocalidsByArk(String ark, boolean expectToFind) throws HttpResponseException, IOException, JSONException {
+        public Set<String> getLocalidsByArk(String ark, boolean expectToFind) throws HttpResponseException, IOException, JSONException {
                 String url = String.format("http://localhost:%d/%s/local/%s?t=json", 
                         port, 
                         cp, 
@@ -545,7 +575,26 @@ public class ServiceDriverIT {
                 );
                 JSONObject json = getJsonContent(url, 200);
                 verifyLocalIdResponse(json, expectToFind, ark);
-                return json;
+                assertTrue(json.has("invloc:localContainerState"));
+                JSONObject j = json.getJSONObject("invloc:localContainerState");
+
+                Set<String> set = new HashSet<>();
+                if(j.has("invloc:local")) {
+                        j = j.getJSONObject("invloc:local");
+                        assertTrue(j.has("invloc:primaryLocalState"));
+                        Object obj = j.get("invloc:primaryLocalState");
+                        if (obj instanceof JSONArray) {
+                                JSONArray arr = j.getJSONArray("invloc:primaryLocalState");
+                                for(int i = 0; i < arr.length(); i++) {
+                                        j = arr.getJSONObject(i);
+                                        set.add(j.getString("invloc:localID"));
+                                }                
+                        } else if (obj instanceof JSONObject) {
+                                j = j.getJSONObject("invloc:primaryLocalState");
+                                set.add(j.getString("invloc:localID"));
+                        }
+                }
+                return set;
         }
 
         public JSONObject getVersion(String ark, int node, int ver) throws HttpResponseException, IOException, JSONException {
