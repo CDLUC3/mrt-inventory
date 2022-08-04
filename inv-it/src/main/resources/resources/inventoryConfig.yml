@@ -1,0 +1,35 @@
+which-inv-info: inv-info
+  
+inv-info:
+  storageBase: "http://mock-merritt-it:4567/store"
+  state:
+    id: inv
+    name: UC3
+    description: "UC3 inventory micro-service"
+    baseURI: "http://it-server:8080/mrtinv"
+  
+  zooserver:
+    queueService: zoo-it:2181
+    queueName: /mrt.inventory.full
+    lockName: /mrt.lock
+
+  zooclient:
+    zooPollMilli: 10000
+    zooThreadCount: 5
+
+  fileLogger:
+    messageMaximumLevel: 5
+    messageMaximumError: 10
+    path: /tmp
+    name: inv
+    qualifier: yyMMdd
+    trace: 5
+
+  db:
+    adapter: mysql2
+    host: mrt-it-database
+    name: inv
+    user: user
+    password: password
+    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&serverTimezone=UTC"   # schema won't load if it's utf8mb4
+    

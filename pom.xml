@@ -20,9 +20,9 @@
                 <module>inv-conf</module>
                 <module>inv-src</module>
                 <module>inv-war</module>
+                <module>inv-it</module>
             </modules>
         </profile>
      </profiles>
 
 </project>
-

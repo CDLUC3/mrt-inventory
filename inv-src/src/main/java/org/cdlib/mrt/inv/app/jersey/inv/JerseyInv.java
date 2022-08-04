@@ -162,6 +162,7 @@ public class JerseyInv
     }
 
     @GET
+    @Deprecated
     @Path("select/{sql}")
     public Response callSelect(
             @PathParam("sql") String select,
