@@ -13,6 +13,12 @@ MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/docker-compose.yml up -d
 
 Run the junit test
 
+## To generate test data for the audit and replic integration tests
+
+```
+MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/make-audit-replic-data.yml up -d
+```
+
 ## SQL for IT stack
 
 ```
