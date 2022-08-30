@@ -200,8 +200,7 @@ public class StoreMeta
                     + "?fixity=no"
                     ;
             if (DEBUG) System.out.println(MESSAGE + "getInputStream url=" + urlS);
-            InputStream inStream = HTTPUtil.getObject(urlS,  EXTRACT_TIMEOUT, 3);
-            return StringUtil.streamToString(inStream, "utf-8");
+            return StoreExtract.getString(urlS, logger, 3);
             
         } catch (Exception ex) {
             ex.printStackTrace();

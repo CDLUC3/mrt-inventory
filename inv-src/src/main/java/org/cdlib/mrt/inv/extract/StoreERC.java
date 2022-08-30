@@ -92,8 +92,7 @@ public class StoreERC
                 + "?fixity=no"
                 ;
             if (DEBUG) System.out.println("getStoreERC:" + urlS);
-            tempFile = FileUtil.url2TempFile(logger, urlS);
-            String ercS = FileUtil.file2String(tempFile);
+            String ercS = StoreExtract.getString(urlS, logger, 3);
             if (DEBUG) System.out.println("ERC:" + ercS);
             StoreERC storeERC = new StoreERC(ercS, logger);
             return storeERC;
@@ -104,12 +103,6 @@ public class StoreERC
         } catch (Exception ex) {
             throw new TException.GENERAL_EXCEPTION(ex);
             
-        } finally {
-            if (tempFile != null) {
-                try {
-                    tempFile.delete();
-                } catch (Exception ex) { }
-            }
         }
     }   
  
@@ -148,8 +141,7 @@ public class StoreERC
                 + "?fixity=no"
                 ;
             if (DEBUG) System.out.println("getStoreERC:" + urlS);
-            tempFile = FileUtil.url2TempFile(logger, urlS);
-            String ercS = FileUtil.file2String(tempFile);
+            String ercS = StoreExtract.getString(urlS, logger, 3);
             if (DEBUG) System.out.println("ERC:" + ercS);
             StoreERC storeERC = new StoreERC(ercS, logger);
             return storeERC;
@@ -160,12 +152,6 @@ public class StoreERC
         } catch (Exception ex) {
             throw new TException.GENERAL_EXCEPTION(ex);
             
-        } finally {
-            if (tempFile != null) {
-                try {
-                    tempFile.delete();
-                } catch (Exception ex) { }
-            }
         }
     }   
     
