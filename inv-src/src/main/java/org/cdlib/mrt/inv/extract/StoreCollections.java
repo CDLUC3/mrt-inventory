@@ -97,8 +97,7 @@ public class StoreCollections
                 + "?fixity=no"
                 ;
             if (DEBUG) System.out.println("getStoreCollection:" + urlS);
-            tempFile = FileUtil.url2TempFile(logger, urlS);
-            String collectionsS = FileUtil.file2String(tempFile);
+            String collectionsS = StoreExtract.getString(urlS, logger, 3);
             if (DEBUG) System.out.println("collectionsS:" + collectionsS);
             StoreCollections storeCollection = new StoreCollections(collectionsS, logger);
             return storeCollection;
@@ -109,12 +108,6 @@ public class StoreCollections
         } catch (Exception ex) {
             throw new TException.GENERAL_EXCEPTION(ex);
             
-        } finally {
-            if (tempFile != null) {
-                try {
-                    tempFile.delete();
-                } catch (Exception ex) { }
-            }
         }
     }
     

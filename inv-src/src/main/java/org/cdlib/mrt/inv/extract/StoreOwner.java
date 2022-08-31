@@ -86,8 +86,7 @@ public class StoreOwner
                 + "?fixity=no"
                 ;
             if (DEBUG) System.out.println("getStoreERC:" + urlS);
-            tempFile = FileUtil.url2TempFile(logger, urlS);
-            String ownerS = FileUtil.file2String(tempFile);
+            String ownerS = StoreExtract.getString(urlS, logger, 3);
             if (DEBUG) System.out.println("ownerS:" + ownerS);
             StoreOwner storeOwner = new StoreOwner(ownerS, logger);
             return storeOwner;
@@ -98,12 +97,6 @@ public class StoreOwner
         } catch (Exception ex) {
             throw new TException.GENERAL_EXCEPTION(ex);
             
-        } finally {
-            if (tempFile != null) {
-                try {
-                    tempFile.delete();
-                } catch (Exception ex) { }
-            }
         }
     }
     
