@@ -117,7 +117,7 @@
                             <port>mrt-it-database.port:3306</port>
                           </ports>
                           <wait>
-                            <time>1000</time>
+                            <time>5000</time>
                           </wait>
                         </run>
                       </image>
