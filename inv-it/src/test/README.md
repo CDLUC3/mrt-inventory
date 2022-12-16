@@ -12,6 +12,12 @@ Make sure that the war is up to date
 mvn install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
 ```
 
+If running on a desktop
+```
+ECR_REGISTRY=it-docker-registry
+```
+
+Launch Containers
 ```
 MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/docker-compose.yml up -d
 ```
