@@ -7,11 +7,20 @@ mvn verify
 
 ## To run from the command line or in a debugger
 
+Make sure that the war is up to date
+```
+mvn install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
+```
+
 ```
 MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/docker-compose.yml up -d
 ```
 
-Run the junit test
+Run the junit test from VSCode
+
+```
+MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/docker-compose.yml down
+```
 
 ## To generate test data for the audit and replic integration tests
 
