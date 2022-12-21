@@ -49,7 +49,7 @@
         <groupId>org.glassfish.jersey.containers</groupId>
         <artifactId>jersey-container-servlet</artifactId>
         <!--this item is required, but showing up in maven report-->
-        <scope>compile</scope>
+        <scope>runtime</scope>
         <version>2.25.1</version>
     </dependency>
     
@@ -110,7 +110,7 @@
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
           <!--this item is required, but showing up in maven report-->
-          <scope>compile</scope>
+          <scope>runtime</scope>
         <version>2.12.2</version>
     </dependency>
 
