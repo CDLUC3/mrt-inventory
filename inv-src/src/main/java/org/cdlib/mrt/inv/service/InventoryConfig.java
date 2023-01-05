@@ -41,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.LinkedHashMap;
+import org.cdlib.mrt.core.DateState;
 
 
 import org.cdlib.mrt.inv.utility.DPRFileDB;
@@ -85,6 +86,7 @@ public class InventoryConfig
     protected boolean shutdown = true;
     protected String storageBase = null;
     protected InvServiceState serviceState = null;
+    protected static final DateState serviceStartTime = new DateState();
     private static class Test{ };
     
     public static InventoryConfig useYaml()
@@ -479,5 +481,9 @@ public class InventoryConfig
                 System.out.println("Exception:" + ex);
                 ex.printStackTrace();
         }
+    }
+
+    public static DateState getServiceStartTime() {
+        return serviceStartTime;
     }
 }

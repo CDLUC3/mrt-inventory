@@ -6,6 +6,18 @@
         <version>1.0-SNAPSHOT</version>
         <name>UC3-mrtInvIT</name>
         <url>http://uc3.cdlib.org</url>
+  
+        <dependencyManagement>
+            <dependencies>
+              <dependency>
+                <groupId>org.cdlib.mrt</groupId>
+                <artifactId>mrt-reflectoring-bom</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+              </dependency>
+            </dependencies>
+          </dependencyManagement>
       
         <repositories>
           <repository>
@@ -221,8 +233,7 @@
         </build>
       
         <dependencies>
-      
-      
+     
           <dependency>
             <groupId>org.cdlib.mrt</groupId>
             <artifactId>mrt-inventorysrc</artifactId>
@@ -232,24 +243,7 @@
           <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>2.4</version>
             <scope>provided</scope>
-          </dependency>
-      
-          <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.14</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.5.13</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
           </dependency>
       
           <dependency>
@@ -258,26 +252,25 @@
             <version>4.13.1</version>
             <scope>test</scope>
           </dependency>
+      
           <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
           </dependency>
+          
           <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4</version>
           </dependency>
+          
           <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.4</version>
           </dependency>
+          
           <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <!--version>5.1.38</version-->
-            <version>8.0.18</version>
           </dependency>
 
         </dependencies>
