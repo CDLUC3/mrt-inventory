@@ -92,7 +92,7 @@ public class HikariConnectionPool
             config.setIdleTimeout(0);
             // default:config.setMaxLifetime(1800000);
             
-            Class.forName("com.mysql.jdbc.Driver");  // allows tomcat to see driver
+            Class.forName("com.mysql.cj.jdbc.Driver");  // allows tomcat to see driver
             connectionPool=new HikariDataSource(config);
   
             System.out.println("Hickari settings:" + "\n"
