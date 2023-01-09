@@ -157,6 +157,9 @@
                             <name>network</name>
                             <alias>zoo-it</alias>
                           </network>
+                          <wait>
+                            <time>2000</time>
+                          </wait>
                         </run>
                       </image>
                       <image>
@@ -171,7 +174,7 @@
                             <port>it-server.port:8080</port>
                           </ports>
                           <wait>
-                            <time>1000</time>
+                            <time>3000</time>
                           </wait>
                           <volumes>
                             <bind>
