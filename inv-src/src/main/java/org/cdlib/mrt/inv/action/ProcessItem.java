@@ -162,7 +162,7 @@ public class ProcessItem
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
             //saveObject.process();
-            saveObjectRetry404(4);
+            saveObjectRetry(4);
             processStatus = ProcessStatus.completed;
             setQueue(Item.COMPLETED);
             
@@ -180,32 +180,48 @@ public class ProcessItem
         }
     }
     
-    public void saveObjectRetry404(int retry)
+    protected void saveObjectRetry(int retry)
        throws TException
     {
         for (int doit=1; true; doit++) {
             try {
                 saveObject.process();
+                if (doit>1) logger.logMessage("saveObjectRetry[" + doit + "] OK", 2);
                 return;
             
-            } catch (TException.REQUESTED_ITEM_NOT_FOUND tex) {
-                if (doit > retry) {
+            } catch (TException tex) {
+                
+                if (doit >= retry) {
                     throw tex;
                 }
                 
+                int sleep = 10000;
+                if (tex instanceof TException.REQUESTED_ITEM_NOT_FOUND) {
+                    sleep = (1000*doit) + 5000;
+                    
+                } else if (tex instanceof TException.SQL_EXCEPTION) {
+                    if (!tex.toString().contains("MySQLTransactionRollbackException")) {
+                        throw tex;
+                    }
+                    sleep = (120000*doit) + 5000;
+                    
+                } else throw tex;
+                
+                
                 try {
                     if (connection.isClosed()) {
-                        System.out.println("saveObjectRetry404 Connection reset");
+                        System.out.println("saveObjectRetry Connection reset");
                         connection = getNewConnection();
                     }
                 } catch (Exception ex) { 
                     throw new TException(ex);
                 }
-                int sleep = (1000*doit) + 5000;
 
-                System.out.println(MESSAGE + "saveObjectRetry404 retry(" + doit + "):"
+                System.out.println(MESSAGE + "saveObjectRetry retry(" + doit + "):"
                         + " - sleep=" + sleep
                         + " - Exception=" + tex);
+                
+                logger.logMessage(MESSAGE +"SaveObjectRetry[" + doit + "," + sleep + "]:" + tex, 2);
                 try {
                     Thread.sleep(sleep);
                 } catch (Exception ex) { }
