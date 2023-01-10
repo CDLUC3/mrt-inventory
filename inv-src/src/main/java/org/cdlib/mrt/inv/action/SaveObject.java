@@ -1053,7 +1053,7 @@ public class SaveObject
                 invCollectionObject = new InvCollectionObject(logger);
                 invCollectionObject.setObjectID(objectseq);
                 invCollectionObject.setCollectionID(collectionseq);
-                long id = insertRetryLock(invCollectionObject);
+                long id = dbAdd.insert(invCollectionObject);
                 bump("insertCollectionObject");
                 if (DEBUG) System.out.println("REPLACE COLLECTIONOBJECT id=" + id);
                 
@@ -1067,40 +1067,6 @@ public class SaveObject
             ex.printStackTrace();
             throw new TException(ex);
         }
-    }
-    
-    protected long insertRetryLock(ContentAbs content)
-        throws TException
-    {       TException processException = null;
-        int maxRetries = 3;
-        Random rn = null;
-        for (int i=1; i<=maxRetries; i++) {
-            try {
-                processException = null;
-                long id = dbAdd.insert(content);
-                if (i>1) logger.logMessage("insertRetryLock Retry[" + i + "] OK:" + id, 2);
-                return id;
-                
-            } catch (TException ex) {
-                if (rn == null) rn = new Random();
-                processException = ex;
-                if (i==maxRetries) break;
-                if (ex.toString().contains("MySQLTransactionRollbackException")) {
-                    int rnval = rn.nextInt(20) + 1;
-                    int sleepTime = (rnval * i * 5000) + 120000;
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (Exception ext) { }
-                    logger.logMessage(MESSAGE +"insertRetryLock Retry[" + i + "," + rnval+ "," + sleepTime + "]:" + ex, 2);
-                    continue;
-                }
-                throw ex;
-            } catch (Exception ex) {
-                throw new TException(ex);
-            }
-        }
-        throw processException;
-        
     }
     
     public void setInvVersions(long objectseq)

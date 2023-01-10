@@ -109,35 +109,8 @@ public class AddObject
     public void process()
         throws TException
     {
-        TException processException = null;
-        int maxRetries = 3;
-        for (int i=1; i<=maxRetries; i++) {
-            try {
-                processException = null;
-                this.saveObject.process();
-                if (i>1) logger.logMessage("Deadlock Retry[" + i + "] OK", 2);
-                return;
-                
-            } catch (TException ex) {
-                processException = ex;
-                if (i==maxRetries) break;
-                String exl = ex.toString().toLowerCase();
-                logger.logError("exl:" + exl, 15);
-                if (exl.contains("deadlock found")) {
-                    int sleepTime = i * 120000;
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (Exception ext) { }
-                    logger.logMessage(MESSAGE +"Deadlock Retry[" + i + "," + sleepTime + "]:" + ex, 2);
-                    continue;
-                }
-                throw ex;
-            } catch (Exception ex) {
-                throw new TException(ex);
-            }
-        }
-        throw processException;
-        
+         this.saveObject.process();
+         return;
     }
     
     public boolean isCommit()
