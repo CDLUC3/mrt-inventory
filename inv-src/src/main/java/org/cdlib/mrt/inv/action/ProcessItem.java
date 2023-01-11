@@ -31,6 +31,7 @@ package org.cdlib.mrt.inv.action;
 
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.Random;
 
 import org.cdlib.mrt.zoo.ItemInfo;
 import org.cdlib.mrt.queue.DistributedQueue;
@@ -71,7 +72,7 @@ public class ProcessItem
     protected boolean shutdown = false;
     protected long ijob = 0;
     protected SaveObject saveObject = null;
- 
+    protected Random rn = new Random();
      
     public static ProcessItem getShutdownProcessItem()
         throws TException
@@ -185,13 +186,17 @@ public class ProcessItem
     {
         for (int doit=1; true; doit++) {
             try {
+                if (false && (doit < 3)) { // force test
+                    throw new TException.SQL_EXCEPTION("com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction - Exception:com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction");
+                }
                 saveObject.process();
-                if (doit>1) logger.logMessage("saveObjectRetry[" + doit + "] OK", 2);
+                if (doit>1) logger.logMessage("SaveObjectRetry OK - manifest:" + manifestURLS, 2);
                 return;
             
             } catch (TException tex) {
                 
                 if (doit >= retry) {
+                    logger.logMessage(MESSAGE +"SaveObjectRetry() FAILS - manifest:" + manifestURLS + " - Exception:" + tex, 2);
                     throw tex;
                 }
                 
@@ -203,17 +208,28 @@ public class ProcessItem
                     if (!tex.toString().contains("MySQLTransactionRollbackException")) {
                         throw tex;
                     }
-                    sleep = (120000*doit) + 5000;
                     
-                } else throw tex;
+                    int rnval = rn.nextInt(20) + 1;
+                    sleep = (rnval * 6000 * doit) + 60000;
+                    
+                } else {
+                    logger.logMessage(MESSAGE +"SaveObjectRetry FAILS - manifest:" + manifestURLS + " - Exception:" + tex, 2);
+                    throw tex;
+                }
                 
                 
                 try {
-                    if (connection.isClosed()) {
-                        System.out.println("saveObjectRetry Connection reset");
-                        connection = getNewConnection();
+                    reInit();
+                    connection = getNewConnection();
+                    if (connection == null) {
+                        logger.logMessage(MESSAGE +"SaveObjectRetry connection null - manifest:" + manifestURLS + " - Exception:" + tex, 2);
+                        return;
                     }
+                    getSaveObjectRetry404(3);
+                    System.out.println("saveObjectRetry Connection reset");
+                    
                 } catch (Exception ex) { 
+                    logger.logMessage(MESSAGE +"SaveObjectRetry reInit FAILS - manifest:" + manifestURLS + " - Exception:" + tex, 2);
                     throw new TException(ex);
                 }
 
@@ -227,6 +243,21 @@ public class ProcessItem
                 } catch (Exception ex) { }
             }
         } 
+    }
+    
+    protected void reInit()
+    {
+        if (saveObject != null) {
+            try {
+                Connection killConnect = saveObject.getConnection();
+                killConnect.close();
+            } catch (Exception tmpEx) { }
+            saveObject = null;
+        }
+        try {
+            if (connection != null) connection.close();
+        } catch (Exception tmpEx) { }
+        connection = null;
     }
     
     public void getSaveObjectRetry404(int retry)
