@@ -181,13 +181,11 @@
                     </wait>
                     <volumes>
                       <bind>
-                        <volume>
-                          ${project.basedir}/target/mrt-inv-it-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtinv.war</volume>
+                        <volume>${project.basedir}/target/mrt-inv-it-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtinv.war</volume>
                       </bind>
                     </volumes>
                     <env>
-                      <CATALINA_OPTS>-Dfile.encoding=UTF8
-                        -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true</CATALINA_OPTS>
+                      <CATALINA_OPTS>-Dfile.encoding=UTF8 -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true</CATALINA_OPTS>
                       <SSM_SKIP_RESOLUTION>Y</SSM_SKIP_RESOLUTION>
                     </env>
                   </run>
