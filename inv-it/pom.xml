@@ -59,14 +59,13 @@
   </profiles>
   <build>
     <plugins>
-      <plugin>
+      <!--plugin>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.3.2</version>
         <configuration>
-          <packagingExcludes>
-            WEB-INF/lib/slf4j-log4j12-1.5.6.jar,WEB-INF/lib/mrt-jena-2.0-SNAPSHOT.jar</packagingExcludes>
+          <packagingExcludes>WEB-INF/lib/slf4j-log4j12-1.5.*.jar,WEB-INF/lib/mrt-jena-2.0-SNAPSHOT.jar</packagingExcludes>
         </configuration>
-      </plugin>
+      </plugin-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -241,76 +240,114 @@
   </build>
 
   <dependencies>
-
+     
     <dependency>
-      <groupId>org.cdlib.mrt</groupId>
-      <artifactId>mrt-inventorysrc</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>runtime</scope>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-core</artifactId>
+        <version>2.0-SNAPSHOT</version>
     </dependency>
 
+    <dependency>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-inventorysrc</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>runtime</scope>
+    </dependency>
 
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore</artifactId>
-      <version>4.4.16</version>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-inventoryconf</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>runtime</scope>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-      <version>4.5.13</version>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-json</artifactId>
+        <version>2.0-SNAPSHOT</version>
+        <scope>runtime</scope>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.5.13</version>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-s3srcpub</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-tools</artifactId>
+        <version>2.0-SNAPSHOT</version>
+        <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>cdl-zk-queue</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-zoopub-src</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.28</version>
       <scope>runtime</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>org.cdlib.mrt</groupId>
-      <artifactId>mrt-json</artifactId>
-      <version>2.0-SNAPSHOT</version>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+    </dependency>
+          
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
     </dependency>
 
     <dependency>
       <groupId>xalan</groupId>
       <artifactId>xalan</artifactId>
       <scope>runtime</scope>
-      <version>2.7.2</version>
     </dependency>
 
     <dependency>
       <groupId>xml-apis</groupId>
       <artifactId>xml-apis</artifactId>
       <scope>runtime</scope>
-      <version>1.4.01</version>
     </dependency>
-    <dependency>
-      <groupId>org.cdlib.mrt</groupId>
-      <artifactId>mrt-cloudconf</artifactId>
-      <scope>runtime</scope>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.cdlib.mrt</groupId>
-      <artifactId>mrt-inventoryconf</artifactId>
-      <scope>runtime</scope>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
+    
   </dependencies>
 </project> 

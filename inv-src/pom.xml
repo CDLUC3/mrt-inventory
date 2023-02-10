@@ -46,25 +46,22 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet</artifactId>
-            <!--this item is required, but showing up in maven report-->
-            <scope>runtime</scope>
-            <version>2.25.1</version>
+            <groupId>org.cdlib.mrt</groupId>
+            <artifactId>cdl-zk-queue</artifactId>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-multipart</artifactId>
-            <!--this item is required, but showing up in maven report-->
-            <scope>compile</scope>
-            <version>2.25.1</version>
-        </dependency>
+        
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
             <artifactId>mrt-core</artifactId>
             <!--this item is required, but showing up in maven report-->
             <scope>compile</scope>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.cdlib.mrt</groupId>
+            <artifactId>mrt-json</artifactId>
             <version>2.0-SNAPSHOT</version>
         </dependency>
 
@@ -79,13 +76,33 @@
             <artifactId>mrt-zoopub-src</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
             <!--this item is required, but showing up in maven report-->
             <scope>compile</scope>
-            <version>4.4.16</version>
         </dependency>
 
         <dependency>
@@ -94,16 +111,27 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <!--this item is required, but showing up in maven report-->
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <!--this item is required, but showing up in maven report-->
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -111,43 +139,6 @@
             <artifactId>xercesImpl</artifactId>
             <!--this item is required, but showing up in maven report-->
             <scope>runtime</scope>
-            <version>2.12.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-server</artifactId>
-            <version>2.25.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.cdlib.mrt</groupId>
-            <artifactId>cdl-zk-queue</artifactId>
-            <version>0.2-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.cdlib.mrt</groupId>
-            <artifactId>mrt-json</artifactId>
-            <version>2.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <version>3.5.5</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>4.0.3</version>
         </dependency>
 
     </dependencies>
