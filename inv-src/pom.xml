@@ -107,6 +107,8 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <!--ignore mvn dependency warn-->
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
