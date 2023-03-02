@@ -1,33 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.cdlib.mrt</groupId>
+    <artifactId>mrt-inventorysrc</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>UC3-mrtInventorySrc</name>
+    <url>http://uc3.cdlib.org</url>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.cdlib.mrt</groupId>
-  <artifactId>mrt-inventorysrc</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>UC3-mrtInventorySrc</name>
-  <url>http://uc3.cdlib.org</url>
-  
-        <dependencyManagement>
-            <dependencies>
-              <dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
                 <groupId>org.cdlib.mrt</groupId>
                 <artifactId>mrt-reflectoring-bom</artifactId>
                 <version>1.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
-              </dependency>
-            </dependencies>
-          </dependencyManagement>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-  <!-- force UTF-8 -->
-  <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <java.compiler>1.8</java.compiler>
-  </properties>
+    <!-- force UTF-8 -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.compiler>1.8</java.compiler>
+    </properties>
 
-  <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -41,109 +41,51 @@
                 </configuration>
             </plugin>
         </plugins>
-  </build>
+    </build>
 
-  <dependencies>
-      
-    <dependency>
-        <groupId>org.glassfish.jersey.containers</groupId>
-        <artifactId>jersey-container-servlet</artifactId>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.glassfish.jersey.media</groupId>
-        <artifactId>jersey-media-multipart</artifactId>
-    </dependency>
-    
-
-    <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-client</artifactId>
-    </dependency>
-    
-    <!--
-    <dependency>
-        <groupId>javax.mail</groupId>
-        <artifactId>mail</artifactId>
-        <version>1.4.1</version>
-    </dependency>
-    
-      <dependency>
-    	  <groupId>org.apache.zookeeper</groupId>
-          <artifactId>zookeeper</artifactId>
-          <version>3.3.3</version>
-      </dependency>
-      
-      <dependency>
-          <groupId>org.cdlib.mrt</groupId>
-          <artifactId>cdl-zk-queue</artifactId>
-          <version>0.2-SNAPSHOT</version>
-      </dependency>
-    
-    -->
-      
-      <dependency>
-          <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-jena</artifactId>
-          <version>2.0-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-          <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-core</artifactId>
-          <version>2.0-SNAPSHOT</version>
-      </dependency>
-  
-      <dependency>
-          <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-tools</artifactId>
-          <version>2.0-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-          <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-inventoryconf</artifactId>
-          <version>1.0-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
-          <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-zoopub-src</artifactId>
-          <version>1.0-SNAPSHOT</version>
-      </dependency>
-      
-      <dependency>
-          <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-cloudconf</artifactId>
-          <version>1.0-SNAPSHOT</version>
-      </dependency>
+    <dependencies>
 
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-s3srcpub</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>mrt-inventoryconf</artifactId>
+             <version>1.0-SNAPSHOT</version>
+             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.cdlib.mrt</groupId>
+            <artifactId>cdl-zk-queue</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
         
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-      
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>org.cdlib.mrt</groupId>
+            <artifactId>mrt-core</artifactId>
+            <!--this item is required, but showing up in maven report-->
+            <version>2.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>com.jolbox</groupId>
-            <artifactId>bonecp</artifactId>
+            <groupId>org.cdlib.mrt</groupId>
+            <artifactId>mrt-json</artifactId>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-           <groupId>com.zaxxer</groupId>
-           <artifactId>HikariCP</artifactId>
-           <scope>compile</scope>
+            <groupId>org.cdlib.mrt</groupId>
+            <artifactId>mrt-tools</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.cdlib.mrt</groupId>
+            <artifactId>mrt-zoopub-src</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
         </dependency>
 
         <dependency>
@@ -152,34 +94,68 @@
         </dependency>
 
         <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <scope>test</scope>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
-      
+
         <dependency>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
-        
+            
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <!--ignore mvn dependency warn-->
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <!--this item is required, but showing up in maven report-->
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
         </dependency>
-        
+
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <!--this item is required, but showing up in maven report-->
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <!--this item is required, but showing up in maven report-->
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
+            <!--this item is required, but showing up in maven report-->
+            <scope>runtime</scope>
         </dependency>
-        
-        
-  </dependencies>
-  
+
+    </dependencies>
+
     <reporting>
         <outputDirectory>/uc3qa/nexus34211/tomcat/webapps/report/mrt/core</outputDirectory>
         <plugins>
@@ -189,6 +165,6 @@
                 <version>2.0.1</version>
             </plugin>
         </plugins>
-   </reporting>
+    </reporting>
 
 </project>
