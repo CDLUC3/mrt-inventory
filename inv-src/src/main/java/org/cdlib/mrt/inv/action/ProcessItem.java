@@ -37,6 +37,8 @@ import org.cdlib.mrt.zoo.ItemInfo;
 import org.cdlib.mrt.queue.DistributedQueue;
 import org.cdlib.mrt.queue.Item;
 import org.cdlib.mrt.core.ServiceStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.zoo.ZooManager;
 import org.cdlib.mrt.zoo.ZooQueue;
@@ -178,6 +180,9 @@ public class ProcessItem
                     + " - manifestURLS=" + manifestURLS
                     + " - processStatus=" + processStatus
                     );
+            ThreadContext.put("manifestURL", manifestURLS);
+            ThreadContext.put("processStatus", processStatus.toString());
+            LogManager.getLogger().info(MESSAGE);
         }
     }
     
