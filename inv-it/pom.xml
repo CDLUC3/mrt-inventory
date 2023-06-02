@@ -147,7 +147,7 @@
                       <port>mock-merritt-it.port:4567</port>
                     </ports>
                     <wait>
-                      <time>1000</time>
+                      <time>3000</time>
                     </wait>
                   </run>
                 </image>
@@ -160,7 +160,7 @@
                       <alias>zoo-it</alias>
                     </network>
                     <wait>
-                      <time>2000</time>
+                      <time>4000</time>
                     </wait>
                   </run>
                 </image>
@@ -176,7 +176,7 @@
                       <port>it-server.port:8080</port>
                     </ports>
                     <wait>
-                      <time>5000</time>
+                      <time>7000</time>
                     </wait>
                     <volumes>
                       <bind>
