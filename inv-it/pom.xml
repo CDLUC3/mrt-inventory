@@ -21,6 +21,12 @@
     </dependencies>
   </dependencyManagement>
 
+    <parent>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-parent-properties</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
   <repositories>
     <repository>
       <id>central</id>
@@ -69,19 +75,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.0</version>
+            <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>${java.compiler}</source>
-          <target>${java.compiler}</target>
-          <compilerArgument>${compilerArgument}</compilerArgument>
-          <!--compilerArgument>-Xlint:unchecked</compilerArgument-->
-          <!--showDeprecation>true</showDeprecation-->
+                <source>${maven.compiler.plugin.java}</source>
+                <target>${maven.compiler.plugin.java}</target>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.5</version>
+        <version>${jacoco.maven.plugin.version}</version>
         <executions>
           <execution>
             <id>default-prepare-agent</id>
@@ -102,7 +105,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.40.2</version>
+        <version>${docker.maven.plugin.version}</version>
         <executions>
           <execution>
             <id>prepare-it-server</id>
@@ -147,7 +150,7 @@
                       <port>mock-merritt-it.port:4567</port>
                     </ports>
                     <wait>
-                      <time>1000</time>
+                      <time>2000</time>
                     </wait>
                   </run>
                 </image>
@@ -176,7 +179,7 @@
                       <port>it-server.port:8080</port>
                     </ports>
                     <wait>
-                      <time>5000</time>
+                      <time>6000</time>
                     </wait>
                     <volumes>
                       <bind>
@@ -204,7 +207,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>${maven.failsafe.plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -227,7 +230,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>${maven.surefire.plugin.version}</version>
         <configuration>
           <!-- Includes Test* and *Test by default -->
           <!-- skips surefire tests without skipping failsafe tests.

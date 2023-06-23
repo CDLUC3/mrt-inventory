@@ -21,6 +21,12 @@
         </dependencies>
     </dependencyManagement>
 
+    <parent>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-parent-properties</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
     <!-- force UTF-8 -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,10 +38,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
+                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>${java.compiler}</source>
-                    <target>${java.compiler}</target>
+                    <source>${maven.compiler.plugin.java}</source>
+                    <target>${maven.compiler.plugin.java}</target>
                     <compilerArgument>${compilerArgument}</compilerArgument>
                     <!--compilerArgument>-Xlint:unchecked</compilerArgument-->
                 </configuration>
@@ -153,18 +159,29 @@
             <!--this item is required, but showing up in maven report-->
             <scope>runtime</scope>
         </dependency>
+       <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+
+        <!-- Include the following as a runtime dependency when logging in ECS format for open
+        search-->
+        <dependency>
+            <groupId>co.elastic.logging</groupId>
+            <artifactId>ecs-logging-core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>co.elastic.logging</groupId>
+            <artifactId>log4j2-ecs-layout</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
-
-    <reporting>
-        <outputDirectory>/uc3qa/nexus34211/tomcat/webapps/report/mrt/core</outputDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.0.1</version>
-            </plugin>
-        </plugins>
-    </reporting>
 
 </project>
