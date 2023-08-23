@@ -30,7 +30,6 @@
     <!-- force UTF-8 -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.compiler>1.8</java.compiler>
     </properties>
 
     <build>
@@ -40,10 +39,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>${maven.compiler.plugin.java}</source>
-                    <target>${maven.compiler.plugin.java}</target>
                     <compilerArgument>${compilerArgument}</compilerArgument>
-                    <!--compilerArgument>-Xlint:unchecked</compilerArgument-->
                 </configuration>
             </plugin>
         </plugins>
