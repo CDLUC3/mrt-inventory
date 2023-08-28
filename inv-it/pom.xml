@@ -43,7 +43,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <itDockerRegistry>it-docker-registry</itDockerRegistry>
-    <java.compiler>1.8</java.compiler>
     <propertyDir>test</propertyDir>
     <docker.skip>${env.SKIP_DOCKER_TEST}</docker.skip>
     <skipTests>${env.SKIP_DOCKER_TEST}</skipTests>
@@ -76,10 +75,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
             <version>${maven.compiler.plugin.version}</version>
-        <configuration>
-                <source>${maven.compiler.plugin.java}</source>
-                <target>${maven.compiler.plugin.java}</target>
-        </configuration>
+            <configuration>
+            </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -168,7 +165,7 @@
                   </run>
                 </image>
                 <image>
-                  <name>tomcat:8-jre8</name>
+                  <name>${itDockerRegistry}/merritt-tomcat:dev</name>
                   <alias>it-server</alias>
                   <run>
                     <network>
