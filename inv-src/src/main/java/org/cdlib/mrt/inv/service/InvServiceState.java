@@ -35,6 +35,7 @@ import java.util.Properties;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.ServiceStatus;
 import static org.cdlib.mrt.inv.service.InventoryConfig.serviceStartTime;
+import org.cdlib.mrt.log.utility.Log4j2Util;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.StateInf;
 import org.json.JSONArray;
@@ -183,5 +184,14 @@ public class InvServiceState
     
     public static DateState getServiceStartTime() {
         return InventoryConfig.getServiceStartTime();
+    }
+    
+    public static String getLogRootLevel()
+    {
+        try {
+            return Log4j2Util.getRootLevel();
+        } catch (Exception  ex) {
+            return "Not found";
+        }
     }
 }
