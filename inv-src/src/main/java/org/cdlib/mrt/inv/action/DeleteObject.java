@@ -85,8 +85,8 @@ public class DeleteObject
             long durationMs = System.currentTimeMillis() - startMs;
             deleteState = new InvDeleteState(objectID, delCnt);
             LogInvDelete logDeleteEntry = LogInvDelete.getLogInvDelete(
-                "idel",
-                "invDelete", 
+                "invdel",
+                "InvDelete", 
                 durationMs, 
                 deleteState);
             logDeleteEntry.addEntry();

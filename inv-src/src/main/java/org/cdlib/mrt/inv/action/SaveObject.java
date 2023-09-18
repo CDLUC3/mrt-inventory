@@ -137,7 +137,7 @@ public class SaveObject
     protected Role copyRole = null;
     protected TallyTable tally = new TallyTable();
     protected AddStateEntryGen logSaveEntry = null;
-    protected String keyPrefix = "invsave";
+    protected String keyPrefix = "invbld";
     protected long addNodeseq = 0;
     protected String method = null;
     protected InvNode inputNode = null;
@@ -533,7 +533,7 @@ public class SaveObject
     {
         long durationStart = System.currentTimeMillis();
         try {
-            logSaveEntry = AddStateEntryGen.getAddStateEntryGen(keyPrefix, "inventory", "BuildInv");
+            logSaveEntry = AddStateEntryGen.getAddStateEntryGen(keyPrefix, "inventory", "InvBuild");
             logSaveEntry.setArk(objectID.getValue());
             logSaveEntry.setProcessNode(node);
             invObject = InvDBUtil.getObject(objectID, connection, logger);
