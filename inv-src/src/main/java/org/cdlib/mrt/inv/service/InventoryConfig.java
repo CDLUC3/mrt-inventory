@@ -46,6 +46,7 @@ import org.cdlib.mrt.core.DateState;
 
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.inv.zoo.ZooHandler;
+import org.cdlib.mrt.log.utility.Log4j2Util;
 import org.cdlib.mrt.zoo.ZooManager;
 import org.cdlib.mrt.queue.DistributedQueue;
 import org.cdlib.mrt.tools.SSMConfigResolver;
@@ -99,6 +100,8 @@ public class InventoryConfig
             System.out.println("***getYamlJson:\n" + jInvInfo.toString(3));
             JSONObject jInvLogger = jInvInfo.getJSONObject("fileLogger");
             LoggerInf logger = inventoryConfig.setLogger(jInvLogger);
+            
+            inventoryConfig.setLog4j(jInvLogger);
             inventoryConfig.setLogger(logger);
             
             JSONObject jdb = jInvInfo.getJSONObject("db");
@@ -291,6 +294,20 @@ public class InventoryConfig
         );
         LoggerInf logger = LoggerAbs.getTFileLogger(qualifier, log.getCanonicalPath() + '/', logprop);
         return logger;
+    }
+           
+    protected void setLog4j(JSONObject fileLogger)
+        throws Exception
+    {
+        String log4jlevel = null;
+        try {
+            log4jlevel = fileLogger.getString("log4jlevel");
+            Log4j2Util.setRootLevel(log4jlevel);
+        } catch (Exception ex) {
+            System.out.println("log4jlevel not found");
+        }
+        Log4j2Util.whichLog4j2("INVCONFIG");
+        System.out.println("log4j level:" + Log4j2Util.getRootLevel());
     }
 
     public DPRFileDB getDb() {

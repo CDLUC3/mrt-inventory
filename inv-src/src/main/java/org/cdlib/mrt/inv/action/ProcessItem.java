@@ -43,6 +43,7 @@ import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.zoo.ZooManager;
 import org.cdlib.mrt.zoo.ZooQueue;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
+import org.cdlib.mrt.log.utility.AddStateEntryGen;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.ZooCodeUtil;
@@ -161,11 +162,12 @@ public class ProcessItem
     public void process()
        throws TException
     {
+        int retry = 0;
         try {
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
             //saveObject.process();
-            saveObjectRetry(4);
+            retry = saveObjectRetry(4);
             processStatus = ProcessStatus.completed;
             setQueue(Item.COMPLETED);
             
@@ -180,13 +182,24 @@ public class ProcessItem
                     + " - manifestURLS=" + manifestURLS
                     + " - processStatus=" + processStatus
                     );
-            ThreadContext.put("manifestURL", manifestURLS);
-            ThreadContext.put("processStatus", processStatus.toString());
-            LogManager.getLogger().info(MESSAGE);
+            AddStateEntryGen logStateEntry = saveObject.getLogStateEntry();
+            if (logStateEntry == null) {
+                ThreadContext.put("manifestURL", manifestURLS);
+                ThreadContext.put("processStatus", processStatus.toString());
+                ThreadContext.put("attempts", "" + retry);
+                LogManager.getLogger().info(MESSAGE);
+                return;
+            }
+            logStateEntry.setStatus(processStatus.toString());
+            logStateEntry.setAttempts(retry);
+            Properties prop = new Properties();
+            prop.setProperty("manifestURL", manifestURLS);
+            logStateEntry.setProperties(prop);
+            logStateEntry.addLogStateEntry("InvJSON");
         }
     }
     
-    protected void saveObjectRetry(int retry)
+    protected int saveObjectRetry(int retry)
        throws TException
     {
         for (int doit=1; true; doit++) {
@@ -196,7 +209,7 @@ public class ProcessItem
                 }
                 saveObject.process();
                 if (doit>1) logger.logMessage("SaveObjectRetry OK - manifest:" + manifestURLS, 2);
-                return;
+                return doit;
             
             } catch (TException tex) {
                 
@@ -228,7 +241,7 @@ public class ProcessItem
                     connection = getNewConnection();
                     if (connection == null) {
                         logger.logMessage(MESSAGE +"SaveObjectRetry connection null - manifest:" + manifestURLS + " - Exception:" + tex, 2);
-                        return;
+                        return doit;
                     }
                     getSaveObjectRetry404(3);
                     System.out.println("saveObjectRetry Connection reset");

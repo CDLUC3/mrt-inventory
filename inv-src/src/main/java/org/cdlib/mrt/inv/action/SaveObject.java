@@ -29,6 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.action;
 
+import java.io.File;
+import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.Connection;
@@ -90,6 +92,7 @@ import org.cdlib.mrt.queue.DistributedLock.Ignorer;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.inv.utility.InvUtil;
+import org.cdlib.mrt.log.utility.AddStateEntryGen;
 import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
@@ -99,6 +102,8 @@ import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.URLEncoder;
 import org.cdlib.mrt.utility.XMLUtil;
 import org.json.JSONObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -114,7 +119,7 @@ public class SaveObject
     protected static final boolean DEBUG = false;
     protected static final boolean DUMPTALLY = false;
     protected static final boolean EACHTALLY = true;
-
+    protected static final Logger log4j2 = LogManager.getLogger();   
     protected VersionMap versionMap = null;
     protected VersionMap copyVersionMap = null;
     protected boolean commit = false;
@@ -131,9 +136,14 @@ public class SaveObject
     protected Role role = null;
     protected Role copyRole = null;
     protected TallyTable tally = new TallyTable();
+    protected AddStateEntryGen logSaveEntry = null;
+    protected String keyPrefix = "invbld";
     protected long addNodeseq = 0;
     protected String method = null;
     protected InvNode inputNode = null;
+    protected int saveVersionCnt = 0;
+    protected long saveFileCnt = 0;
+    protected long durationMs = 0;
 
     // Support lock
     private ZooKeeper zooKeeper;
@@ -193,6 +203,7 @@ public class SaveObject
             dbAdd = new DBAdd(connection, logger);
             tika = new Tika(logger);
             versionMap.setNode(this.node);
+            
         } catch (Exception ex) {
             try {
                 if (connection != null) {
@@ -520,7 +531,11 @@ public class SaveObject
     protected void setObject()
         throws TException
     {
+        long durationStart = System.currentTimeMillis();
         try {
+            logSaveEntry = AddStateEntryGen.getAddStateEntryGen(keyPrefix, "inventory", "InvBuild");
+            logSaveEntry.setArk(objectID.getValue());
+            logSaveEntry.setProcessNode(node);
             invObject = InvDBUtil.getObject(objectID, connection, logger);
             bump("getObject");
             if (invObject == null) {
@@ -556,8 +571,28 @@ public class SaveObject
             
         } catch (Exception ex) {
             throw new TException(ex);
+            
+        } finally {
+            durationMs = System.currentTimeMillis() - durationStart;
+            setLog4j();
         }
+       
         
+    }
+    
+    protected void setLog4j()
+        throws TException
+    { 
+            logSaveEntry.setDurationMs(durationMs);
+            logSaveEntry.setVersions(saveVersionCnt);
+            logSaveEntry.setFiles(saveFileCnt);
+            //logSaveEntry.addLogStateEntry("InvJSON");
+    }
+    
+    protected void addLog4jEntry()
+        throws TException
+    { 
+            logSaveEntry.addLogStateEntry("InvJSON");
     }
     
     protected void validateCopy()
@@ -1092,10 +1127,11 @@ public class SaveObject
                     setInvContent(addNodeseq, objectseq, invVersion.getId(), iv, content);
                     setInvDK(objectseq, invVersion.getId(), iv, currentVersionID);
                     setInvMetadatas(objectseq, invVersion.getId(), iv);
+                    saveVersionCnt++;
                 }
                 if (currentVersionID == iv) {
                     setCurrent(invVersion, currentVersionID);
-                    
+                    logSaveEntry.setVersion(iv);
                 } else {
                     setInvIngests(invVersion, null);
                 }
@@ -1358,7 +1394,7 @@ public class SaveObject
         throws TException
     {
         try {
-            log("setInvContent entered:"
+            log4j2.debug("setInvContent entered:"
                     + " - objectseq=" + objectseq
                     + " - versionseq=" + versionseq
                     + " - versionID=" + versionID
@@ -1388,6 +1424,7 @@ public class SaveObject
                     mimeType = invFile.getMimeType();
                     if (DEBUG) System.out.println("2**mimeType=" + mimeType);
                     if (isBillable) {
+                        saveFileCnt++;
                         if (mimeType != null) {
                             mimeList.put(mimeKey, mimeType);
                             log("Existing MimeType"
@@ -1447,6 +1484,7 @@ public class SaveObject
             }
             
         } catch (TException tex) {
+            tex.printStackTrace();
             throw tex;
 
         } catch (Exception ex) {
@@ -1795,4 +1833,8 @@ public class SaveObject
         }
     }
 
+    public AddStateEntryGen getLogStateEntry()
+    {
+            return logSaveEntry;
+    }
 }

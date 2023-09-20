@@ -50,6 +50,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.QueryParam;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.action.InvManifestUrl;
@@ -64,7 +66,9 @@ import org.cdlib.mrt.inv.service.PrimaryLocalState;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.inv.service.VersionsState;
 import org.cdlib.mrt.core.Identifier;
+import org.cdlib.mrt.inv.logging.LogInvPrimary;
 import org.cdlib.mrt.inv.service.InvProcessState;
+import org.cdlib.mrt.log.utility.Log4j2Util;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.TFrame;
@@ -90,6 +94,7 @@ public class JerseyInv
     protected static final boolean DEBUG = true;
     protected static final String NL = System.getProperty("line.separator");
 
+    private static final Logger log4j = LogManager.getLogger();
     /**
      * Get state information about a specific node
      * @param nodeID node identifier
@@ -331,6 +336,36 @@ public class JerseyInv
         throws TException
     {
         return getLocal(objectIDS, formatType, cs, sc);
+    }
+    
+    @POST
+    @Path("reset")
+    public Response callResetState(
+            @DefaultValue("-none-") @QueryParam("log4jlevel") String log4jlevel,
+            @DefaultValue("xhtml") @QueryParam(KeyNameHttpInf.RESPONSEFORM) String formatType,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        try {
+            log4j.info("getResetState entered:"
+                    + " - formatType=" + formatType
+                    + " - log4jlevel=" + log4jlevel
+                    );
+            if (!log4jlevel.equals("-none-")) {
+                Log4j2Util.setRootLevel(log4jlevel);
+            }
+            return getServiceState(formatType, cs, sc);
+
+        } catch (TException tex) {
+            log4j.error(tex.toString(), tex);
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            log4j.error(ex.toString(), ex);
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
     }
     
     /**
@@ -846,12 +881,15 @@ public class JerseyInv
                     + " - localID=" + localIDs
                     + " - formatType=" + formatType
                     );
+            long durationStart = System.currentTimeMillis();
             InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
             InvServiceInf invService = invServiceInit.getInvService();
             logger = invService.getLogger();
             Identifier objectID = new Identifier(objectIDS);
             Identifier ownerID = new Identifier(ownerIDS);
             LocalContainerState responseState  = invService.addPrimary(objectID, ownerID, localIDs);
+            LogInvPrimary invPrimary = LogInvPrimary.getLogInvPrimary("iaddprime", "InvAddPrimary", System.currentTimeMillis() - durationStart, responseState);
+            invPrimary.addEntry();
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {
@@ -908,11 +946,14 @@ public class JerseyInv
                     + " - objectIDS=" + objectIDS
                     + " - formatType=" + formatType
                     );
+            long durationStart = System.currentTimeMillis();
             InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
             InvServiceInf invService = invServiceInit.getInvService();
             logger = invService.getLogger();
             Identifier objectID = new Identifier(objectIDS);
             LocalContainerState responseState  = invService.deletePrimary(objectID);
+            LogInvPrimary invPrimary = LogInvPrimary.getLogInvPrimary("idelprime", "InvDeletePrimary", System.currentTimeMillis() - durationStart, responseState);
+            invPrimary.addEntry();
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {
@@ -939,11 +980,14 @@ public class JerseyInv
                     + " - localID=" + localID
                     + " - formatType=" + formatType
                     );
+            long durationStart = System.currentTimeMillis();
             InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
             InvServiceInf invService = invServiceInit.getInvService();
             logger = invService.getLogger();
             Identifier ownerID = new Identifier(ownerIDS);
             LocalContainerState responseState  = invService.getPrimary(ownerID, localID);
+            LogInvPrimary invPrimary = LogInvPrimary.getLogInvPrimary("igetprime", "InvGetPrimary", System.currentTimeMillis() - durationStart, responseState);
+            invPrimary.addEntry();
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {
@@ -1011,5 +1055,4 @@ public class JerseyInv
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
-
 }

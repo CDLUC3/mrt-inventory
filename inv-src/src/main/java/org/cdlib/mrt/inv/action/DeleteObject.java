@@ -33,6 +33,7 @@ import java.sql.Connection;
 
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.content.InvObject;
+import org.cdlib.mrt.inv.logging.LogInvDelete;
 import org.cdlib.mrt.inv.utility.DBDelete;
 import org.cdlib.mrt.inv.service.InvDeleteState;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
@@ -79,8 +80,16 @@ public class DeleteObject
     {
         try {
             log("delete entered - objectID:" + objectID.getValue());
+            long startMs = System.currentTimeMillis();
             int delCnt = deleteObject();
+            long durationMs = System.currentTimeMillis() - startMs;
             deleteState = new InvDeleteState(objectID, delCnt);
+            LogInvDelete logDeleteEntry = LogInvDelete.getLogInvDelete(
+                "invdel",
+                "InvDelete", 
+                durationMs, 
+                deleteState);
+            logDeleteEntry.addEntry();
             return deleteState;
 
         } catch (Exception ex) {
