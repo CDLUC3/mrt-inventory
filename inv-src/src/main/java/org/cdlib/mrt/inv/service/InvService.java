@@ -36,14 +36,12 @@ import java.sql.Connection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Properties;
 import org.cdlib.mrt.cloud.ManifestSAX;
 
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.core.ServiceStatus;
-import org.cdlib.mrt.cloud.ManifestXML;
 import org.cdlib.mrt.cloud.VersionMap;
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.action.AddLocalAfterTo;
@@ -66,10 +64,8 @@ import org.cdlib.mrt.zoo.ZooQueue;
 import org.cdlib.mrt.queue.Item;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.URLEncoder;
-import org.cdlib.mrt.inv.service.VersionsState;
 
 /**
  * Inv Service
