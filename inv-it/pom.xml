@@ -147,7 +147,7 @@
                       <port>mock-merritt-it.port:4567</port>
                     </ports>
                     <wait>
-                      <time>2000</time>
+                      <time>4000</time>
                     </wait>
                   </run>
                 </image>
