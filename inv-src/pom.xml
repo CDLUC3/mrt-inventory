@@ -66,12 +66,6 @@
             <!--this item is required, but showing up in maven report-->
             <version>2.0-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.cdlib.mrt</groupId>
-            <artifactId>mrt-json</artifactId>
-            <version>2.0-SNAPSHOT</version>
-        </dependency>
         
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
@@ -158,6 +152,11 @@
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
             <scope>runtime</scope>
+        </dependency>
+         
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
         </dependency>
 
         <dependency>
