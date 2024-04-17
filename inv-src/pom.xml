@@ -66,12 +66,6 @@
             <!--this item is required, but showing up in maven report-->
             <version>2.0-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.cdlib.mrt</groupId>
-            <artifactId>mrt-json</artifactId>
-            <version>2.0-SNAPSHOT</version>
-        </dependency>
         
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
@@ -137,6 +131,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper-jute</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
             <!--this item is required, but showing up in maven report-->
@@ -158,6 +157,11 @@
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
             <scope>runtime</scope>
+        </dependency>
+         
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
         </dependency>
 
         <dependency>
