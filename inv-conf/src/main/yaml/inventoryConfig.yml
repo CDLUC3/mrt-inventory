@@ -9,8 +9,10 @@ inv-info:
     baseURI: "{!SSM: inventory/config/baseURI}"
   
   zooserver:
-    queueService: "{!SSM: inventory/zoo/queueService}"
+    queueService: "{!SSM: inventory/zoo/queueService !DEFAULT: localhost:2181}"
+    #queueService: "localhost:2181"
     queueName: "{!SSM: inventory/zoo/queueName}"
+    queueTimeout: "{!SSM: inventory/zoo/Timeout !DEFAULT: 40000}"
     lockName: "{!SSM: inventory/zoo/lockName !DEFAULT: /mrt.lock}"
 
   zooclient:
@@ -43,6 +45,7 @@ inv-info-docker: &docker
   zooserver:
     queueService: zoo:2181
     queueName: /mrt.inventory.full
+    queueTimeout: 40000
     lockName: /mrt.lock
 
   zooclient:
