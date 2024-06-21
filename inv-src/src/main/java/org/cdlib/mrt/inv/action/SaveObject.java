@@ -104,6 +104,7 @@ import org.cdlib.mrt.utility.XMLUtil;
 import org.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdlib.mrt.zk.MerrittLocks;
 
 
 /**
@@ -169,6 +170,7 @@ public class SaveObject
             LoggerInf logger)
         throws TException
     {
+        System.out.println("SaveObject.getSavedObject:" + ingestURL);
         return new SaveObject(ingestURL, Role.primary, null, connection, logger);
     }
     
@@ -397,7 +399,7 @@ public class SaveObject
         throws TException
     {
         try {
-            boolean lock = getLock(objectID.getValue(), ingestURL);
+            boolean lock = getLock(objectID.getValue());
             if (method.equals("copy")) {
                copy();
                return;
@@ -435,7 +437,7 @@ public class SaveObject
         } finally {
             try {
             System.out.println("[debug] " + MESSAGE + " Releasing Zookeeper lock: " + objectID.getValue());
-            releaseLock();
+            releaseLock(objectID.getValue());
                 connection.close();
             } catch (Exception ex) { }
         }
@@ -1781,38 +1783,23 @@ public class SaveObject
      * @param String jobID
      * @return Boolean result of obtaining lock
      */
-    private boolean getLock(String primaryID, String payload) {
-    try {
+    private boolean getLock(String primaryID) {
+        try {
 
-       // SSM vars
-       String zooConnectString = InventoryConfig.qService;
-       String zooLockNode = InventoryConfig.lockName;
+            // SSM vars
+            String zooConnectString = InventoryConfig.qService;
+            String zooLockNode = InventoryConfig.lockName;
 
-       // Zookeeper treats slashes as nodes
-       String lockID = primaryID.replace(":", "").replace("/", "-");
+            // Zookeeper treats slashes as nodes
+            String lockID = primaryID.replace(":", "").replace("/", "-");
 
-       zooKeeper = new ZooKeeper(zooConnectString, DistributedLock.sessionTimeout, new Ignorer());
-       distributedLock = new DistributedLock(zooKeeper, zooLockNode, lockID, null);
-       boolean locked = false;
-
-        while (! locked) {
-            try {
-               System.out.println("[info] " + MESSAGE + " Attempting to gain lock");
-               locked = distributedLock.submit(payload);
-            } catch (Exception e) {
-              if (DEBUG) System.err.println("[debug] " + MESSAGE + " Exception in gaining lock: " + lockID);
-            }
-            if (locked) break;
-            System.out.println("[info] " + MESSAGE + " UNABLE to Gain lock for ID: " + lockID + " Waiting 15 seconds before retry");
-            Thread.currentThread().sleep(15 * 1000);    // Wait 15 seconds before attempting to gain lock for ID
-        }
-        System.out.println("[debug] " + MESSAGE + " Gained lock for ID: " + lockID + " -- " + payload);
+            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
+            return MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
 
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-    return true;
     }
 
     /**
@@ -1821,12 +1808,18 @@ public class SaveObject
      * @param none needed inputs are global
      * @return void
      */
-    private void releaseLock() {
+    private void releaseLock(String primaryID) {
         try {
 
-                this.distributedLock.cleanup();
-                this.distributedLock = null;
-                this.zooKeeper = null;
+       // SSM vars
+            String zooConnectString = InventoryConfig.qService;
+            String zooLockNode = InventoryConfig.lockName;
+
+            // Zookeeper treats slashes as nodes
+            String lockID = primaryID.replace(":", "").replace("/", "-");
+
+            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
+            MerrittLocks.unlockObjectInventory(zooKeeper, primaryID);
 
         } catch (Exception e) {
             e.printStackTrace();

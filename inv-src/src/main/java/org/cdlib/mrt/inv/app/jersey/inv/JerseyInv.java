@@ -55,6 +55,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.action.InvManifestUrl;
+import org.cdlib.mrt.inv.action.AddZoo;
 import org.cdlib.mrt.inv.app.jersey.KeyNameHttpInf;
 import org.cdlib.mrt.inv.app.jersey.JerseyBase;
 import org.cdlib.mrt.inv.service.InvDeleteState;
@@ -74,8 +75,12 @@ import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.TFrame;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.zoo.ZooManager;
-import org.cdlib.mrt.zoo.ZooQueue;
+import org.cdlib.mrt.zk.Batch;
+import org.cdlib.mrt.zk.Job;
+import org.cdlib.mrt.zk.JobState;
+import org.cdlib.mrt.inv.zoo.ZooManager;
+import org.apache.zookeeper.ZooKeeper;
+import org.cdlib.mrt.core.ProcessStatus;
 
 /**
  * Thin Jersey layer for inv handling
@@ -497,16 +502,13 @@ public class JerseyInv
             Properties loadProp = new Properties();
             loadProp.setProperty("manifestURL", manifestUrl);
             ZooManager zooManager = invService.getZooManager();
-            ZooQueue zooQueue = ZooQueue.getZooQueue(zooManager);
-            for (int b=0; b<4; b++) {
-                try {
-                    zooQueue.getQueue().cleanup((byte)b);
-                    System.out.println("cleanup:" + b);
-                } catch (Exception e) { 
-                    System.out.println("exception:" + b);
-                }
+            AddZoo addZoo = AddZoo.getAddZoo(zooManager);
+            ProcessStatus status = addZoo.addUrl(manifestUrl);
+            if (status == ProcessStatus.failed) {
+                Exception ex = addZoo.getEx();
+                throw ex;
             }
-            invService.addZoo(loadProp, zooQueue);
+
             logger = invService.getLogger();
             InvProcessState responseState = new InvProcessState(manifestUrl, "addMultiPartZoo");
             return getStateResponse(responseState, formatType, logger, cs, sc);

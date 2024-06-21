@@ -37,15 +37,16 @@ import java.util.concurrent.TimeUnit;
 
 
 import org.cdlib.mrt.queue.Item;
-import org.cdlib.mrt.inv.action.ProcessItem;
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.core.ThreadHandler;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.zoo.ZooHandlerAbs;
-import org.cdlib.mrt.zoo.ZooManager;
+import org.cdlib.mrt.inv.zoo.ZooHandlerAbs;
+import org.cdlib.mrt.inv.zoo.ZooManager;
+import org.cdlib.mrt.zk.Job;
+import org.cdlib.mrt.zk.JobState;
 
 /**
  * Run fixity
@@ -113,9 +114,8 @@ public class ZooHandler
     
     
     @Override
-    protected ProcessStatus processItem(
-            long ijob,
-            Item item)
+    protected ProcessStatus processJob(
+            Job job)
         throws TException
     {
         
@@ -124,27 +124,23 @@ public class ZooHandler
             if (zooManager.getZookeeperStatus() == ServiceStatus.shutdown) {
                 return ProcessStatus.shutdown;
             }
-            ProcessItem  processItem = null;
+            ProcessJob  processJob = null;
             try {
-                processItem = ProcessItem.getProcessItem(
-                    ijob,
-                    zooQueue,
-                    db,
-                    item);
+                //job.setJobStatus(JobStatusEnum.CONSUMED);
+                processJob  = ProcessJob.getProcessJob(job, zooManager, db);
                 
             } catch (Exception ex) {
                 System.out.println(MESSAGE + "Exception:" + ex);
                 ex.printStackTrace();
-                removeItem(item);
                 return ProcessStatus.format;
             }
-            if (processItem.isShutdown()) return ProcessStatus.shutdown;
+            if (processJob.isShutdown()) return ProcessStatus.shutdown;
             ProcessStatus status = ProcessStatus.unknown;
             if (threadCnt == 1) {
-                processItem.run();
-                status = processItem.getProcessStatus();
+                processJob.run();
+                status = processJob.getProcessStatus();
             } else {
-                status = runThread(processItem);
+                status = runThreadJob(processJob);
             }
             
             return status;
@@ -154,10 +150,10 @@ public class ZooHandler
         }
     }
     
-    protected ProcessStatus runThread(ProcessItem  processItem)
+    protected ProcessStatus runThreadJob(ProcessJob processJob)
         throws TException
     {
-        System.out.println("Start thread:" + processItem.getManifestURLS());
+        System.out.println("Start thread:" + processJob.getManifestURLS());
         restartCnt++;
         if (false && (restartCnt >= restartMax)) { // stub for now
             completeThreads();
@@ -169,7 +165,7 @@ public class ZooHandler
         if (zooManager.getZookeeperStatus() == ServiceStatus.shutdown) {
             return ProcessStatus.shutdown;
         }
-        return threadHandler.runThread(processItem);
+        return threadHandler.runThread(processJob);
     }
     
     protected void completeThreads()
