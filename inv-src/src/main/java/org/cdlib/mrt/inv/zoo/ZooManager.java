@@ -48,6 +48,9 @@ import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
+import org.cdlib.mrt.zk.Access;
+import org.cdlib.mrt.zk.MerrittLocks;
+import org.cdlib.mrt.zk.Job;
 
 
 /**
@@ -62,6 +65,7 @@ public class ZooManager
     private static final String MESSAGE = NAME + ": ";
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
+    private static boolean initZooKeeper = true;
     private static boolean STARTUP = false;
     private LoggerInf logger = null;
     private Properties conf = null;
@@ -205,6 +209,11 @@ public class ZooManager
             }
             System.out.println("**Establishing new ZooKeeper:" + queueConnectionString);
             zooKeeper = new ZooKeeper(queueConnectionString, queueTimeout, new Ignorer());
+            if (initZooKeeper) {
+                MerrittLocks.initLocks(zooKeeper);
+                Job.initNodes(zooKeeper);
+                initZooKeeper = false;
+            }
             return zooKeeper;
 
         } catch (Exception ex) {

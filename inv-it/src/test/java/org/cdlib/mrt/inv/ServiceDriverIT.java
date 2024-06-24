@@ -18,6 +18,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.cdlib.mrt.utility.HTTPUtil;
+import org.cdlib.mrt.utility.StringUtil;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -134,6 +136,7 @@ public class ServiceDriverIT {
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
                         HttpPost post = new HttpPost(url);
                         HttpResponse response = client.execute(post);
+                        HTTPUtil.dumpHttpResponse(response, 200); //!!!!!
                         assertEquals(200, response.getStatusLine().getStatusCode());
                         String s = new BasicResponseHandler().handleResponse(response).trim();
                         assertFalse(s.isEmpty());
@@ -231,6 +234,8 @@ public class ServiceDriverIT {
                         HttpEntity entity = builder.build();
                         post.setEntity(entity);
                         HttpResponse response = client.execute(post);
+                        //HTTPUtil.dumpHttpResponse(response, 200); //!!!
+
                         assertEquals(200, response.getStatusLine().getStatusCode());
                         String s = new BasicResponseHandler().handleResponse(response).trim();
                         assertFalse(s.isEmpty());
