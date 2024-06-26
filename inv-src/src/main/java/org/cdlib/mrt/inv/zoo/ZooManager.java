@@ -72,7 +72,7 @@ public class ZooManager
     //private Properties ingestProperties = null;
     private Properties queueProperties = null;
     private String queueConnectionString = null; //"hokusai.cdlib.org:2181";
-    private String queueNode = null; //"/distrib.hokusai.1";
+    //private String queueNode = null; //"/distrib.hokusai.1";
     private Integer queueTimeout = null;
     //private String zooBase = null;
     private ArrayList<String> m_admin = new ArrayList<String>(20);
@@ -160,9 +160,6 @@ public class ZooManager
                 if (key.equals(matchQueueService)) {
 		    this.queueConnectionString = value;
                 }
-                if (key.equals(matchQueueNode)) {
-		    this.queueNode = value;
-                }
 
                 // admin notification
                 if (key.startsWith(matchAdmin)) {
@@ -172,13 +169,13 @@ public class ZooManager
                 }
 	    }
             this.queueConnectionString = conf.getProperty("QueueService");
-            this.queueNode = conf.getProperty("QueueName");
+            //this.queueNode = conf.getProperty("QueueName");
             this.queueTimeout = Integer.parseInt(conf.getProperty("QueueTimeout"));
             
             if (DEBUG) System.out.println("Parms" + NL
                     + " - " + PropertiesUtil.dumpProperties("zooparm", conf) + NL
                     + " - queueConnectionString=" + queueConnectionString + NL
-                    + " - queueNode=" + queueNode + NL
+                    //+ " - queueNode=" + queueNode + NL
                     );
             setZoo();
             zooStatus = ServiceStatus.running;
@@ -266,12 +263,6 @@ public class ZooManager
         return zooKeeper;
     }
     
-    public String getQueueBaseNode(String base)
-    {
-        if (StringUtil.isEmpty(base)) base = "";
-        return queueNode + base;
-    }
-    
     public String dump(String header, byte[] bytes, Properties[] rows)
         throws TException
     {
@@ -305,9 +296,6 @@ public class ZooManager
         return queueProperties;
     }
 
-    public String getZooNode() {
-        return queueNode;
-    }
 
     public String getQueueConnectionString() {
         return queueConnectionString;

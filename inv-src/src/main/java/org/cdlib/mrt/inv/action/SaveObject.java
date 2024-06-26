@@ -398,8 +398,13 @@ public class SaveObject
     public void process(boolean doCheckVersion)
         throws TException
     {
+        boolean lock = false;
         try {
-            boolean lock = getLock(objectID.getValue());
+            lock = getLock(objectID.getValue());
+            if (!lock) {
+                log4j2.info("SaveObject item already locked:" + objectID.getValue());
+                return;
+            }
             if (method.equals("copy")) {
                copy();
                return;
@@ -436,8 +441,8 @@ public class SaveObject
 
         } finally {
             try {
-            System.out.println("[debug] " + MESSAGE + " Releasing Zookeeper lock: " + objectID.getValue());
-            releaseLock(objectID.getValue());
+                System.out.println("[debug] " + MESSAGE + " Releasing Zookeeper lock: " + objectID.getValue());
+                if (lock) releaseLock(objectID.getValue());
                 connection.close();
             } catch (Exception ex) { }
         }
@@ -1785,7 +1790,6 @@ public class SaveObject
      */
     private boolean getLock(String primaryID) {
         try {
-
             // SSM vars
             String zooConnectString = InventoryConfig.qService;
             String zooLockNode = InventoryConfig.lockName;
@@ -1794,7 +1798,9 @@ public class SaveObject
             String lockID = primaryID.replace(":", "").replace("/", "-");
 
             zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
-            return MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
+            Boolean gotLock =  MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
+            log4j2.debug("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
+            return gotLock;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -1811,6 +1817,7 @@ public class SaveObject
     private void releaseLock(String primaryID) {
         try {
 
+            log4j2.debug("SaveObject.releaseLock:" + primaryID);
        // SSM vars
             String zooConnectString = InventoryConfig.qService;
             String zooLockNode = InventoryConfig.lockName;

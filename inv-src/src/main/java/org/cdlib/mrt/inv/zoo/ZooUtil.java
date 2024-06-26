@@ -34,8 +34,10 @@ package org.cdlib.mrt.inv.zoo;
 
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
+import java.util.LinkedHashMap;
 
 import org.cdlib.mrt.utility.PropertiesUtil;
+import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.ZooCodeUtil;
 
 import org.cdlib.mrt.queue.Item;
@@ -141,7 +143,7 @@ public class ZooUtil
     {
         IngestState jobState = job.status();
         String  buf  = "***" + msg + "***\n"
-                + " - id=" + jobState + "\n"
+                + " - jobState=" + jobState + "\n"
                 + " - id=" + job.id() + "\n"
                 + " - bid=" + job.bid() + "\n"
                 + " - status=" + job.status() + "\n"
@@ -158,5 +160,4 @@ public class ZooUtil
         return buf;
    
     }
-   
 }

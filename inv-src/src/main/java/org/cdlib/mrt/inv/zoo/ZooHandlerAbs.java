@@ -115,7 +115,7 @@ public abstract class ZooHandlerAbs
                 try {
                     job = Job.acquireJob(zooManager.getZooKeeper(), JobState.Recording);
                     if (job == null) {
-                        System.out.println(MESSAGE + "No item founc");
+                        System.out.println(MESSAGE + "No Recording found");
                         Thread.sleep(pollTime);
                         if (DEBUG) System.out.println("consume continue");
                         continue;
@@ -128,7 +128,7 @@ public abstract class ZooHandlerAbs
                     if (DEBUG) System.out.println("consume continue");
                     continue;
                 }
-                log4j.info("Recording job found:" + job.id());
+                log4j.info("Recording job found:" + job.data());
                 ProcessStatus status = processJob(job);
                 if (DEBUG) System.out.println("ZooHandler Status:" + status.toString());
                 if ((status == ProcessStatus.unknown) || (status == ProcessStatus.shutdown)) {
