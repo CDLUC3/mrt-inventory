@@ -480,47 +480,6 @@ public class JerseyInv
         }
     }
 
-    @POST
-    @Path("addzoo")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response addMultipartZoo(
-            @DefaultValue("") @FormDataParam("zoourl") String manifestUrl,
-            @DefaultValue("xhtml") @FormDataParam("responseForm") String formatType,
-            @Context CloseableService cs,
-            @Context ServletConfig sc)
-        throws TException
-    {
-        
-        LoggerInf logger = defaultLogger;
-        try {
-            log("addMultipartZoo process:"
-                    + " - manifestUrl=" + manifestUrl
-                    + " - formatType=" + formatType
-                    );
-            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
-            InvServiceInf invService = invServiceInit.getInvService();
-            Properties loadProp = new Properties();
-            loadProp.setProperty("manifestURL", manifestUrl);
-            ZooManager zooManager = invService.getZooManager();
-            AddZoo addZoo = AddZoo.getAddZoo(zooManager);
-            ProcessStatus status = addZoo.addUrl(manifestUrl);
-            if (status == ProcessStatus.failed) {
-                Exception ex = addZoo.getEx();
-                throw ex;
-            }
-
-            logger = invService.getLogger();
-            InvProcessState responseState = new InvProcessState(manifestUrl, "addMultiPartZoo");
-            return getStateResponse(responseState, formatType, logger, cs, sc);
-
-        } catch (TException tex) {
-            return getExceptionResponse(tex, formatType, logger);
-
-        } catch (Exception ex) {
-            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
-            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
-        }
-    }
     /**
      * Retart inv service
      * @param formatType user provided format type
