@@ -1,3 +1,4 @@
+
 package org.cdlib.mrt.inv;
 
 import org.junit.Before;
@@ -438,7 +439,16 @@ public class ServiceDriverIT {
         }
 
         @Test
-        public void AddObjectToZkTest() throws MerrittZKNodeInvalid, KeeperException, InterruptedException, MerrittStateError {
+        public void AddObjectToZkTest() 
+                throws IOException, JSONException, MerrittZKNodeInvalid, KeeperException, InterruptedException, MerrittStateError 
+        {
+            String ark = "ark:/1111/3333";
+            if (checkArk(ark)) {
+                        deleteObject(ark);
+            }
+            
+            String ark_e = URLEncoder.encode(ark, StandardCharsets.UTF_8.name());
+            String manifest = String.format("http://mock-merritt-it:4567/storage/manifest/7777/%s", ark_e);
             JSONObject json = new JSONObject();
             json.put("job", "quack");
             Batch b = Batch.createBatch(zk, json);
@@ -462,22 +472,27 @@ public class ServiceDriverIT {
             jj.unlock(zk);
             
             jj = Job.acquireJob(zk, JobState.Processing);
-            jj.setInventory(zk, "test", "tbd");
+            jj.setInventory(zk, manifest, "tbd");
             jj.setStatus(zk, jj.status().success());
             jj.unlock(zk);
 
+            if (false) return;
             boolean complete = false;
             for(int i=0; i<20; i++) {
                 Thread.sleep(1000);
-                Job job = new Job(jj.id());
-                job.load(zk);
-                if (job.status() == JobState.Completed) {
-                        complete = true;
-                        break;
-                }
-                System.out.println(i + " " + job.status());
+                boolean found = checkArk(ark);
+                if (found) break;
+                System.out.println(i + " Test");
             }
-            assertTrue(complete);
+  
+            assertTrue(checkArk(ark));
+            deleteObject(ark);
+            
+            
+            Job job = new Job(jj.id());
+            job.load(zk);
+            System.out.println("job status:"  + job.status());
+            assertTrue(job.status() == JobState.Notify);
         }
 
         @Test
