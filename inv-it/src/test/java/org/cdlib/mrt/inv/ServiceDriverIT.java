@@ -482,7 +482,7 @@ public class ServiceDriverIT {
                 Thread.sleep(1000);
                 boolean found = checkArk(ark);
                 if (found) break;
-                System.out.println(i + " Test");
+                //System.out.println(i + " Test");
             }
   
             assertTrue(checkArk(ark));
@@ -491,7 +491,7 @@ public class ServiceDriverIT {
             
             Job job = new Job(jj.id());
             job.load(zk);
-            System.out.println("job status:"  + job.status());
+            //System.out.println("job status:"  + job.status());
             assertTrue(job.status() == JobState.Notify);
         }
 
