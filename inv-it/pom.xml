@@ -162,6 +162,9 @@
                     <wait>
                       <time>2000</time>
                     </wait>
+                    <ports>
+                      <port>mrt-zk.port:2181</port>
+                    </ports>
                   </run>
                 </image>
                 <image>
@@ -221,6 +224,7 @@
             <it-server.port>${it-server.port}</it-server.port>
             <mock-merritt-it.port>${mock-merritt-it.port}</mock-merritt-it.port>
             <mrt-it-database.port>${mrt-it-database.port}</mrt-it-database.port>
+            <mrt-zk.port>${mrt-zk.port}</mrt-zk.port>
           </environmentVariables>
         </configuration>
       </plugin>
