@@ -476,22 +476,17 @@ public class ServiceDriverIT {
             jj.setStatus(zk, jj.status().success());
             jj.unlock(zk);
 
-            if (false) return;
-            boolean complete = false;
             for(int i=0; i<20; i++) {
                 Thread.sleep(1000);
                 boolean found = checkArk(ark);
                 if (found) break;
-                //System.out.println(i + " Test");
             }
   
             assertTrue(checkArk(ark));
-            deleteObject(ark);
-            
+            deleteObject(ark);            
             
             Job job = new Job(jj.id());
             job.load(zk);
-            //System.out.println("job status:"  + job.status());
             assertTrue(job.status() == JobState.Notify);
         }
 
