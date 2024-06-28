@@ -146,12 +146,6 @@ public class SaveObject
     protected long saveFileCnt = 0;
     protected long durationMs = 0;
 
-    // Support lock
-    private ZooKeeper zooKeeper;
-    private String zooConnectString = null;
-    private String zooLockNode = null;
-    private DistributedLock distributedLock;
-
     
     public static SaveObject getSaveObject(
             String ingestURL,
@@ -404,6 +398,8 @@ public class SaveObject
             if (!lock) {
                 log4j2.info("SaveObject item already locked:" + objectID.getValue());
                 return;
+            } else {
+                log4j2.debug("SaveObject item locked:" + objectID.getValue());
             }
             if (method.equals("copy")) {
                copy();
@@ -1789,13 +1785,10 @@ public class SaveObject
      * @return Boolean result of obtaining lock
      */
     private boolean getLock(String primaryID) {
+        ZooKeeper zooKeeper = null;
         try {
             // SSM vars
             String zooConnectString = InventoryConfig.qService;
-            String zooLockNode = InventoryConfig.lockName;
-
-            // Zookeeper treats slashes as nodes
-            String lockID = primaryID.replace(":", "").replace("/", "-");
 
             zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
             Boolean gotLock =  MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
@@ -1805,6 +1798,11 @@ public class SaveObject
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+            
+        } finally {
+            try {
+                zooKeeper.close();
+            } catch (Exception ex) { }
         }
     }
 
@@ -1815,21 +1813,23 @@ public class SaveObject
      * @return void
      */
     private void releaseLock(String primaryID) {
+        ZooKeeper zooKeeper = null;
         try {
 
             log4j2.debug("SaveObject.releaseLock:" + primaryID);
        // SSM vars
             String zooConnectString = InventoryConfig.qService;
-            String zooLockNode = InventoryConfig.lockName;
-
-            // Zookeeper treats slashes as nodes
-            String lockID = primaryID.replace(":", "").replace("/", "-");
 
             zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
             MerrittLocks.unlockObjectInventory(zooKeeper, primaryID);
 
         } catch (Exception e) {
             e.printStackTrace();
+            
+        } finally {
+            try {
+                zooKeeper.close();
+            } catch (Exception ex) { }
         }
     }
 

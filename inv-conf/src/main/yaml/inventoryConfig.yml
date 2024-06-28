@@ -12,7 +12,7 @@ inv-info:
     queueService: "{!SSM: inventory/zoo/queueService !DEFAULT: localhost:2181}"
     #queueService: "localhost:2181"
     queueName: "{!SSM: inventory/zoo/queueName}"
-    queueTimeout: "{!SSM: inventory/zoo/Timeout !DEFAULT: 40000}"
+    queueTimeout: "{!SSM: inventory/zoo/Timeout !DEFAULT: 3600000}"
     lockName: "{!SSM: inventory/zoo/lockName !DEFAULT: /mrt.lock}"
 
   zooclient:

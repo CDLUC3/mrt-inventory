@@ -464,6 +464,10 @@ public class InventoryConfig
     public void setJdb(JSONObject jdb) {
         this.jdb = jdb;
     }
+
+    public Properties getZooProperties() {
+        return zooProperties;
+    }
     
     public static void main(String[] argv) {
     	

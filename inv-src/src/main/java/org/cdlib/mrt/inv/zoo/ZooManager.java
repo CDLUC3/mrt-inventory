@@ -195,6 +195,41 @@ public class ZooManager
     
     }
     
+    public ZooKeeper getZooKeeper()
+        throws TException
+    {
+        boolean newZoo = false;
+        try {
+            if (zooKeeper == null) newZoo = true;
+            else {
+                ZooKeeper.States state = zooKeeper.getState();
+                if (state != ZooKeeper.States.CONNECTED) {
+                    newZoo = true;
+                    closeZooKeeper();
+                }
+            }
+            if (newZoo) {
+                System.out.println("**Establishing new ZooKeeper:" + queueConnectionString);
+                if (StringUtil.isEmpty(queueConnectionString)) {
+                    throw new TException.INVALID_OR_MISSING_PARM("ZooManager - queueConnectionString missing");
+                }
+                zooKeeper = new ZooKeeper(queueConnectionString, queueTimeout, new Ignorer());
+            }
+            if (initZooKeeper) {
+                MerrittLocks.initLocks(zooKeeper);
+                Job.initNodes(zooKeeper);
+                initZooKeeper = false;
+            }
+            return zooKeeper;
+
+        } catch (Exception ex) {
+            String msg = MESSAGE + " Exception:" + ex;
+            logger.logError(msg, 3);
+            logger.logError(StringUtil.stackTrace(ex), 0);
+            ex.printStackTrace();
+            throw new TException.GENERAL_EXCEPTION(msg);
+        }
+    }
     
     public ZooKeeper setZoo()
         throws TException
@@ -257,10 +292,6 @@ public class ZooManager
     {
         zooStatus = ServiceStatus.shutdown;
         closeZooKeeper();
-    }
-
-    public ZooKeeper getZooKeeper() {
-        return zooKeeper;
     }
     
     public String dump(String header, byte[] bytes, Properties[] rows)
