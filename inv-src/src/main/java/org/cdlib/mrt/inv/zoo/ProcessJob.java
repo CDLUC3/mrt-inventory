@@ -35,6 +35,7 @@ import java.util.Random;
 
 import org.cdlib.mrt.core.ServiceStatus;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.inv.service.InventoryConfig;
@@ -63,6 +64,7 @@ public class ProcessJob
     protected static final boolean DEBUG = false;
     protected static final boolean STATUS = true;
  
+    protected static final Logger log4j = LogManager.getLogger();  
     
     protected Job job = null;
     protected TException saveTex = null;
@@ -175,10 +177,10 @@ public class ProcessJob
             jobOK();
             
         } catch (TException tex) {
-            jobFails();
+            jobFails(tex);
             
-        } catch (Exception tex) {
-            jobFails();
+        } catch (Exception ex) {
+            jobFails(ex);
             
         }finally {
             try {
@@ -317,13 +319,15 @@ public class ProcessJob
         } 
     }
     
-    public void jobFails()
+    public void jobFails(Exception saveEx)
        throws TException
     {
         try {
             processStatus = ProcessStatus.failed;
-            job.setStatus(zooManager.getZooKeeper(), job.status().fail());
+            job.setStatus(zooManager.getZooKeeper(), job.status().fail(), saveEx.toString());
             job.unlock(zooManager.getZooKeeper());
+            JSONObject data = job.data();
+            log4j.error("ProcessJob.jobFail:" + saveEx.toString(), data);
             
         } catch (Exception ex) {
             throw new TException(ex);

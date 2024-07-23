@@ -29,21 +29,12 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.action;
 
-import java.io.File;
-import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
-import java.util.concurrent.Callable;
-
-import org.apache.zookeeper.data.Stat;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 
 import org.cdlib.mrt.core.DateState;
@@ -52,9 +43,6 @@ import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.core.ComponentContent;
 import org.cdlib.mrt.cloud.MatchMap;
 import org.cdlib.mrt.cloud.VersionMap;
-import org.cdlib.mrt.core.DC;
-import org.cdlib.mrt.core.DataciteConvert;
-import org.cdlib.mrt.inv.content.ContentAbs;
 import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.content.InvCollectionObject;
 import org.cdlib.mrt.inv.content.InvDK;
@@ -81,19 +69,16 @@ import org.cdlib.mrt.inv.extract.StoreMom;
 import org.cdlib.mrt.inv.extract.StoreOwner;
 import org.cdlib.mrt.inv.extract.StoreState;
 import org.cdlib.mrt.inv.utility.DBAdd;
-import org.cdlib.mrt.inv.utility.DBDelete;
 import org.cdlib.mrt.inv.extract.StoreFile;
 import org.cdlib.mrt.inv.service.InvProcessState;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.core.Tika;
 import static org.cdlib.mrt.inv.action.InvActionAbs.getVersionMap;
-import org.cdlib.mrt.queue.DistributedLock;
-import org.cdlib.mrt.queue.DistributedLock.Ignorer;
+//import org.cdlib.mrt.queue.DistributedLock.Ignorer;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.inv.utility.InvUtil;
 import org.cdlib.mrt.log.utility.AddStateEntryGen;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
@@ -101,9 +86,10 @@ import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.URLEncoder;
 import org.cdlib.mrt.utility.XMLUtil;
-import org.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
 import org.cdlib.mrt.zk.MerrittLocks;
 
 
@@ -1836,5 +1822,9 @@ public class SaveObject
     public AddStateEntryGen getLogStateEntry()
     {
             return logSaveEntry;
+    }
+        
+    public static class Ignorer implements Watcher {
+        public void process(WatchedEvent event){}
     }
 }

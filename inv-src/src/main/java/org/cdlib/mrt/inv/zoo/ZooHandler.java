@@ -29,24 +29,13 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.zoo;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-
-import org.cdlib.mrt.queue.Item;
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.core.ThreadHandler;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.inv.zoo.ZooHandlerAbs;
-import org.cdlib.mrt.inv.zoo.ZooManager;
 import org.cdlib.mrt.zk.Job;
-import org.cdlib.mrt.zk.JobState;
 
 /**
  * Run fixity

@@ -39,16 +39,11 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.ConnectionLossException;
-import org.apache.zookeeper.KeeperException.SessionExpiredException;
-
-import org.cdlib.mrt.queue.DistributedQueue;
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.zk.Access;
 import org.cdlib.mrt.zk.MerrittLocks;
 import org.cdlib.mrt.zk.Job;
 

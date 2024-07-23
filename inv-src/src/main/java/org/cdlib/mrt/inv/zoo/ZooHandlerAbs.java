@@ -195,16 +195,5 @@ public abstract class ZooHandlerAbs
     
     
     
-    protected String dumpJob(Job job)
-    {   
-        try {
-            if (job == null) return "Job null";
-            return ZooUtil.dumpJob("ZooHandler-Job", job);
-            
-        } catch (Exception ex) {
-            return "Exception:" + ex;
-        }
-        
-    }
 }
 
