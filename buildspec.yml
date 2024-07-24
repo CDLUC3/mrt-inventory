@@ -33,7 +33,6 @@ phases:
         fi
       - echo "Semver [${SEMVER}]"
       - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls inv-src/target/mrt-inventorysrc-*.jar)
-      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls inv-it/target/mrt-inv-it-*.war) ${SEMVER}
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls inv-war/target/mrt-invwar-*.war) ${SEMVER}
 
       - |
