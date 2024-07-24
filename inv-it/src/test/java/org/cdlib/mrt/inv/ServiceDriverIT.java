@@ -21,9 +21,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.cdlib.mrt.utility.HTTPUtil;
 import org.cdlib.mrt.utility.StringUtil;
+import org.cdlib.mrt.zk.Access;
 import org.cdlib.mrt.zk.Batch;
 import org.cdlib.mrt.zk.Job;
 import org.cdlib.mrt.zk.JobState;
+import org.cdlib.mrt.zk.MerrittLocks;
 import org.cdlib.mrt.zk.MerrittStateError;
 import org.cdlib.mrt.zk.MerrittZKNodeInvalid;
 
@@ -77,7 +79,7 @@ public class ServiceDriverIT {
         private String user = "user";
         private String password = "password";
     
-        public ServiceDriverIT() throws ParserConfigurationException, HttpResponseException, IOException, JSONException, SQLException {
+        public ServiceDriverIT() throws ParserConfigurationException, HttpResponseException, IOException, JSONException, SQLException, KeeperException, InterruptedException {
                 try {
                         port = Integer.parseInt(System.getenv("it-server.port"));
                         dbport = Integer.parseInt(System.getenv("mrt-it-database.port"));
@@ -88,6 +90,8 @@ public class ServiceDriverIT {
                 db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 xpathfactory = new XPathFactoryImpl();
                 zk = new ZooKeeper(String.format("localhost:%s", zkport), 100, null);
+                Job.initNodes(zk);
+                MerrittLocks.initLocks(zk);
 
                 connstr = String.format("jdbc:mysql://localhost:%d/inv?characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&serverTimezone=UTC", dbport);
                 initServiceAndNodes();
