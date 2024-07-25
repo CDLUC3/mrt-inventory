@@ -40,6 +40,6 @@ phases:
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls inv-war/target/mrt-invwar-*.war) ${SEMVER}
 
       - |
-        docker build --push \
+          docker buildx build --platform linux/arm64,linux/amd64 --push \
           --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
           -t ${ECR_REGISTRY}/mrt-inventory:dev .
