@@ -9,12 +9,22 @@
   <name>UC3-mrtInvIT</name>
   <url>http://uc3.cdlib.org</url>
 
+  <properties>
+    <merritt-core.version>3.0-SNAPSHOT</merritt-core.version>
+    <merritt-bom.version>3.0-SNAPSHOT</merritt-bom.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <itDockerRegistry>it-docker-registry</itDockerRegistry>
+    <propertyDir>test</propertyDir>
+    <docker.skip>${env.SKIP_DOCKER_TEST}</docker.skip>
+    <skipTests>${env.SKIP_DOCKER_TEST}</skipTests>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.cdlib.mrt</groupId>
         <artifactId>mrt-reflectoring-bom</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>${merritt-bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -24,7 +34,8 @@
     <parent>
         <groupId>org.cdlib.mrt</groupId>
         <artifactId>mrt-parent-properties</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <!--This version cannot be set as a property-->
+        <version>PAR-3.0-SNAPSHOT</version>
     </parent>
 
   <repositories>
@@ -39,14 +50,6 @@
       </snapshots>
     </repository>
   </repositories>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <itDockerRegistry>it-docker-registry</itDockerRegistry>
-    <propertyDir>test</propertyDir>
-    <docker.skip>${env.SKIP_DOCKER_TEST}</docker.skip>
-    <skipTests>${env.SKIP_DOCKER_TEST}</skipTests>
-  </properties>
 
   <profiles>
     <profile>
@@ -176,7 +179,7 @@
                     </wait>
                     <volumes>
                       <bind>
-                        <volume>${project.basedir}/target/mrt-inv-it-3.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtinv.war</volume>
+                        <volume>${project.basedir}/target/mrt-inv-it-${project.version}.war:/usr/local/tomcat/webapps/mrtinv.war</volume>
                       </bind>
                     </volumes>
                     <env>
@@ -241,14 +244,14 @@
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
             <artifactId>mrt-core</artifactId>
-             <version>3.0-SNAPSHOT</version>
+             <version>${merritt-core.version}</version>
              <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
             <artifactId>mrt-inventorysrc</artifactId>
-             <version>3.0-SNAPSHOT</version>
+             <version>${project.version}</version>
              <scope>runtime</scope>
         </dependency>
         
