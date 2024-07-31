@@ -35,6 +35,9 @@ phases:
         elif [[ "${BRANCHTAG}" == "codebuild2" ]]
         then
           SEMVER=''
+        elif [[ "${BRANCHTAG}" == "zooInv" ]]
+        then
+          SEMVER=''
         else
           SEMVER="-Dversion=${BRANCHTAG}"
         fi
