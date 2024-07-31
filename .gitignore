@@ -4,3 +4,4 @@ target/
 .project
 */.gitignore
 inv-war/war/test/mrtinv.war
+pom.xml.releaseBackup

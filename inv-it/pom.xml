@@ -5,16 +5,26 @@
   <groupId>org.cdlib.mrt</groupId>
   <artifactId>mrt-inv-it</artifactId>
   <packaging>war</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>3.0-SNAPSHOT</version>
   <name>UC3-mrtInvIT</name>
   <url>http://uc3.cdlib.org</url>
+
+  <properties>
+    <merritt-core.version>3.0-SNAPSHOT</merritt-core.version>
+    <merritt-bom.version>3.0-SNAPSHOT</merritt-bom.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <itDockerRegistry>it-docker-registry</itDockerRegistry>
+    <propertyDir>test</propertyDir>
+    <docker.skip>${env.SKIP_DOCKER_TEST}</docker.skip>
+    <skipTests>${env.SKIP_DOCKER_TEST}</skipTests>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.cdlib.mrt</groupId>
         <artifactId>mrt-reflectoring-bom</artifactId>
-        <version>1.0.0</version>
+        <version>${merritt-bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -24,7 +34,8 @@
     <parent>
         <groupId>org.cdlib.mrt</groupId>
         <artifactId>mrt-parent-properties</artifactId>
-        <version>1.0.0</version>
+        <!--This version cannot be set as a property-->
+        <version>PAR-3.0-SNAPSHOT</version>
     </parent>
 
   <repositories>
@@ -39,14 +50,6 @@
       </snapshots>
     </repository>
   </repositories>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <itDockerRegistry>it-docker-registry</itDockerRegistry>
-    <propertyDir>test</propertyDir>
-    <docker.skip>${env.SKIP_DOCKER_TEST}</docker.skip>
-    <skipTests>${env.SKIP_DOCKER_TEST}</skipTests>
-  </properties>
 
   <profiles>
     <profile>
@@ -64,13 +67,6 @@
   </profiles>
   <build>
     <plugins>
-      <!--plugin>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>3.3.2</version>
-        <configuration>
-          <packagingExcludes>WEB-INF/lib/slf4j-log4j12-1.5.*.jar,WEB-INF/lib/mrt-jena-2.0-SNAPSHOT.jar</packagingExcludes>
-        </configuration>
-      </plugin-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -152,7 +148,7 @@
                   </run>
                 </image>
                 <image>
-                  <name>zookeeper</name>
+                  <name>public.ecr.aws/docker/library/zookeeper:3.8.4</name>
                   <alias>zoo-it</alias>
                   <run>
                     <network>
@@ -179,11 +175,11 @@
                       <port>it-server.port:8080</port>
                     </ports>
                     <wait>
-                      <time>6000</time>
+                      <time>10000</time>
                     </wait>
                     <volumes>
                       <bind>
-                        <volume>${project.basedir}/target/mrt-inv-it-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtinv.war</volume>
+                        <volume>${project.basedir}/target/mrt-inv-it-${project.version}.war:/usr/local/tomcat/webapps/mrtinv.war</volume>
                       </bind>
                     </volumes>
                     <env>
@@ -248,14 +244,14 @@
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
             <artifactId>mrt-core</artifactId>
-             <version>2.0-SNAPSHOT</version>
+             <version>${merritt-core.version}</version>
              <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>org.cdlib.mrt</groupId>
             <artifactId>mrt-inventorysrc</artifactId>
-             <version>1.0-SNAPSHOT</version>
+             <version>${project.version}</version>
              <scope>runtime</scope>
         </dependency>
         
