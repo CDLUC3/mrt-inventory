@@ -24,8 +24,8 @@ phases:
   build:
     on-failure: ABORT
     commands:
-    - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
-    # - mvn -ntp clean install
+    # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
+    - mvn -ntp clean install
     - |
       if [[ "${BRANCHTAG}" == "main" ]]
       then
@@ -42,9 +42,16 @@ phases:
         SEMVER="-Dversion=${BRANCHTAG}"
       fi
     - echo "Semver [${SEMVER}]"
-    - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls inv-src/target/mrt-inventorysrc-*.jar)
-    - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls inv-conf/target/mrt-inventoryconf-*.jar)
-    - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls inv-war/target/mrt-invwar-*.war) ${SEMVER}
+    - mvn deploy:deploy-file \
+      -Durl=${CODEARTIFACT_URL} \
+      -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
+      -Dfile=$(ls inv-src/target/mrt-inventorysrc-*.jar)
+
+    - mvn -ntp deploy:deploy-file \
+      -Durl=${CODEARTIFACT_URL} \
+      -DgroupId=org.cdlib.mrt -DartifactId=mrtinv \
+      -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
+      -Dfile=$(ls inv-war/target/mrt-invwar-*.war) ${SEMVER}
 
     - |
         docker build --push --quiet \
@@ -75,7 +82,7 @@ phases:
         | sed -e "s/^/- /" >> $RPT
 
     - |
-      for pkg in mrt-inventoryconf mrt-invwar
+      for pkg in mrtinv
       do
         echo "## Code Artifact Packages for $pkg" >> $RPT
         aws codeartifact list-package-versions \
