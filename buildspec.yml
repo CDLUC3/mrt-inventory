@@ -49,7 +49,6 @@ phases:
 
     - mvn -ntp deploy:deploy-file \
       -Durl=${CODEARTIFACT_URL} \
-      -DgroupId=org.cdlib.mrt -DartifactId=mrtinv \
       -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
       -Dfile=$(ls inv-war/target/mrt-invwar-*.war) ${SEMVER}
 
@@ -82,7 +81,7 @@ phases:
         | sed -e "s/^/- /" >> $RPT
 
     - |
-      for pkg in mrtinv
+      for pkg in mrt-invwar
       do
         echo "## Code Artifact Packages for $pkg" >> $RPT
         aws codeartifact list-package-versions \
