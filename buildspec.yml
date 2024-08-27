@@ -42,11 +42,18 @@ phases:
         SEMVER="-Dversion=${BRANCHTAG}"
       fi
     - echo "Semver [${SEMVER}]"
+
     - |
       mvn deploy:deploy-file \
         -Durl=${CODEARTIFACT_URL} \
         -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
         -Dfile=$(ls inv-src/target/mrt-inventorysrc-*.jar)
+
+    - |
+      mvn deploy:deploy-file \
+        -Durl=${CODEARTIFACT_URL} \
+        -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
+        -Dfile=$(ls inv-conf/target/mrt-inventoryconf-*.jar)
 
     - | 
       mvn -ntp deploy:deploy-file \
