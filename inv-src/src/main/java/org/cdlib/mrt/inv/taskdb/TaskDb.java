@@ -57,7 +57,7 @@ public class TaskDb
     private static final String MESSAGE = NAME + ": ";
     private static final int MAXW = 5394;
     
-    public enum CurrentStatus {ok, fail, partial, unknown };
+    public enum CurrentStatus {ok, fail, pending, partial, unknown };
     private Connection connect = null;
     private static final Logger log4j = LogManager.getLogger();
     
