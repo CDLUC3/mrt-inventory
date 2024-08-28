@@ -395,6 +395,17 @@ public class InventoryConfig
         return db.getSingleConnection(autoCommit);
     }
     
+    
+    public static void closeConnect(Connection connection)
+    {
+        try {
+            if (connection == null) return;
+            connection.close();
+            
+        } catch (Exception ex) {  
+        
+        }
+    }
 
     public LoggerInf getLogger() {
         return logger;
