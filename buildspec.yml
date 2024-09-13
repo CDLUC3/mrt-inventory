@@ -14,9 +14,14 @@ phases:
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
     - COMMIT=`git rev-parse --short HEAD`
-    - BRANCH=`git symbolic-ref -q --short HEAD || git name-rev $(git rev-parse --short HEAD) | cut -d' ' -f2 || echo ''`
     - TAG=`git describe --tags --exact-match 2> /dev/null || echo ''`
-    - BRANCHTAG=`git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git name-rev $(git rev-parse --short HEAD) | cut -d' ' -f2 || git rev-parse --short HEAD`
+    - |
+      if [[ "$MODE" == "OnPush" ]]
+      then
+        BRANCHTAG=`git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git name-rev $(git rev-parse --short HEAD) | cut -d' ' -f2 || git rev-parse --short HEAD`
+      else
+        BRANCHTAG=$BRANCHNAME
+      fi
     - DOCKTAG=$BRANCHTAG
     - COMMITDATE=`git --no-pager log -1 --pretty='format:%cd' --date='format:%Y-%m-%d %H:%M:%S'`
     - echo "Branchtag ${BRANCHTAG}; COMMITDATE=${COMMITDATE}; REPONAME=${REPONAME}; BRANCHNAME=${BRANCHNAME}"
@@ -43,6 +48,11 @@ phases:
       fi
     - echo "Semver [${SEMVER}]"
 
+    - mkdir -p /build/static
+    - |
+      echo "build_tag: ${BRANCHTAG}" > /build/static/build.content.txt 
+    - ${JAVA_HOME}/bin/jar uf $(ls ls inv-war/target/mrt-invwar-*.war) -C /build static/build.content.txt
+
     - |
       mvn deploy:deploy-file \
         -Durl=${CODEARTIFACT_URL} \
@@ -64,7 +74,6 @@ phases:
     - |
       docker build --push --quiet \
         --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-        --build-arg COMMITDATE="${COMMITDATE}" \
         -t ${ECR_REGISTRY}/${REPONAME}:${DOCKTAG} .
 
     # report results
