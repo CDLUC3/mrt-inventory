@@ -35,7 +35,6 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import org.apache.zookeeper.ZooKeeper;
 
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FileComponent;
@@ -75,7 +74,6 @@ import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.core.Tika;
 import static org.cdlib.mrt.inv.action.InvActionAbs.getVersionMap;
 //import org.cdlib.mrt.queue.DistributedLock.Ignorer;
-import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.inv.utility.InvUtil;
 import org.cdlib.mrt.log.utility.AddStateEntryGen;
@@ -90,7 +88,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-import org.cdlib.mrt.zk.MerrittLocks;
 
 
 /**
@@ -380,13 +377,7 @@ public class SaveObject
     {
         boolean lock = false;
         try {
-            lock = getLock(objectID.getValue());
-            if (!lock) {
-                log4j2.info("SaveObject item already locked:" + objectID.getValue());
-                return;
-            } else {
-                log4j2.debug("SaveObject item locked:" + objectID.getValue());
-            }
+            log4j2.debug("SaveObject start:" + objectID.getValue());
             if (method.equals("copy")) {
                copy();
                return;
@@ -401,6 +392,7 @@ public class SaveObject
             setObject();
             connection.commit();
             commit = true;
+            log4j2.debug("SaveObject connection commit:" + objectID.getValue());
             if (DUMPTALLY) System.out.println("***Tally\n" + tally.dumpProp());
 
         } catch (Exception ex) {
@@ -412,6 +404,9 @@ public class SaveObject
             logger.logError(StringUtil.stackTrace(ex),3);
             try {
                 connection.rollback();
+                log4j2.info("SaveObject connection rollback:" + objectID.getValue()
+                        + " - ex:" + ex
+                );
             } catch (Exception cex) {
                 System.out.println("WARNING: rollback Exception:" + cex);
             }
@@ -423,8 +418,6 @@ public class SaveObject
 
         } finally {
             try {
-                System.out.println("[debug] " + MESSAGE + " Releasing Zookeeper lock: " + objectID.getValue());
-                if (lock) releaseLock(objectID.getValue());
                 connection.close();
             } catch (Exception ex) { }
         }
@@ -460,6 +453,9 @@ public class SaveObject
             logger.logError(StringUtil.stackTrace(ex),3);
             try {
                 connection.rollback();
+                log4j2.info("SaveObject connection copy rollback:" + objectID.getValue()
+                        + " - ex:" + ex
+                );
             } catch (Exception cex) {
                 System.out.println("WARNING: rollback Exception:" + cex);
             }
@@ -1763,65 +1759,13 @@ public class SaveObject
         return state;
     }
 
-    /**
-     * Lock on primary identifier.  Will loop unitil lock obtained.
-     *
-     * @param String primary ID of object (ark)
-     * @param String jobID
-     * @return Boolean result of obtaining lock
-     */
-    private boolean getLock(String primaryID) {
-        ZooKeeper zooKeeper = null;
-        try {
-            // SSM vars
-            String zooConnectString = InventoryConfig.qService;
-
-            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
-            Boolean gotLock =  MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
-            log4j2.debug("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
-            return gotLock;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-            
-        } finally {
-            try {
-                zooKeeper.close();
-            } catch (Exception ex) { }
-        }
-    }
-
-    /**
-     * Release lock
-     *
-     * @param none needed inputs are global
-     * @return void
-     */
-    private void releaseLock(String primaryID) {
-        ZooKeeper zooKeeper = null;
-        try {
-
-            log4j2.debug("SaveObject.releaseLock:" + primaryID);
-       // SSM vars
-            String zooConnectString = InventoryConfig.qService;
-
-            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
-            MerrittLocks.unlockObjectInventory(zooKeeper, primaryID);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            
-        } finally {
-            try {
-                zooKeeper.close();
-            } catch (Exception ex) { }
-        }
-    }
-
     public AddStateEntryGen getLogStateEntry()
     {
             return logSaveEntry;
+    }
+
+    public Identifier getObjectID() {
+        return objectID;
     }
         
     public static class Ignorer implements Watcher {

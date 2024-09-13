@@ -34,9 +34,12 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.cdlib.mrt.core.ServiceStatus;
+import org.cdlib.mrt.core.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.zoo.ZooManager;
@@ -48,6 +51,7 @@ import org.cdlib.mrt.inv.action.AddZoo;
 import org.cdlib.mrt.inv.action.InvActionAbs;
 import org.cdlib.mrt.inv.action.SaveObject;
 import org.cdlib.mrt.zk.Job;
+import org.cdlib.mrt.zk.MerrittLocks;
 import org.json.JSONObject;
 
 /**
@@ -167,12 +171,16 @@ public class ProcessJob
        throws TException
     {
         int retry = 0;
+        boolean arkLock = false;
+        Identifier ark = null;
         try {
             ZooKeeper zooKeeper = zooManager.getZooKeeper();
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
             //saveObject.process();
             //job.setStatus(zooKeeper, job.status().stateChange(JobState.Recording));
+            ark = saveObject.getObjectID();
+            arkLock = getLockRetry(ark.getValue(), 300);
             retry = saveObjectRetry(4);
             jobOK();
             
@@ -182,10 +190,13 @@ public class ProcessJob
         } catch (Exception ex) {
             jobFails(ex);
             
-        }finally {
+        } finally {
             try {
                 connection.close();
             } catch (Exception ex) { }
+            if (arkLock) {
+                releaseLock(ark.getValue());
+            }
             if (STATUS) System.out.println(MESSAGE + "process "
                     + " - manifestURLS=" + manifestURLS
                     + " - processStatus=" + processStatus
@@ -346,6 +357,111 @@ public class ProcessJob
             throw new TException(ex);
         }
     }
+    
+    /**
+     * lock processing to an ID
+     * @param primaryID ID to lock
+     * @param timeoutSeconds allowed seconds for retries then fail
+     * @return true=lock; false=unable to lock
+     * @throws TException Lock failed in allowed time
+     */
+    private boolean getLockRetry(String primaryID, int timeoutSeconds) 
+        throws TException
+    {
+        try {
+            Long startMlSec = System.currentTimeMillis();
+            int attempts = 0;
+            int sleepMs = 10000; // time between allock attempts
+            while (true) {
+                boolean gotLock = getLock(primaryID);
+                attempts++;
+                if (gotLock) {
+                    log4j.debug("Got lock:" + primaryID);
+                    return true;
+                }
+                
+                try {
+                    Thread.sleep(sleepMs);
+                } catch (Exception tmpEx) { }
+                long elapsedMs= System.currentTimeMillis() - startMlSec;
+                long totalTimeoutMs = timeoutSeconds * 1000;
+                log4j.info("getLockRetry(" + attempts + "): "
+                        + " - elapsedMs=" + elapsedMs
+                        + " - totalTimeoutMs=" + totalTimeoutMs
+                );
+                if (elapsedMs > totalTimeoutMs) {
+                    throw new TException.GATEWAY_TIMEOUT("lock not released Exception" 
+                            + " - primaryID:" + primaryID
+                            + " - timeoutSeconds:" + timeoutSeconds
+                            + " - elapsedMs:" + elapsedMs
+                    );
+                }
+            }
+
+        } catch (TException tex) {
+            throw tex;
+        }
+        
+    }
+
+    /**
+     * Lock on primary identifier.  Will loop unitil lock obtained.
+     *
+     * @param String primary ID of object (ark)
+     * @param String jobID
+     * @return Boolean result of obtaining lock
+     */
+    private boolean getLock(String primaryID) {
+        ZooKeeper zooKeeper = null;
+        try {
+            // SSM vars
+            String zooConnectString = InventoryConfig.qService;
+
+            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
+            Boolean gotLock =  MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
+            log4j.debug("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
+            System.out.println("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
+            return gotLock;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+            
+        } finally {
+            try {
+                zooKeeper.close();
+            } catch (Exception ex) { }
+        }
+    }
+
+
+    /**
+     * Release lock
+     *
+     * @param none needed inputs are global
+     * @return void
+     */
+    private void releaseLock(String primaryID) {
+        ZooKeeper zooKeeper = null;
+        try {
+
+            log4j.debug("SaveObject.releaseLock:" + primaryID);
+       // SSM vars
+            String zooConnectString = InventoryConfig.qService;
+
+            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
+            MerrittLocks.unlockObjectInventory(zooKeeper, primaryID);
+            System.out.println("releaseLock:" + primaryID);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            
+        } finally {
+            try {
+                zooKeeper.close();
+            } catch (Exception ex) { }
+        }
+    }
 
     public ProcessStatus getProcessStatus() {
         return processStatus;
@@ -395,6 +511,11 @@ public class ProcessJob
             logger.logError(msg, 1);
         }
         throw new TException.SQL_EXCEPTION("Database unavailable");
+    }
+    
+        
+    public static class Ignorer implements Watcher {
+        public void process(WatchedEvent event){}
     }
     
 }
