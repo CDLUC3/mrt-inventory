@@ -133,18 +133,28 @@ public class ProcessJob
     private void validate()
         throws TException
     {
-        if (zooManager == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "zooManager null");
-        if (job == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "job null");
-        
-	AddZoo.jp("ProcessJob.validate", job);
-        manifestURLS = job.inventoryManifestUrl();
-        if (manifestURLS == null) {
-            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "manifestURL null");
+        try {
+            if (zooManager == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "zooManager null");
+            if (job == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "job null");
+
+            AddZoo.jp("ProcessJob.validate", job);
+            manifestURLS = job.inventoryManifestUrl();
+            if (manifestURLS == null) {
+                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "manifestURL null");
+            }
+            connection = getNewConnection();
+            if (connection == null) return;
+            if (DEBUG) System.out.println(MESSAGE + "connection returned");
+            getSaveObjectRetry404(3);
+            
+        } catch (TException tex) {
+            jobFails(tex);
+            throw tex;
+            
+        } catch (Exception ex) {
+            jobFails(ex);
+            throw new TException(ex);
         }
-        connection = getNewConnection();
-        if (connection == null) return;
-        if (DEBUG) System.out.println(MESSAGE + "connection returned");
-        getSaveObjectRetry404(3);
         
     }
 
@@ -376,7 +386,7 @@ public class ProcessJob
                 boolean gotLock = getLock(primaryID);
                 attempts++;
                 if (gotLock) {
-                    log4j.debug("Got lock:" + primaryID);
+                    log4j.info("Got lock:" + primaryID);
                     return true;
                 }
                 
