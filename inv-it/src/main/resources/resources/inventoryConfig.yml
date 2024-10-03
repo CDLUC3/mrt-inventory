@@ -11,6 +11,7 @@ inv-info:
   zooserver:
     queueService: zoo-it:2181
     queueName: /mrt.inventory.full
+    queueTimeout: 600000
     lockName: /mrt.lock
 
   zooclient:

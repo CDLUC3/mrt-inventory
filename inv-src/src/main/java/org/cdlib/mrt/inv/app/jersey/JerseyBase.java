@@ -52,6 +52,8 @@ import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.TFileLogger;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
+import org.cdlib.mrt.zk.MerrittJsonKey;
+import org.json.JSONObject;
 
 /**
  * Base Jersey handling for both Storage and CAN services
@@ -585,5 +587,4 @@ public class JerseyBase
         public FormatType formatType = null;
         public File file = null;
     }
-
 }

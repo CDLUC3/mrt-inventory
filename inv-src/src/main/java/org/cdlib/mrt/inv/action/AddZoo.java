@@ -30,22 +30,35 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.action;
 
 import java.util.Properties;
+import org.apache.zookeeper.ZooKeeper;
 
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.core.ProcessStatus;
-import org.cdlib.mrt.zoo.ZooManager;
-import org.cdlib.mrt.zoo.ZooQueue;
+import org.cdlib.mrt.utility.StringUtil;
+import org.cdlib.mrt.inv.zoo.ZooManager;
 import org.cdlib.mrt.utility.ZooCodeUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.TException;
+import org.cdlib.mrt.zk.Batch;
+import org.cdlib.mrt.zk.Job;
+import org.cdlib.mrt.zk.JobState;
+import org.cdlib.mrt.zk.MerrittJsonKey;
+import org.json.JSONObject;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Run fixity
  * @author dloy
  */
 public class AddZoo
-        extends InvActionAbs
+        //extends InvActionAbs
         implements Runnable
 {
 
@@ -55,96 +68,182 @@ public class AddZoo
     protected static final boolean LIST = true;
     
     
-    protected ZooQueue zooQueue = null;
     protected ZooManager zooManager = null;
-    protected Properties zooProp = null;
     protected boolean sent = false;
     protected ProcessStatus processStatus = null;
     protected byte[] bytes = null;
-    protected TException saveTex = null;
+    protected Exception saveEx = null;
+    protected String manifestUrl = null;
+    protected LoggerInf logger = null;
  
+    protected static final Logger log4j = LogManager.getLogger();   
     
     public static AddZoo getAddZoo(
-            ZooQueue zooQueue,
-            Properties zooProp)
-        throws TException
+            String manifestUrl,
+            ZooManager zooManager)
+        throws Exception
     {
-        LoggerInf logger = zooQueue.getLogger();
-        return new AddZoo(zooQueue, zooProp, logger);
+        return new AddZoo(zooManager).setManifestUrl(manifestUrl);
+    }
+    public static AddZoo getAddZoo(
+            ZooManager zooManager)
+        throws Exception
+    {
+        return new AddZoo(zooManager);
     }
     
     protected AddZoo(
-            ZooQueue zooQueue,
-            Properties zooProp,
-            LoggerInf logger)
-        throws TException
+            ZooManager zooManager)
+        throws Exception
     {
-        super(null, logger);
-        this.zooQueue = zooQueue;
-        this.zooProp = zooProp;
-        String zooNode = zooQueue.getZooNode();
-        if (LIST) {
-            System.out.println(PropertiesUtil.dumpProperties(NAME, zooProp) 
-                    + " - zooNode:" + zooNode
-                    );
-        }
-        bytes = ZooCodeUtil.encodeItem(this.zooProp);
-        zooManager = zooQueue.getZooManager();
-            }
+        this.logger = zooManager.getLogger();
+        this.zooManager = zooManager;
+    }
 
     public void run()
     {
-            try {
-                process();
-
-            } catch (TException tex) {
-                saveTex = tex;
-                processStatus = ProcessStatus.exception;
-            }
+        if (!StringUtil.isAllBlank(manifestUrl)) {
+            processStatus = addUrl(manifestUrl);
+        }
 
     }
    
-    public void process()
-       throws TException
+    public ProcessStatus addUrl(String manifestUrl)
     {
         try {
             ServiceStatus runStatus = zooManager.getZookeeperStatus();
-            if (DEBUG) System.out.println("process runStatus:" + runStatus);
             if (runStatus != ServiceStatus.running) {
-                processStatus = ProcessStatus.shutdown;
+                return ProcessStatus.shutdown;
             }
-
-            Exception saveEx = null;
-            for (int i=0; i<3; i++) {
-                try {
-                    if (DEBUG) System.out.println("AddZoo size=" + bytes.length
-                            + " - prop string:" + new String(bytes,"utf-8")
-                            );
-                    boolean submitStatue = zooQueue.getQueue().submit(bytes);
-                    if (DEBUG) System.out.println("submitStatue=" + submitStatue);
-                    processStatus = ProcessStatus.completed;
-                    return;
-
-                } catch (Exception ex) {
-                    if (DEBUG) System.out.println(MESSAGE + "Exception:" + ex);
-                    zooQueue.processException(ex);
-                    continue;
-                }
-            }
-            throw new TException.EXTERNAL_SERVICE_UNAVAILABLE(saveEx);
+            processStatus = ProcessStatus.queued;
+            //ZooKeeper zk = zooManager.setZoo();
+            ZooKeeper zk = zooManager.getZooKeeper();
+            Batch b = Batch.createBatch(zk, fooBar());
+            Batch bb = Batch.acquirePendingBatch(zk);
             
-        } catch (TException tex) {
-            tex.printStackTrace();
+            Job j = Job.createJob(zk, bb.id(), quack());
+            Job jj = Job.acquireJob(zk, JobState.Pending);
+            jj.setStatus(zk, jj.status().stateChange(JobState.Estimating));
+            jj.unlock(zk);
+            jp("After Pending", jj);
+            
+            jj = Job.acquireJob(zk, JobState.Estimating);
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            jp("After Estimating", jj);
+            
+            jj = Job.acquireJob(zk, JobState.Provisioning);
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            jp("After Provisioning", jj);
+            
+            jj = Job.acquireJob(zk, JobState.Downloading);
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            jp("After Downloading", jj);
+            
+            jj = Job.acquireJob(zk, JobState.Processing);
+            jj.setInventory(zk, manifestUrl, "tbd");
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            jp("After Processing", jj);
+            
+            saveEx = null;
+            return ProcessStatus.completed;
             
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new TException(ex);
+            saveEx = ex;
+            return ProcessStatus.failed;
         }
+    }
+ 
+    public int addList(String listFilePath)
+        throws Exception
+    {
+        int successCnt = 0;
+        try {
+            List<String> listOfStrings
+                = new ArrayList<String>();
+
+            // load the data from file
+            listOfStrings
+                = Files.readAllLines(Paths.get(listFilePath));
+
+            // print each line of string in array
+            for (String urlString :listOfStrings) {
+                ProcessStatus result = addUrl(urlString);
+                if (result == ProcessStatus.completed) {
+                    successCnt++;
+                }
+            }
+            
+        } catch (Exception ex) {
+            log4j.debug("AddZoo exception:" + ex, ex);
+        
+        } finally {
+            return successCnt;
+        }
+    }
+    
+    public AddZoo setManifestUrl(String manifestUrl)
+    {
+        this.manifestUrl = manifestUrl;
+        return this;
     }
     
     public boolean isSent()
     {
         return sent;
+    }
+
+    public Exception getEx() {
+        return saveEx;
+    }
+
+    private JSONObject quack() {
+        UUID uuid = UUID.randomUUID();
+      return quack(uuid.toString());
+    }
+
+    private JSONObject quack(String suffix) {
+      JSONObject json = new JSONObject();
+      json.put("job", "quack"+suffix);
+      return json;
+    }
+    
+    private JSONObject fooBar() {
+        UUID uuid = UUID.randomUUID();
+      return quack(uuid.toString());
+    }
+
+    private JSONObject fooBar(String suffix) {
+      return fooBar(suffix, "bid-uuid");
+    }
+
+    private JSONObject fooBar(String suffix, String uuid) {
+      JSONObject json = new JSONObject();
+      json.put("foo", "bar" + suffix);
+      json.put(MerrittJsonKey.BatchId.key(), uuid);
+      return json;
+    }
+    
+    public static void jp(String msg, Job job)
+    {
+        log4j.trace("***" + msg + "***\n"
+                + " - id=" + job.id() + "\n"
+                + " - bid=" + job.bid() + "\n"
+                + " - status=" + job.status() + "\n"
+                + " - priority=" + job.priority() + "\n"
+                + " - profileName:" + job.profileName() + "\n"
+                + " - submitter:" + job.submitter() + "\n"
+                + " - payloadUrl:" + job.payloadUrl() + "\n"
+                + " - inventoryManifestUrl:" + job.inventoryManifestUrl() + "\n"
+                + " - inventoryMode:" + job.inventoryMode()+ "\n"
+                + " - payloadType:" + job.payloadType() + "\n"
+                + " - responseType:" + job.responseType() + "\n"
+                + " - data:\n" + job.data().toString(2) + "\n"
+        );
     }
 }
 

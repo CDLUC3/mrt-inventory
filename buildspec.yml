@@ -1,0 +1,130 @@
+version: 0.2
+
+# Pre-requisites
+# - Create CodeBuild project
+#   - Provide minimal github credentials to access public repo
+# test
+
+phases:
+  pre_build:
+    on-failure: ABORT
+    commands:
+    - cp settings.xml ~/.m2/
+    - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cdlib-uc3-mrt --domain-owner $AWS_ACCOUNT_ID --region $AWS_REGION --query authorizationToken --output text`
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+    - COMMIT=`git rev-parse --short HEAD`
+    - # Get semantic tags for commit otherwise get all tags for commit, sort and choose the last value
+    - TAG=`(git tag --contains $COMMIT | egrep "^[0-9]+\.[0-9]+\.[0-9]+$" || git tag --contains $COMMIT || echo '') | sort | tail -1`
+    - |
+      if [[ "$MODE" == "OnPush" ]]
+      then
+        # Get Tag || Get Branch || Alternate Branch Lookup || Get Committ
+        BRANCHTAG=`echo $TAG | grep . || git symbolic-ref -q --short HEAD || git name-rev $(git rev-parse --short HEAD) | cut -d' ' -f2 || git rev-parse --short HEAD`
+      else
+        BRANCHTAG=$BRANCHNAME
+      fi
+    - DOCKTAG=$BRANCHTAG
+    - COMMITDATE=`git --no-pager log -1 --pretty='format:%cd' --date='format:%Y-%m-%d %H:%M:%S'`
+    - echo "Branchtag ${BRANCHTAG}; COMMITDATE=${COMMITDATE}; REPONAME=${REPONAME}; BRANCHNAME=${BRANCHNAME}"
+
+  build:
+    on-failure: ABORT
+    commands:
+    # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
+    - mvn -ntp clean install
+    - |
+      if [[ "${BRANCHTAG}" == "main" ]]
+      then
+        SEMVER=''
+        DOCKTAG='dev'
+      elif [[ "${BRANCHTAG}" == "zooInv" ]]
+      then
+        SEMVER=''
+        DOCKTAG='dev'
+      elif [[ "${TAG}" == "" ]]
+      then
+        SEMVER="-Dversion=${BRANCHTAG}-SNAPSHOT"
+      else
+        SEMVER="-Dversion=${BRANCHTAG}"
+      fi
+    - echo "Semver [${SEMVER}]"
+
+    - mkdir -p /build/static
+    - |
+      echo "build_tag: ${BRANCHTAG}" > /build/static/build.content.txt 
+    - ${JAVA_HOME}/bin/jar uf $(ls ls inv-war/target/mrt-invwar-*.war) -C /build static/build.content.txt
+
+    - |
+      mvn deploy:deploy-file \
+        -Durl=${CODEARTIFACT_URL} \
+        -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
+        -Dfile=$(ls inv-src/target/mrt-inventorysrc-*.jar)
+
+    - |
+      mvn deploy:deploy-file \
+        -Durl=${CODEARTIFACT_URL} \
+        -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
+        -Dfile=$(ls inv-conf/target/mrt-inventoryconf-*.jar)
+
+    - | 
+      mvn -ntp deploy:deploy-file \
+        -Durl=${CODEARTIFACT_URL} \
+        -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
+        -Dfile=$(ls inv-war/target/mrt-invwar-*.war) ${SEMVER}
+
+    - |
+      docker build --push --quiet \
+        --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
+        -t ${ECR_REGISTRY}/${REPONAME}:${DOCKTAG} .
+
+    # report results
+    - mkdir -p reports
+    - RPT=reports/${REPONAME}.md
+    - echo "## Semantic Tags" > $RPT
+    - |
+      git for-each-ref --sort=-creatordate --format '- %(refname) (%(creatordate:short))' refs/tags \
+        | egrep "tags/[0-9]+\.[0-9]+\.[0-9]+ " \
+        | sed -e "s/refs\/tags\///" \
+        | head -10 >> $RPT
+    - echo "## Feature Tags" >> $RPT
+    - |
+      git for-each-ref --sort=-creatordate --format '- %(refname) (%(creatordate:short))' refs/tags \
+        | egrep -v "tags/[0-9]+\.[0-9]+\.[0-9]+ " \
+        | egrep -v "sprint-" \
+        | sed -e "s/refs\/tags\///" \
+        | head -10 >> $RPT
+    - echo "## Docker Image Tags ${REPONAME}" >> $RPT
+    - |
+      aws ecr list-images --repository-name ${REPONAME} --filter tagStatus=TAGGED --output=text \
+        | cut -f3 \
+        | sed -e "s/^/- /" \
+        | sort >> $RPT
+
+    - |
+      for pkg in mrt-invwar
+      do
+        echo "## Code Artifact Packages for $pkg" >> $RPT
+        aws codeartifact list-package-versions \
+          --domain=cdlib-uc3-mrt --repository=uc3-mrt-java \
+          --format=maven --namespace=org.cdlib.mrt \
+          --package=$pkg --status=Published --output=text \
+          | grep Published \
+          | cut -f4 \
+          | sed -e "s/^/- /" \
+          | sort >> $RPT
+        for ver in `aws codeartifact list-package-versions \
+          --domain=cdlib-uc3-mrt --repository=uc3-mrt-java \
+          --format=maven --namespace=org.cdlib.mrt \
+          --package=$pkg --status=Unlisted \
+          --output=text | grep Unlisted | cut -f4`
+        do
+          aws codeartifact delete-package-versions \
+            --domain=cdlib-uc3-mrt --repository=uc3-mrt-java \
+            --format=maven --namespace=org.cdlib.mrt \
+            --package=$pkg --versions=$ver --no-cli-pager
+        done
+      done
+
+    - aws s3 cp $RPT s3://${S3CFBUCKET}/$RPT
+    - aws cloudfront create-invalidation --distribution-id ${CFDISTRIBUTIONID} --paths /reports/* --region us-east-1

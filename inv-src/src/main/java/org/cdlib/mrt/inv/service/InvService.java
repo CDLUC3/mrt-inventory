@@ -40,7 +40,6 @@ import java.util.Properties;
 import org.cdlib.mrt.cloud.ManifestSAX;
 
 import org.cdlib.mrt.utility.FileUtil;
-import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.cloud.VersionMap;
 import org.cdlib.mrt.core.Identifier;
@@ -52,20 +51,19 @@ import org.cdlib.mrt.inv.action.DeleteObject;
 import org.cdlib.mrt.inv.action.InvSelect;
 import org.cdlib.mrt.inv.action.InvManifestUrl;
 import org.cdlib.mrt.inv.action.LocalMap;
-import org.cdlib.mrt.inv.action.ProcessItem;
 import org.cdlib.mrt.inv.action.ProcessObject;
 import org.cdlib.mrt.inv.action.SaveNode;
 import org.cdlib.mrt.inv.action.Versions;
+import org.cdlib.mrt.inv.taskdb.TaskDb;
 import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
-import org.cdlib.mrt.zoo.ZooManager;
-import org.cdlib.mrt.zoo.ZooQueue;
-import org.cdlib.mrt.queue.Item;
+import org.cdlib.mrt.inv.zoo.ZooManager;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.URLEncoder;
+import org.json.JSONObject;
 
 /**
  * Inv Service
@@ -155,20 +153,6 @@ public class InvService
         throws TException
     {
         return process(null, manifestURL, doCheckVersion);
-    }
-    
-    @Override
-    public boolean addZoo(
-            Properties zooProp,
-            ZooQueue queue)
-        throws TException
-    {
-        if (DEBUG) System.out.print("add entered");
-        AddZoo addZoo = AddZoo.getAddZoo(
-                queue,
-                zooProp);
-        addZoo.process();
-        return addZoo.isSent();
     }
     
     @Override
@@ -402,22 +386,6 @@ public class InvService
         return state;
     }
     
-    public ProcessStatus processItem(
-            Item item,
-            ZooQueue queue)
-        throws TException
-    {
-        if (DEBUG) System.out.print("processItem entered");
-        if (inventoryConfig.getZookeeperStatus() == ServiceStatus.shutdown) return ProcessStatus.shutdown;
-        Connection connection = inventoryConfig.getConnection(false);
-        ProcessItem  processItem = ProcessItem.getProcessItem(1,
-            queue,
-            inventoryConfig.getDb(),
-            item);
-        processItem.process();
-        return processItem.getProcessStatus();
-    }
-    
     @Override
     public InvProcessState process(
             Role copyRole,
@@ -529,6 +497,83 @@ public class InvService
         return invSelectState;
     }
 
+    @Override
+    public JSONObject addTask(
+            String taskName, 
+            String taskItem, 
+            String currentStatusS,    
+            String note)
+        throws TException
+    {
+        
+        Connection connection = null;
+        try {
+            connection = inventoryConfig.getConnection(true);
+            TaskDb taskDb = new TaskDb(connection);
+            JSONObject json  = taskDb.addTaskJSON(taskName, taskItem, currentStatusS, note);
+            return json;
+                
+        } catch (TException tex) {
+            throw tex ;
+            
+        } catch (Exception ex) {
+            throw new TException(ex) ;
+            
+        } finally {
+            inventoryConfig.closeConnect(connection);
+        }
+    }
+    
+    @Override
+    public JSONObject getTask(
+            String taskName, 
+            String taskItem)
+        throws TException
+    {
+        
+        Connection connection = null;
+        try {
+            connection = inventoryConfig.getConnection(true);
+            TaskDb taskDb = new TaskDb(connection);
+            JSONObject json  = taskDb.getTaskJSON(taskName, taskItem);
+            return json;
+                
+        } catch (TException tex) {
+            throw tex ;
+            
+        } catch (Exception ex) {
+            throw new TException(ex) ;
+            
+        } finally {
+            inventoryConfig.closeConnect(connection);
+        }
+    }
+
+    @Override
+    public JSONObject deleteTask(
+            String taskName, 
+            String taskItem)
+        throws TException
+    {
+        
+        Connection connection = null;
+        try {
+            connection = inventoryConfig.getConnection(true);
+            TaskDb taskDb = new TaskDb(connection);
+            JSONObject json  = taskDb.deleteTaskJSON(taskName, taskItem);
+            return json;
+                
+        } catch (TException tex) {
+            throw tex ;
+            
+        } catch (Exception ex) {
+            throw new TException(ex) ;
+            
+        } finally {
+            inventoryConfig.closeConnect(connection);
+        }
+    }
+    
     @Override
     public InvServiceState getInvServiceState()
         throws TException

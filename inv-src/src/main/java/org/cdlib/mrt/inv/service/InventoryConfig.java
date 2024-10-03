@@ -47,8 +47,7 @@ import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.inv.zoo.ZooHandler;
 import org.cdlib.mrt.log.utility.Log4j2Util;
-import org.cdlib.mrt.zoo.ZooManager;
-import org.cdlib.mrt.queue.DistributedQueue;
+import org.cdlib.mrt.inv.zoo.ZooManager;
 import org.cdlib.mrt.tools.SSMConfigResolver;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.TFileLogger;
@@ -72,6 +71,7 @@ public class InventoryConfig
     // Hack for creating locks
     public static String qService = null;
     public static String lockName = null;
+    public static Integer qTimeout = null;
 
     protected Properties zooProperties = null;
     protected JSONObject stateJsonObject = null;
@@ -246,7 +246,8 @@ public class InventoryConfig
 	    // Locks not using ZooManager
             qService = queueService;
             lockName = jzooServer.getString("lockName");
-
+            qTimeout = jzooServer.getInt("queueTimeout");
+            zooProperties.setProperty("QueueTimeout", "" + qTimeout);
             zooProperties.setProperty("QueueService", queueService);
             
             String  queueName = jzooServer.getString("queueName");
@@ -393,13 +394,18 @@ public class InventoryConfig
         if (db == null) return null;
         return db.getSingleConnection(autoCommit);
     }
-
-    public DistributedQueue getDistributedQueue()
-        throws TException
-    {
-        return zooManager.getQueue();
-    }
     
+    
+    public static void closeConnect(Connection connection)
+    {
+        try {
+            if (connection == null) return;
+            connection.close();
+            
+        } catch (Exception ex) {  
+        
+        }
+    }
 
     public LoggerInf getLogger() {
         return logger;
@@ -468,6 +474,10 @@ public class InventoryConfig
 
     public void setJdb(JSONObject jdb) {
         this.jdb = jdb;
+    }
+
+    public Properties getZooProperties() {
+        return zooProperties;
     }
     
     public static void main(String[] argv) {

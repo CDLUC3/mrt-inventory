@@ -27,48 +27,53 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-package org.cdlib.mrt.inv.action;
+package org.cdlib.mrt.inv.zoo;
 
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.Random;
 
-import org.cdlib.mrt.zoo.ItemInfo;
-import org.cdlib.mrt.queue.DistributedQueue;
-import org.cdlib.mrt.queue.Item;
 import org.cdlib.mrt.core.ServiceStatus;
+import org.cdlib.mrt.core.Identifier;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
 import org.cdlib.mrt.core.ProcessStatus;
-import org.cdlib.mrt.zoo.ZooManager;
-import org.cdlib.mrt.zoo.ZooQueue;
+import org.cdlib.mrt.inv.service.InventoryConfig;
+import org.cdlib.mrt.inv.zoo.ZooManager;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.log.utility.AddStateEntryGen;
-import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.ZooCodeUtil;
+import org.apache.zookeeper.ZooKeeper;
+import org.cdlib.mrt.inv.action.AddZoo;
+import org.cdlib.mrt.inv.action.InvActionAbs;
+import org.cdlib.mrt.inv.action.SaveObject;
+import org.cdlib.mrt.zk.Job;
+import org.cdlib.mrt.zk.MerrittLocks;
+import org.json.JSONObject;
 
 /**
  * Run fixity
  * @author dloy
  */
-public class ProcessItem
+public class ProcessJob
         extends InvActionAbs
         implements Runnable
 {
 
-    protected static final String NAME = "ProcessItem";
+    protected static final String NAME = "ProcessJob";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
     protected static final boolean STATUS = true;
  
-    protected ZooQueue zooQueue = null;
-    protected ZooManager zooManager = null;
-    protected Item item = null;
-    protected ItemInfo info = null;
+    protected static final Logger log4j = LogManager.getLogger();  
+    
+    protected Job job = null;
     protected TException saveTex = null;
     protected ProcessStatus processStatus = null;
-    protected Properties prop = null;
+    protected JSONObject prop = null;
     protected String manifestURLS = null;
     protected DPRFileDB db = null;
     protected Connection connection = null;
@@ -76,46 +81,51 @@ public class ProcessItem
     protected long ijob = 0;
     protected SaveObject saveObject = null;
     protected Random rn = new Random();
+    protected ZooManager zooManager = null;
      
-    public static ProcessItem getShutdownProcessItem()
+    public static ProcessJob getShutdownProcessItem()
         throws TException
     {
-        return new ProcessItem(true);
+        return new ProcessJob(true);
     } 
     
-    protected ProcessItem(boolean shutdown)
+    protected ProcessJob(boolean shutdown)
         throws TException
     {
         super(null, null);
         this.shutdown = shutdown;
     }
     
-    public static ProcessItem getProcessItem(
-            long ijob,
-            ZooQueue zooQueue,
-            DPRFileDB db,
-            Item item)
+    public static ProcessJob getProcessJob(
+            Job job,
+            InventoryConfig config)
         throws TException
     {
-        LoggerInf logger = zooQueue.getLogger();
-        return new ProcessItem(ijob, zooQueue, db, item, logger);
+        return new ProcessJob(job, config.getZooManager(),config.getDb());
     }
     
-    protected ProcessItem(
-            long ijob,
-            ZooQueue zooQueue,
-            DPRFileDB db,
-            Item item,
-            LoggerInf logger)
+    public static ProcessJob getProcessJob(
+            Job job,
+            ZooManager zooManager,
+            DPRFileDB db)
         throws TException
     {
-        super(null, logger);
-        this.ijob = ijob;
-        this.zooQueue = zooQueue;
-        this.item = item;
+        return new ProcessJob(job, zooManager, db);
+    }
+    
+    protected ProcessJob(
+            Job job,
+            ZooManager zooManager,
+            DPRFileDB db)
+        throws TException
+    {
+        super(null, zooManager.getLogger());
+        
+        this.job = job;
+        this.zooManager = zooManager;
         this.db = db;
         validate();
-        if (zooQueue.getZooManager().getZookeeperStatus() == ServiceStatus.shutdown) {
+        if (zooManager.getZookeeperStatus() == ServiceStatus.shutdown) {
             this.shutdown = true;
         }
     }
@@ -123,20 +133,28 @@ public class ProcessItem
     private void validate()
         throws TException
     {
-        if (zooQueue == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "zooQueue null");
-        if (item == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "item null");
-        info = new ItemInfo();
-        info.setWithItem(zooQueue.getZooNode(), item.getId(), item);
-        byte[] bytes = item.getData();
-        prop = ZooCodeUtil.decodeItem(bytes);
-        manifestURLS = prop.getProperty("manifestURL");
-        if (manifestURLS == null) {
-            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "manifestURL null");
+        try {
+            if (zooManager == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "zooManager null");
+            if (job == null) throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "job null");
+
+            AddZoo.jp("ProcessJob.validate", job);
+            manifestURLS = job.inventoryManifestUrl();
+            if (manifestURLS == null) {
+                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "manifestURL null");
+            }
+            connection = getNewConnection();
+            if (connection == null) return;
+            if (DEBUG) System.out.println(MESSAGE + "connection returned");
+            getSaveObjectRetry404(3);
+            
+        } catch (TException tex) {
+            jobFails(tex);
+            throw tex;
+            
+        } catch (Exception ex) {
+            jobFails(ex);
+            throw new TException(ex);
         }
-        connection = getNewConnection();
-        if (connection == null) return;
-        if (DEBUG) System.out.println(MESSAGE + "connection returned");
-        getSaveObjectRetry404(3);
         
     }
 
@@ -146,7 +164,7 @@ public class ProcessItem
                 process();
                 String threadName = Thread.currentThread().getName();
                 String pmsg = "ProcessItem(" + ijob + " - " + threadName + "):"
-                    + " - id:" + item.getId()
+                    + " - id:" + job.id()
                     + " - manifestURLS:" + manifestURLS
                     + " - status:" + processStatus;
                 logger.logMessage(pmsg, 1, true);
@@ -163,21 +181,32 @@ public class ProcessItem
        throws TException
     {
         int retry = 0;
+        boolean arkLock = false;
+        Identifier ark = null;
         try {
+            ZooKeeper zooKeeper = zooManager.getZooKeeper();
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
             //saveObject.process();
+            //job.setStatus(zooKeeper, job.status().stateChange(JobState.Recording));
+            ark = saveObject.getObjectID();
+            arkLock = getLockRetry(ark.getValue(), 300);
             retry = saveObjectRetry(4);
-            processStatus = ProcessStatus.completed;
-            setQueue(Item.COMPLETED);
+            jobOK();
             
         } catch (TException tex) {
-            resetQueue();
+            jobFails(tex);
+            
+        } catch (Exception ex) {
+            jobFails(ex);
             
         } finally {
             try {
                 connection.close();
             } catch (Exception ex) { }
+            if (arkLock) {
+                releaseLock(ark.getValue());
+            }
             if (STATUS) System.out.println(MESSAGE + "process "
                     + " - manifestURLS=" + manifestURLS
                     + " - processStatus=" + processStatus
@@ -311,31 +340,136 @@ public class ProcessItem
         } 
     }
     
-    public void resetQueue()
+    public void jobFails(Exception saveEx)
        throws TException
     {
         try {
-            setQueue(Item.FAILED);
             processStatus = ProcessStatus.failed;
+            job.setStatus(zooManager.getZooKeeper(), job.status().fail(), saveEx.toString());
+            job.unlock(zooManager.getZooKeeper());
+            JSONObject data = job.data();
+            log4j.error("ProcessJob.jobFail:" + saveEx.toString(), data);
             
         } catch (Exception ex) {
             throw new TException(ex);
         }
     }
-   
-    public void setQueue(byte itemStatus)
+    
+    public void jobOK()
        throws TException
     {
-        //CONSUMED = (byte) 1;
-        //DELETED  = (byte) 2;
-        //FAILED   = (byte) 3;
-        //COMPLETED= (byte) 4;
         try {
-            DistributedQueue queue = zooQueue.getQueue();
-            queue.updateStatus(item.getId(), item.getStatus(), itemStatus);
+            processStatus = ProcessStatus.completed;
+            job.setStatus(zooManager.getZooKeeper(), job.status().success());
+            job.unlock(zooManager.getZooKeeper());
             
         } catch (Exception ex) {
             throw new TException(ex);
+        }
+    }
+    
+    /**
+     * lock processing to an ID
+     * @param primaryID ID to lock
+     * @param timeoutSeconds allowed seconds for retries then fail
+     * @return true=lock; false=unable to lock
+     * @throws TException Lock failed in allowed time
+     */
+    private boolean getLockRetry(String primaryID, int timeoutSeconds) 
+        throws TException
+    {
+        try {
+            Long startMlSec = System.currentTimeMillis();
+            int attempts = 0;
+            int sleepMs = 10000; // time between allock attempts
+            while (true) {
+                boolean gotLock = getLock(primaryID);
+                attempts++;
+                if (gotLock) {
+                    log4j.info("Got lock:" + primaryID);
+                    return true;
+                }
+                
+                try {
+                    Thread.sleep(sleepMs);
+                } catch (Exception tmpEx) { }
+                long elapsedMs= System.currentTimeMillis() - startMlSec;
+                long totalTimeoutMs = timeoutSeconds * 1000;
+                log4j.info("getLockRetry(" + attempts + "): "
+                        + " - elapsedMs=" + elapsedMs
+                        + " - totalTimeoutMs=" + totalTimeoutMs
+                );
+                if (elapsedMs > totalTimeoutMs) {
+                    throw new TException.GATEWAY_TIMEOUT("lock not released Exception" 
+                            + " - primaryID:" + primaryID
+                            + " - timeoutSeconds:" + timeoutSeconds
+                            + " - elapsedMs:" + elapsedMs
+                    );
+                }
+            }
+
+        } catch (TException tex) {
+            throw tex;
+        }
+        
+    }
+
+    /**
+     * Lock on primary identifier.  Will loop unitil lock obtained.
+     *
+     * @param String primary ID of object (ark)
+     * @param String jobID
+     * @return Boolean result of obtaining lock
+     */
+    private boolean getLock(String primaryID) {
+        ZooKeeper zooKeeper = null;
+        try {
+            // SSM vars
+            String zooConnectString = InventoryConfig.qService;
+
+            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
+            Boolean gotLock =  MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
+            log4j.debug("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
+            System.out.println("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
+            return gotLock;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+            
+        } finally {
+            try {
+                zooKeeper.close();
+            } catch (Exception ex) { }
+        }
+    }
+
+
+    /**
+     * Release lock
+     *
+     * @param none needed inputs are global
+     * @return void
+     */
+    private void releaseLock(String primaryID) {
+        ZooKeeper zooKeeper = null;
+        try {
+
+            log4j.debug("SaveObject.releaseLock:" + primaryID);
+       // SSM vars
+            String zooConnectString = InventoryConfig.qService;
+
+            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
+            MerrittLocks.unlockObjectInventory(zooKeeper, primaryID);
+            System.out.println("releaseLock:" + primaryID);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            
+        } finally {
+            try {
+                zooKeeper.close();
+            } catch (Exception ex) { }
         }
     }
 
@@ -373,7 +507,7 @@ public class ProcessItem
                 sleepConnection = true;
             }
             if (sleepConnection) {
-                if (zooQueue.getZooManager().getZookeeperStatus() == ServiceStatus.shutdown) {
+                if (zooManager.getZookeeperStatus() == ServiceStatus.shutdown) {
                     return null;
                 }   
                 sleepConnection = false;
@@ -387,6 +521,11 @@ public class ProcessItem
             logger.logError(msg, 1);
         }
         throw new TException.SQL_EXCEPTION("Database unavailable");
+    }
+    
+        
+    public static class Ignorer implements Watcher {
+        public void process(WatchedEvent event){}
     }
     
 }

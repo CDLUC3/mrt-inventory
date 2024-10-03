@@ -55,6 +55,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.action.InvManifestUrl;
+import org.cdlib.mrt.inv.action.AddZoo;
 import org.cdlib.mrt.inv.app.jersey.KeyNameHttpInf;
 import org.cdlib.mrt.inv.app.jersey.JerseyBase;
 import org.cdlib.mrt.inv.service.InvDeleteState;
@@ -74,8 +75,13 @@ import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.TFrame;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.zoo.ZooManager;
-import org.cdlib.mrt.zoo.ZooQueue;
+import org.cdlib.mrt.zk.Batch;
+import org.cdlib.mrt.zk.Job;
+import org.cdlib.mrt.zk.JobState;
+import org.cdlib.mrt.inv.zoo.ZooManager;
+import org.apache.zookeeper.ZooKeeper;
+import org.cdlib.mrt.core.ProcessStatus;
+import org.json.JSONObject;
 
 /**
  * Thin Jersey layer for inv handling
@@ -368,6 +374,83 @@ public class JerseyInv
         }
     }
     
+    
+    @POST
+    @Path("task")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response callAddTaskMultipart(
+            @DefaultValue("") @FormDataParam("name") String taskName,
+            @DefaultValue("") @FormDataParam("item") String taskItem,
+            @DefaultValue("") @FormDataParam("status") String currentStatus,
+            @DefaultValue("") @FormDataParam("note") String note,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        log4j.debug("addVersionMultipart entered"
+                    + " - taskName=" + taskName + NL
+                    + " - taskItem=" + taskItem + NL
+                    + " - status=" + currentStatus + NL
+                    + " - note=" + note + NL
+                    );
+        if (DEBUG) System.out.println("addVersionMultipart entered");
+        
+        if (note.length() == 0) note = null;
+        return addTask(
+                taskName,
+                taskItem,
+                currentStatus,
+                note,
+                cs,
+                sc);
+    }
+    
+    @DELETE
+    @Path("task")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response callDeleteTaskMultipart(
+            @DefaultValue("") @FormDataParam("name") String taskName,
+            @DefaultValue("") @FormDataParam("item") String taskItem,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        log4j.debug("addVersionMultipart entered"
+                    + " - taskName=" + taskName + NL
+                    + " - taskItem=" + taskItem + NL
+                    );
+        if (DEBUG) System.out.println("addVersionMultipart entered");
+        
+        return deleteTask(
+                taskName,
+                taskItem,
+                cs,
+                sc);
+    }
+    
+    @GET
+    @Path("task")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response callGetTaskMultipart(
+            @DefaultValue("") @FormDataParam("name") String taskName,
+            @DefaultValue("") @FormDataParam("item") String taskItem,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        log4j.debug(MESSAGE + "addVersionMultipart entered"
+                    + " - taskName=" + taskName + NL
+                    + " - taskItem=" + taskItem + NL
+                    );
+        if (DEBUG) System.out.println("addVersionMultipart entered");
+        
+        return getTask(
+                taskName,
+                taskItem,
+                cs,
+                sc);
+    }
+    
     /**
      * Get state information about a specific node
      * @param nodeID node identifier
@@ -475,50 +558,6 @@ public class JerseyInv
         }
     }
 
-    @POST
-    @Path("addzoo")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response addMultipartZoo(
-            @DefaultValue("") @FormDataParam("zoourl") String manifestUrl,
-            @DefaultValue("xhtml") @FormDataParam("responseForm") String formatType,
-            @Context CloseableService cs,
-            @Context ServletConfig sc)
-        throws TException
-    {
-        
-        LoggerInf logger = defaultLogger;
-        try {
-            log("addMultipartZoo process:"
-                    + " - manifestUrl=" + manifestUrl
-                    + " - formatType=" + formatType
-                    );
-            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
-            InvServiceInf invService = invServiceInit.getInvService();
-            Properties loadProp = new Properties();
-            loadProp.setProperty("manifestURL", manifestUrl);
-            ZooManager zooManager = invService.getZooManager();
-            ZooQueue zooQueue = ZooQueue.getZooQueue(zooManager);
-            for (int b=0; b<4; b++) {
-                try {
-                    zooQueue.getQueue().cleanup((byte)b);
-                    System.out.println("cleanup:" + b);
-                } catch (Exception e) { 
-                    System.out.println("exception:" + b);
-                }
-            }
-            invService.addZoo(loadProp, zooQueue);
-            logger = invService.getLogger();
-            InvProcessState responseState = new InvProcessState(manifestUrl, "addMultiPartZoo");
-            return getStateResponse(responseState, formatType, logger, cs, sc);
-
-        } catch (TException tex) {
-            return getExceptionResponse(tex, formatType, logger);
-
-        } catch (Exception ex) {
-            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
-            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
-        }
-    }
     /**
      * Retart inv service
      * @param formatType user provided format type
@@ -1049,6 +1088,109 @@ public class JerseyInv
 
         } catch (TException tex) {
             return getExceptionResponse(tex, formatType, logger);
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+    
+    
+    public Response addTask(
+            String taskName,
+            String taskItem,
+            String currentStatusS,
+            String note,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = defaultLogger;
+        try {
+            log("addTask entered:"
+                    + " - taskName=" + taskName
+                    + " - taskItem=" + taskItem
+                    + " - currentStatusS=" + currentStatusS
+                    + " - note=" + note
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            JSONObject jsonResponse = invService.addTask(taskName, taskItem, currentStatusS, note);
+            log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+    
+    
+    
+    public Response deleteTask(
+            String taskName,
+            String taskItem,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = defaultLogger;
+        try {
+            log("addTask entered:"
+                    + " - taskName=" + taskName
+                    + " - taskItem=" + taskItem
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            JSONObject jsonResponse = invService.deleteTask(taskName, taskItem);
+            log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }   
+    
+    public Response getTask(
+            String taskName,
+            String taskItem,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = defaultLogger;
+        try {
+            log("addTask entered:"
+                    + " - taskName=" + taskName
+                    + " - taskItem=" + taskItem
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            JSONObject jsonResponse = invService.getTask(taskName, taskItem);
+            log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
 
         } catch (Exception ex) {
             System.out.println("TRACE:" + StringUtil.stackTrace(ex));

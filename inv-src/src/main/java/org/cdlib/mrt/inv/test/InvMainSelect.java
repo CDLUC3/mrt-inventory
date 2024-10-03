@@ -9,7 +9,6 @@ package org.cdlib.mrt.inv.test;
 
 
 
-import org.cdlib.mrt.zoo.ZooQueue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Properties;
@@ -74,35 +73,6 @@ public class InvMainSelect
                     service.shutdown();
                 } catch (Exception ex) { }
             }
-        }
-    }
-    
-    public static void add(Properties storeLoadProp, InvService service, ZooQueue zooQueue)
-    {        
-        try {
-            System.out.println("***** ADD *****");
-            for (int i=1; true; i++) {
-                String manifestURL = storeLoadProp.getProperty("manifestURL." + i);
-                if (manifestURL == null) break;
-                Properties loadProp = new Properties();
-                loadProp.setProperty("manifestURL", manifestURL);
-                
-                try {
-                    service.addZoo(loadProp, zooQueue);
-                    System.out.println("****************> ZOO ADD:" + manifestURL);
-                } catch (Exception ex) {
-                    System.out.println("Exception:" + ex);
-                    continue;
-                }
-            }
-
-        } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
-                
         }
     }
 

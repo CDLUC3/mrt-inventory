@@ -1,3 +1,4 @@
+
 package org.cdlib.mrt.inv;
 
 import org.junit.Before;
@@ -18,6 +19,15 @@ import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.cdlib.mrt.utility.HTTPUtil;
+import org.cdlib.mrt.utility.StringUtil;
+import org.cdlib.mrt.zk.Access;
+import org.cdlib.mrt.zk.Batch;
+import org.cdlib.mrt.zk.Job;
+import org.cdlib.mrt.zk.JobState;
+import org.cdlib.mrt.zk.MerrittLocks;
+import org.cdlib.mrt.zk.MerrittStateError;
+import org.cdlib.mrt.zk.MerrittZKNodeInvalid;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -37,6 +47,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathFactory;
 //https://stackoverflow.com/a/22939742/3846548
 import org.apache.xpath.jaxp.XPathFactoryImpl;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooKeeper;
 
 import java.io.IOException;
 
@@ -47,6 +59,7 @@ public class ServiceDriverIT {
         private int dbport = 9999;
         private int primaryNode = 7777;
         private int replNode = 8888;
+        private int zkport = 8084;
 
         //https://github.com/CDLUC3/merritt-docker/blob/main/mrt-inttest-services/mock-merritt-it/data/system/mrt-owner.txt
         private String owner = "ark:/99999/owner";
@@ -60,20 +73,25 @@ public class ServiceDriverIT {
         private String cp = "mrtinv";
         private DocumentBuilder db;
         private XPathFactory xpathfactory;
+        private ZooKeeper zk;
 
         private String connstr;
         private String user = "user";
         private String password = "password";
     
-        public ServiceDriverIT() throws ParserConfigurationException, HttpResponseException, IOException, JSONException, SQLException {
+        public ServiceDriverIT() throws ParserConfigurationException, HttpResponseException, IOException, JSONException, SQLException, KeeperException, InterruptedException {
                 try {
                         port = Integer.parseInt(System.getenv("it-server.port"));
                         dbport = Integer.parseInt(System.getenv("mrt-it-database.port"));
+                        zkport = Integer.parseInt(System.getenv("mrt-zk.port"));
                 } catch (NumberFormatException e) {
                         System.err.println("it-server.port not set, defaulting to " + port);
                 }
                 db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 xpathfactory = new XPathFactoryImpl();
+                zk = new ZooKeeper(String.format("localhost:%s", zkport), 100, null);
+                Job.initNodes(zk);
+                MerrittLocks.initLocks(zk);
 
                 connstr = String.format("jdbc:mysql://localhost:%d/inv?characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&serverTimezone=UTC", dbport);
                 initServiceAndNodes();
@@ -134,6 +152,7 @@ public class ServiceDriverIT {
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
                         HttpPost post = new HttpPost(url);
                         HttpResponse response = client.execute(post);
+                        HTTPUtil.dumpHttpResponse(response, 200); //!!!!!
                         assertEquals(200, response.getStatusLine().getStatusCode());
                         String s = new BasicResponseHandler().handleResponse(response).trim();
                         assertFalse(s.isEmpty());
@@ -206,28 +225,6 @@ public class ServiceDriverIT {
                         builder.addTextBody("responseForm", "json", ContentType.TEXT_PLAIN.withCharset("UTF-8"));
                         builder.addTextBody("url", manifest, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
                         builder.addTextBody("checkVersion", "false", ContentType.TEXT_PLAIN.withCharset("UTF-8"));
-                        HttpEntity entity = builder.build();
-                        post.setEntity(entity);
-                        HttpResponse response = client.execute(post);
-                        assertEquals(200, response.getStatusLine().getStatusCode());
-                        String s = new BasicResponseHandler().handleResponse(response).trim();
-                        assertFalse(s.isEmpty());
-                        JSONObject json = new JSONObject(s);
-                        assertTrue(json.has("invp:invProcessState"));
-                        return json;
-                }
-        }
-
-        public JSONObject addUrlToZk(String ark) throws IOException, JSONException {
-                String ark_e = URLEncoder.encode(ark, StandardCharsets.UTF_8.name());
-                String manifest = String.format("http://mock-merritt-it:4567/storage/manifest/7777/%s", ark_e);
-                String url = String.format("http://localhost:%d/%s/addzoo", port, cp);
-                try (CloseableHttpClient client = HttpClients.createDefault()) {
-                        HttpPost post = new HttpPost(url);
-                        
-                        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                        builder.addTextBody("responseForm", "json", ContentType.TEXT_PLAIN.withCharset("UTF-8"));
-                        builder.addTextBody("zoourl", manifest, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
                         HttpEntity entity = builder.build();
                         post.setEntity(entity);
                         HttpResponse response = client.execute(post);
@@ -446,17 +443,55 @@ public class ServiceDriverIT {
         }
 
         @Test
-        public void AddObjectToZkTest() throws IOException, JSONException, InterruptedException {
-                String ark = "ark:/1111/3333";
-                if (checkArk(ark)) {
+        public void AddObjectToZkTest() 
+                throws IOException, JSONException, MerrittZKNodeInvalid, KeeperException, InterruptedException, MerrittStateError 
+        {
+            String ark = "ark:/1111/3333";
+            if (checkArk(ark)) {
                         deleteObject(ark);
-                }
-                assertFalse(checkArk(ark));
-                addUrlToZk(ark);
-                //Allow time for queue entry to be processed
-                Thread.sleep(25000);
-                assertTrue(checkArk(ark));
-                deleteObject(ark);
+            }
+            
+            String ark_e = URLEncoder.encode(ark, StandardCharsets.UTF_8.name());
+            String manifest = String.format("http://mock-merritt-it:4567/storage/manifest/7777/%s", ark_e);
+            JSONObject json = new JSONObject();
+            json.put("job", "quack");
+            Batch b = Batch.createBatch(zk, json);
+            Batch bb = Batch.acquirePendingBatch(zk);
+            
+            Job j = Job.createJob(zk, bb.id(), json);
+            Job jj = Job.acquireJob(zk, JobState.Pending);
+            jj.setStatus(zk, jj.status().stateChange(JobState.Estimating));
+            jj.unlock(zk);
+            
+            jj = Job.acquireJob(zk, JobState.Estimating);
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            
+            jj = Job.acquireJob(zk, JobState.Provisioning);
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            
+            jj = Job.acquireJob(zk, JobState.Downloading);
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            
+            jj = Job.acquireJob(zk, JobState.Processing);
+            jj.setInventory(zk, manifest, "tbd");
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+
+            for(int i=0; i<20; i++) {
+                Thread.sleep(1000);
+                boolean found = checkArk(ark);
+                if (found) break;
+            }
+  
+            assertTrue(checkArk(ark));
+            deleteObject(ark);            
+            
+            Job job = new Job(jj.id());
+            job.load(zk);
+            assertTrue(job.status() == JobState.Notify);
         }
 
         @Test

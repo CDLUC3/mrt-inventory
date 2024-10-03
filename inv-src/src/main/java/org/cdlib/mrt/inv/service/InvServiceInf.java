@@ -34,12 +34,12 @@ import java.net.URL;
 import java.util.Properties;
 
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.zoo.ZooManager;
-import org.cdlib.mrt.zoo.ZooQueue;
+import org.cdlib.mrt.inv.zoo.ZooManager;
 
 import org.cdlib.mrt.inv.action.InvManifestUrl;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
+import org.json.JSONObject;
 
 /**
  * Inv Service Interface
@@ -74,17 +74,6 @@ public interface InvServiceInf
     public InvProcessState add(
             String manifestURL,
             boolean doCheckVersion)
-        throws TException;
-    
-    /**
-     * Submit properties as an Item added to zookeeper queue
-     * @param zooProp Item properties
-     * @param queue Zoo keeper queue
-     * @return true - item added to queue
-     */
-    public boolean addZoo(
-            Properties zooProp,
-            ZooQueue queue)
         throws TException;
     
     /**
@@ -263,6 +252,46 @@ public interface InvServiceInf
     public InvSelectState select(String sql)
         throws TException;
     
+    
+    /**
+     * Add entry to inv_tasks
+     * @param taskName name of general task being tracked
+     * @param taskItem item of type name
+     * @param currentStatusS status 'ok','fail','partial','unknown'
+     * @param note optional note about task item (e.g. exception
+     * @return jsonobject of added task
+     * @throws TException 
+     */
+    public JSONObject addTask(
+            String taskName, 
+            String taskItem, 
+            String currentStatusS,
+            String note)
+        throws TException;
+    
+    /**
+     * Delete entry to inv_tasks
+     * @param taskName name of general task being tracked
+     * @param taskItem item of type name
+     * @return jsonobject of task entry before deletion
+     * @throws TException 
+     */
+    public JSONObject deleteTask(
+            String taskName, 
+            String taskItem)
+        throws TException;
+    
+    /**
+     * Get entry to inv_tasks
+     * @param taskName name of general task being tracked
+     * @param taskItem item of type name
+     * @return current jsonobject of task entry 
+     * @throws TException 
+     */
+    public JSONObject getTask(
+            String taskName, 
+            String taskItem)
+        throws TException;
             
     /**
      * @return Zoo Manager for this service
