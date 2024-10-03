@@ -34,7 +34,7 @@ MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/docker-compose.yml down
 MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/make-audit-replic-data.yml up -d
 ```
 
-## SQL for IT stack
+## SQL for IT stack 
 
 ```
 docker exec -it mrt-it-database mysql -u user --password=password --database=inv
