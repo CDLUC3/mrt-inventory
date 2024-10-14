@@ -110,10 +110,11 @@ public abstract class ZooHandlerAbs
                 break;
             }
             Job job = null;
+            ZooKeeper handlerZooKeeper = null;
             try { 
-                
+                handlerZooKeeper = zooManager.getZooKeeper();
                 try {
-                    job = Job.acquireJob(zooManager.getZooKeeper(), JobState.Recording);
+                    job = Job.acquireJob(handlerZooKeeper, JobState.Recording);
                     if (job == null) {
                         System.out.println(MESSAGE + "No Recording found");
                         Thread.sleep(pollTime);

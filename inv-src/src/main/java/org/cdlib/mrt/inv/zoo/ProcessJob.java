@@ -82,6 +82,7 @@ public class ProcessJob
     protected SaveObject saveObject = null;
     protected Random rn = new Random();
     protected ZooManager zooManager = null;
+    protected ZooKeeper processZooKeeper = null;
      
     public static ProcessJob getShutdownProcessItem()
         throws TException
@@ -128,6 +129,7 @@ public class ProcessJob
         if (zooManager.getZookeeperStatus() == ServiceStatus.shutdown) {
             this.shutdown = true;
         }
+        processZooKeeper = this.zooManager.getZooKeeper();
     }
     
     private void validate()
@@ -184,7 +186,6 @@ public class ProcessJob
         boolean arkLock = false;
         Identifier ark = null;
         try {
-            ZooKeeper zooKeeper = zooManager.getZooKeeper();
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
             //saveObject.process();
@@ -345,8 +346,8 @@ public class ProcessJob
     {
         try {
             processStatus = ProcessStatus.failed;
-            job.setStatus(zooManager.getZooKeeper(), job.status().fail(), saveEx.toString());
-            job.unlock(zooManager.getZooKeeper());
+            job.setStatus(processZooKeeper, job.status().fail(), saveEx.toString());
+            job.unlock(processZooKeeper);
             JSONObject data = job.data();
             log4j.error("ProcessJob.jobFail:" + saveEx.toString(), data);
             
@@ -360,8 +361,8 @@ public class ProcessJob
     {
         try {
             processStatus = ProcessStatus.completed;
-            job.setStatus(zooManager.getZooKeeper(), job.status().success());
-            job.unlock(zooManager.getZooKeeper());
+            job.setStatus(processZooKeeper, job.status().success());
+            job.unlock(processZooKeeper);
             
         } catch (Exception ex) {
             throw new TException(ex);
@@ -422,13 +423,9 @@ public class ProcessJob
      * @return Boolean result of obtaining lock
      */
     private boolean getLock(String primaryID) {
-        ZooKeeper zooKeeper = null;
         try {
             // SSM vars
-            String zooConnectString = InventoryConfig.qService;
-
-            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
-            Boolean gotLock =  MerrittLocks.lockObjectInventory(zooKeeper, primaryID);
+            Boolean gotLock =  MerrittLocks.lockObjectInventory(processZooKeeper, primaryID);
             log4j.debug("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
             System.out.println("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
             return gotLock;
@@ -436,11 +433,6 @@ public class ProcessJob
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-            
-        } finally {
-            try {
-                zooKeeper.close();
-            } catch (Exception ex) { }
         }
     }
 
@@ -452,24 +444,14 @@ public class ProcessJob
      * @return void
      */
     private void releaseLock(String primaryID) {
-        ZooKeeper zooKeeper = null;
         try {
-
             log4j.debug("SaveObject.releaseLock:" + primaryID);
-       // SSM vars
-            String zooConnectString = InventoryConfig.qService;
-
-            zooKeeper = new ZooKeeper(zooConnectString, InventoryConfig.qTimeout, new Ignorer());
-            MerrittLocks.unlockObjectInventory(zooKeeper, primaryID);
+            MerrittLocks.unlockObjectInventory(processZooKeeper, primaryID);
             System.out.println("releaseLock:" + primaryID);
 
         } catch (Exception e) {
             e.printStackTrace();
             
-        } finally {
-            try {
-                zooKeeper.close();
-            } catch (Exception ex) { }
         }
     }
 

@@ -33,6 +33,8 @@ package org.cdlib.mrt.inv.zoo;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.apache.zookeeper.WatchedEvent;
@@ -74,6 +76,8 @@ public class ZooManager
 
     private ZooKeeper zooKeeper = null;
     private ServiceStatus zooStatus = ServiceStatus.unknown;
+ 
+    protected static final Logger log4j = LogManager.getLogger();  
     
     //private DistributedQueue distributedQueue = null;
 
@@ -209,6 +213,7 @@ public class ZooManager
                     throw new TException.INVALID_OR_MISSING_PARM("ZooManager - queueConnectionString missing");
                 }
                 zooKeeper = new ZooKeeper(queueConnectionString, queueTimeout, new Ignorer());
+                log4j.info("ZooManager.getZooKeeper zooKeeper initialize");
             }
             if (initZooKeeper) {
                 MerrittLocks.initLocks(zooKeeper);
@@ -236,6 +241,7 @@ public class ZooManager
             }
             System.out.println("**Establishing new ZooKeeper:" + queueConnectionString);
             zooKeeper = new ZooKeeper(queueConnectionString, queueTimeout, new Ignorer());
+            log4j.info("ZooManager.setZoo zooKeeper initialize");
             if (initZooKeeper) {
                 MerrittLocks.initLocks(zooKeeper);
                 Job.initNodes(zooKeeper);
@@ -269,7 +275,10 @@ public class ZooManager
     private void closeZooKeeper()
     {
         try {
-            if (zooKeeper != null) zooKeeper.close();
+            if (zooKeeper != null)  {
+                zooKeeper.close();
+                log4j.info("ZooManager.closeZooKeeper zooKeeper close");
+            }
         } catch (Exception ze) {}
         zooKeeper = null;
     }
