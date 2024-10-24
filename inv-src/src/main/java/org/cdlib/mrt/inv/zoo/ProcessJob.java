@@ -29,6 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.zoo;
 
+import java.net.URL;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.Random;
@@ -83,6 +85,7 @@ public class ProcessJob
     protected Random rn = new Random();
     protected ZooManager zooManager = null;
     protected ZooKeeper processZooKeeper = null;
+    protected boolean arkLock = false;
      
     public static ProcessJob getShutdownProcessItem()
         throws TException
@@ -125,11 +128,11 @@ public class ProcessJob
         this.job = job;
         this.zooManager = zooManager;
         this.db = db;
-        validate();
         if (zooManager.getZookeeperStatus() == ServiceStatus.shutdown) {
             this.shutdown = true;
         }
         processZooKeeper = this.zooManager.getZooKeeper();
+        validate();
     }
     
     private void validate()
@@ -144,9 +147,11 @@ public class ProcessJob
             if (manifestURLS == null) {
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "manifestURL null");
             }
+            String arkS = url2ark(manifestURLS);
             connection = getNewConnection();
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "connection returned");
+            arkLock = getLockRetry(arkS, 300);
             getSaveObjectRetry404(3);
             
         } catch (TException tex) {
@@ -183,15 +188,13 @@ public class ProcessJob
        throws TException
     {
         int retry = 0;
-        boolean arkLock = false;
         Identifier ark = null;
         try {
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
             //saveObject.process();
             //job.setStatus(zooKeeper, job.status().stateChange(JobState.Recording));
-            ark = saveObject.getObjectID();
-            arkLock = getLockRetry(ark.getValue(), 300);
+            //ark = saveObject.getObjectID();
             retry = saveObjectRetry(4);
             jobOK();
             
@@ -505,6 +508,16 @@ public class ProcessJob
         throw new TException.SQL_EXCEPTION("Database unavailable");
     }
     
+    public static String url2ark(String urlS)
+        throws Exception
+    {
+        URL manurl = new URL(urlS);
+        String path = manurl.getPath();
+        int pos = path.lastIndexOf("/");
+        String rem = path.substring(pos+1);
+        String arkS = URLDecoder.decode(rem, "utf-8");
+        return arkS;
+    }
         
     public static class Ignorer implements Watcher {
         public void process(WatchedEvent event){}
