@@ -151,7 +151,7 @@ public class ProcessJob
             connection = getNewConnection();
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "connection returned");
-            arkLock = getLockRetry(arkS, 300);
+            arkLock = getLockRetry(arkS, 3600);
             getSaveObjectRetry404(3);
             
         } catch (TException tex) {
