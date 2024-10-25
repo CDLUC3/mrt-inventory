@@ -86,6 +86,7 @@ public class ProcessJob
     protected ZooManager zooManager = null;
     protected ZooKeeper processZooKeeper = null;
     protected boolean arkLock = false;
+    protected String lockKey = null;
      
     public static ProcessJob getShutdownProcessItem()
         throws TException
@@ -147,11 +148,11 @@ public class ProcessJob
             if (manifestURLS == null) {
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "manifestURL null");
             }
-            String arkS = url2ark(manifestURLS);
+            lockKey = url2ark(manifestURLS);
             connection = getNewConnection();
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "connection returned");
-            arkLock = getLockRetry(arkS, 3600);
+            arkLock = getLockRetry(lockKey, 900);
             getSaveObjectRetry404(3);
             
         } catch (TException tex) {
@@ -188,7 +189,6 @@ public class ProcessJob
        throws TException
     {
         int retry = 0;
-        Identifier ark = null;
         try {
             if (connection == null) return;
             if (DEBUG) System.out.println(MESSAGE + "begin process");
@@ -205,11 +205,8 @@ public class ProcessJob
             jobFails(ex);
             
         } finally {
-            try {
-                connection.close();
-            } catch (Exception ex) { }
-            if (arkLock) {
-                releaseLock(ark.getValue());
+            if (lockKey != null) {
+                releaseLock(lockKey); 
             }
             if (STATUS) System.out.println(MESSAGE + "process "
                     + " - manifestURLS=" + manifestURLS
@@ -229,6 +226,9 @@ public class ProcessJob
             prop.setProperty("manifestURL", manifestURLS);
             logStateEntry.setProperties(prop);
             logStateEntry.addLogStateEntry("InvJSON");
+            try {
+                connection.close();
+            } catch (Exception ex) { }
         }
     }
     
@@ -413,6 +413,7 @@ public class ProcessJob
             }
 
         } catch (TException tex) {
+            releaseLock(primaryID);
             throw tex;
         }
         
@@ -425,17 +426,18 @@ public class ProcessJob
      * @param String jobID
      * @return Boolean result of obtaining lock
      */
-    private boolean getLock(String primaryID) {
+    private boolean getLock(String primaryID) 
+         throws TException
+    {
         try {
             // SSM vars
             Boolean gotLock =  MerrittLocks.lockObjectInventory(processZooKeeper, primaryID);
             log4j.debug("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
-            System.out.println("SaveObject.getLock:" + primaryID + " - gotLock:" + gotLock);
             return gotLock;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            throw new TException(e);
         }
     }
 
@@ -456,6 +458,7 @@ public class ProcessJob
             e.printStackTrace();
             
         }
+        
     }
 
     public ProcessStatus getProcessStatus() {
