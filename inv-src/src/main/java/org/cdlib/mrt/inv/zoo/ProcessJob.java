@@ -353,9 +353,17 @@ public class ProcessJob
             job.unlock(processZooKeeper);
             JSONObject data = job.data();
             log4j.error("ProcessJob.jobFail:" + saveEx.toString(), data);
+            if (lockKey != null) {
+                releaseLock(lockKey); 
+            }
             
         } catch (Exception ex) {
             throw new TException(ex);
+            
+        } finally {
+            if (lockKey != null) {
+                releaseLock(lockKey); 
+            }
         }
     }
     
@@ -366,9 +374,17 @@ public class ProcessJob
             processStatus = ProcessStatus.completed;
             job.setStatus(processZooKeeper, job.status().success());
             job.unlock(processZooKeeper);
+            if (lockKey != null) {
+                releaseLock(lockKey); 
+            }
             
         } catch (Exception ex) {
             throw new TException(ex);
+            
+        } finally {
+            if (lockKey != null) {
+                releaseLock(lockKey); 
+            }
         }
     }
     
@@ -390,7 +406,9 @@ public class ProcessJob
                 boolean gotLock = getLock(primaryID);
                 attempts++;
                 if (gotLock) {
-                    log4j.info("Got lock:" + primaryID);
+                    log4j.info("getLockRetry(" + job.id() + ") lock OK"
+                            + " - attempts=" + attempts 
+                    );
                     return true;
                 }
                 
@@ -399,13 +417,16 @@ public class ProcessJob
                 } catch (Exception tmpEx) { }
                 long elapsedMs= System.currentTimeMillis() - startMlSec;
                 long totalTimeoutMs = timeoutSeconds * 1000;
-                log4j.info("getLockRetry(" + attempts + "): "
+                log4j.debug("getLockRetry(" + job.id() + ") lock fail"
+                        + " - attempts=" + attempts 
                         + " - elapsedMs=" + elapsedMs
                         + " - totalTimeoutMs=" + totalTimeoutMs
                 );
                 if (elapsedMs > totalTimeoutMs) {
                     throw new TException.GATEWAY_TIMEOUT("lock not released Exception" 
+                            + " - job.id:" + job.id()
                             + " - primaryID:" + primaryID
+                            + " - attempts=" + attempts 
                             + " - timeoutSeconds:" + timeoutSeconds
                             + " - elapsedMs:" + elapsedMs
                     );
