@@ -102,7 +102,7 @@ phases:
         | sort >> $RPT
 
     - |
-      for pkg in mrt-invwar
+      for pkg in mrt-invwar mrt-inventoryconf
       do
         echo "## Code Artifact Packages for $pkg" >> $RPT
         aws codeartifact list-package-versions \
