@@ -47,7 +47,7 @@ services:
       merrittnet:
   zoo-it:
     container_name: zoo-it
-    image: public.ecr.aws/docker/library/zookeeper:3.8.4
+    image: public.ecr.aws/docker/library/zookeeper:3.9.3
     ports:
     - published: 8084
       target: 2181
