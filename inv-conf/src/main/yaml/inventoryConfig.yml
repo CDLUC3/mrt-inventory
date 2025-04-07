@@ -66,8 +66,7 @@ inv-info-docker: &docker
     name: inv
     user: user
     password: password
-    #encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&enabledTLSProtocols=TLSv1.2"   # schema won't load if it's utf8mb4
-    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&serverTimezone=UTC"   # schema won't load if it's utf8mb4
+    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"   # schema won't load if it's utf8mb4
   
 inv-info-docker-dev: 
   <<: *docker
