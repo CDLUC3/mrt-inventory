@@ -40,7 +40,7 @@ inv-info-docker: &docker
     id: inv
     name: UC3
     description: "UC3 inventory micro-service"
-    baseURI: http://localhost:8082/inventory
+    baseURI: http://inventory:8080/inventory
   
   zooserver:
     queueService: zoo:2181
