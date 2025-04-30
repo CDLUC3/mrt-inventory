@@ -89,7 +89,7 @@ public class ServiceDriverIT {
                 }
                 db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 xpathfactory = new XPathFactoryImpl();
-                zk = new ZooKeeper(String.format("localhost:%s", zkport), 100, null);
+                zk = new ZooKeeper(String.format("localhost:%s", zkport), 600000, null);
                 Job.initNodes(zk);
                 MerrittLocks.initLocks(zk);
 
