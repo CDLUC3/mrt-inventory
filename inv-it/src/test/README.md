@@ -19,19 +19,19 @@ export ECR_REGISTRY=it-docker-registry
 
 Launch Containers
 ```
-MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/docker-compose.yml up -d
+MDIR=$(pwd) docker compose -f inv-it/src/test/docker/docker-compose.yml up -d
 ```
 
 Run the junit test from VSCode
 
 ```
-MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/docker-compose.yml down
+MDIR=$(pwd) docker compose -f inv-it/src/test/docker/docker-compose.yml down
 ```
 
 ## To generate test data for the audit and replic integration tests
 
 ```
-MDIR=$(pwd) docker-compose -f inv-it/src/test/docker/make-audit-replic-data.yml up -d
+MDIR=$(pwd) docker compose -f inv-it/src/test/docker/make-audit-replic-data.yml up -d
 ```
 
 ## SQL for IT stack
