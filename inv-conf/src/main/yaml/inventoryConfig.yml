@@ -43,7 +43,7 @@ inv-info-docker: &docker
     baseURI: http://inventory:8080/inventory
   
   zooserver:
-    queueService: zoo:2181
+    queueService: "{!ENV: ZKCONN !DEFAULT: zoo:2181}"
     queueName: /mrt.inventory.full
     queueTimeout: 40000
     lockName: /mrt.lock
