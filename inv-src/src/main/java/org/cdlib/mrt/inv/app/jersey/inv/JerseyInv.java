@@ -345,6 +345,20 @@ public class JerseyInv
     }
     
     @POST
+    @Path("admin/sla")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response callAddAdminSLA(
+            @DefaultValue("") @FormDataParam("adminid") String adminIDS,
+            @DefaultValue("") @FormDataParam("name") String name,
+            @DefaultValue("") @FormDataParam("mnemonic") String mnemonic,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        return adminSLA(adminIDS, name, mnemonic, cs, sc);
+    }
+    
+    @POST
     @Path("reset")
     public Response callResetState(
             @DefaultValue("-none-") @QueryParam("log4jlevel") String log4jlevel,
@@ -1094,8 +1108,42 @@ public class JerseyInv
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
-    
-    
+   
+    public Response adminSLA(
+            String adminIDS,
+            String name,
+            String mnemonic,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+         LoggerInf logger = defaultLogger;
+        try {
+            log("addTask entered:"
+                    + " - adminIDS=" + adminIDS
+                    + " - name=" + name
+                    + " - mnemonic=" + mnemonic
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            Identifier adminID = new Identifier(adminIDS);
+            
+            JSONObject jsonResponse = invService.addAdminSLA(adminID, name, mnemonic);
+            log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
     public Response addTask(
             String taskName,
             String taskItem,

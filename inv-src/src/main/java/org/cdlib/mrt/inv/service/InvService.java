@@ -36,6 +36,8 @@ import java.sql.Connection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 import org.cdlib.mrt.cloud.ManifestSAX;
 
@@ -54,6 +56,8 @@ import org.cdlib.mrt.inv.action.LocalMap;
 import org.cdlib.mrt.inv.action.ProcessObject;
 import org.cdlib.mrt.inv.action.SaveNode;
 import org.cdlib.mrt.inv.action.Versions;
+import org.cdlib.mrt.inv.admin.AdminSLA;
+import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.taskdb.TaskDb;
 import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
@@ -572,6 +576,43 @@ public class InvService
         } finally {
             inventoryConfig.closeConnect(connection);
         }
+    }
+    
+    @Override
+    public JSONObject addAdminSLA(
+            Identifier adminID, 
+            String name, 
+            String mnemonic)
+        throws TException
+    {   
+        try {
+            LinkedHashMap<String,String> map = inventoryConfig.getAdminMap();
+            Connection connection = inventoryConfig.getConnection(false);
+            if (connection.isValid(1000)) System.out.println("valid connection");
+            else System.out.println("valid connection");
+            Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
+            Identifier ownerID = new Identifier(map.get("ownerOwner")); 
+            String mem1S = map.get("slaCollection");
+            Identifier mem1 = new Identifier(mem1S);
+            ArrayList<Identifier> members = new ArrayList<>();
+            members.add(mem1);
+            AdminSLA adminSLA = AdminSLA.getAdminSLA(slaID,ownerID, name, mnemonic, members, connection, logger)
+                .setCommit(false);
+            adminSLA.processSla();
+            InvCollection invCollection = adminSLA.getSlaCollection();
+            return invCollection.dumpJson("addAdminSla");
+            
+        } catch (TException tex) {
+            System.out.println("addAdminSLA Exception:" + tex);
+            tex.printStackTrace();
+            throw tex;
+            
+        } catch (Exception ex) {
+            System.out.println("addAdminSLA Exception:" + ex);
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+ 
     }
     
     @Override

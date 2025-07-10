@@ -292,7 +292,21 @@ public interface InvServiceInf
             String taskName, 
             String taskItem)
         throws TException;
-            
+    
+    /**
+     * 
+     * @param adminID sla ark for SLA collection
+     * @param name name of sla
+     * @param mnemonic mnemonic of sla
+     * @return
+     * @throws TException 
+     */
+    public JSONObject addAdminSLA(
+            Identifier adminID, 
+            String name, 
+            String mnemonic)
+        throws TException;
+    
     /**
      * @return Zoo Manager for this service
      */

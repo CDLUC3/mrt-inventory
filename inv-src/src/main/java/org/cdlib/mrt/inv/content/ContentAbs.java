@@ -33,9 +33,12 @@ package org.cdlib.mrt.inv.content;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Set;
 
 
+import org.json.JSONObject;
 
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.Identifier;
@@ -123,6 +126,35 @@ public abstract class ContentAbs
             return PropertiesUtil.dumpProperties(header, retrieveProp());
         } catch (Exception ex) {
             return ex.toString();
+        }
+    }
+    
+    public JSONObject dumpJson(String header) 
+    {
+        JSONObject jsonhead = new JSONObject();
+        try {
+            jsonhead.put("header", header);
+            jsonhead.put("dbName", getDBName());
+            
+            JSONObject json = new JSONObject();
+            Properties prop = retrieveProp();
+            Enumeration e = prop.propertyNames();
+            String key = null;
+            String value = null;
+
+            while( e.hasMoreElements() )
+            {
+               key = (String)e.nextElement();
+               value = prop.getProperty(key);
+               if (value != null) {
+                   json.put(key,value);
+               }
+            }
+            jsonhead.put("content", json);
+            return jsonhead;
+            
+        } catch (Exception ex) {
+            return null;
         }
     }
 
