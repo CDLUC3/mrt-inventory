@@ -25,6 +25,12 @@ inv-info:
     name: inv
     qualifier: yyMMdd
     trace: 5
+    
+    
+  admin:
+    ownerOwner: none
+    slaCollection: none
+    collectionCollection: none
 
   db:
     adapter: mysql2
