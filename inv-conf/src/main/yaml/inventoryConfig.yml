@@ -9,8 +9,8 @@ inv-info:
     baseURI: "{!SSM: inventory/config/baseURI}"
   
   zooserver:
+    #queueService: "uc3-mrtdocker-dev03.cdlib.org:2181"  
     queueService: "{!SSM: inventory/zoo/queueService !DEFAULT: localhost:2181}"
-    #queueService: "localhost:2181"
     queueName: "{!SSM: inventory/zoo/queueName}"
     queueTimeout: "{!SSM: inventory/zoo/Timeout !DEFAULT: 3600000}"
     lockName: "{!SSM: inventory/zoo/lockName !DEFAULT: /mrt.lock}"
@@ -26,6 +26,11 @@ inv-info:
     name: inv
     qualifier: yyMMdd
     trace: 5
+    
+  admin:
+    ownerOwner: "{!SSM: inventory/config/admin/ownerOwner !DEFAULT: none}"
+    slaCollection: "{!SSM: inventory/config/admin/slaCollection !DEFAULT: none}"
+    collectionCollection: "{!SSM: inventory/config/admin/collectionCollection !DEFAULT: none}"
 
   db:
     user: "{!SSM: inv/readwrite/db-user}"
@@ -58,7 +63,12 @@ inv-info-docker: &docker
     path: /tdr/tmpdir
     name: inv
     qualifier: yyMMdd
-    trace: 5
+    trace: 5 
+    
+  admin:
+    ownerOwner: none
+    slaCollection: none
+    collectionCollection: none
 
   db:
     adapter: mysql2
