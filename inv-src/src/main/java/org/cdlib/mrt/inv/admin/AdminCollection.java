@@ -29,8 +29,6 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.admin;
 
-import org.cdlib.mrt.inv.action.*;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,19 +39,9 @@ import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
-import org.cdlib.mrt.inv.utility.DBAdd;
-import org.cdlib.mrt.inv.service.Role;
-//import org.cdlib.mrt.queue.DistributedLock.Ignorer;
-import org.cdlib.mrt.inv.utility.InvDBUtil;
-import org.cdlib.mrt.log.utility.AddStateEntryGen;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 
 /**
@@ -77,7 +65,6 @@ public class AdminCollection
     protected List<Identifier> members = null;
     protected CollectionType collectionType = CollectionType.collection_private;
             
-    protected Boolean commit = false;
     protected int node = 0;
     protected int toNode = 0;
     protected long objectseq = 0;
@@ -133,6 +120,24 @@ public class AdminCollection
         return new AdminCollection(collectID, ownerID, name, mnemonic, members, collectionType, connection, logger);
     }
     
+    public static AdminCollection getAdminCollection(
+            boolean privateCollection,
+            Identifier collectID,
+            Identifier ownerID,
+            String name,
+            String mnemonic,
+            List<Identifier> members,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        CollectionType collectionType = null;
+        if (privateCollection) collectionType = CollectionType.collection_private;
+        else collectionType = CollectionType.collection_public;
+        
+        return new AdminCollection(collectID, ownerID, name, mnemonic, members, collectionType, connection, logger);
+    }
+    
     public AdminCollection(
             Identifier collectID,
             Identifier ownerID,
@@ -156,7 +161,7 @@ public class AdminCollection
     
     
     
-    protected void processCollection()
+    public void processCollection()
         throws TException
     {
         try {
@@ -294,16 +299,6 @@ public class AdminCollection
         }
     }
     
-
-    public AdminCollection setCommit(Boolean commit) {
-        this.commit = commit;
-        System.out.println("setCommit called:" + commit);
-        return this;
-    }
-
-    public Boolean getCommit() {
-        return commit;
-    }
 
     public InvOwner getInvOwner() {
         return invOwner;

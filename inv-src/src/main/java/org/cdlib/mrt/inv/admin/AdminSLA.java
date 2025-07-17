@@ -29,8 +29,6 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.admin;
 
-import org.cdlib.mrt.inv.action.*;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,20 +39,9 @@ import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
-import org.cdlib.mrt.inv.utility.DBAdd;
-import org.cdlib.mrt.inv.service.Role;
-//import org.cdlib.mrt.queue.DistributedLock.Ignorer;
-import org.cdlib.mrt.inv.utility.InvDBUtil;
-import org.cdlib.mrt.log.utility.AddStateEntryGen;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import static org.cdlib.mrt.inv.admin.AdminShare.AdminType.sla;
-import static org.cdlib.mrt.inv.admin.AdminShare.getMembers;
 
 
 /**
@@ -77,7 +64,6 @@ public class AdminSLA
     protected String mnemonic = null;
     protected List<Identifier> members = null;
             
-    protected Boolean commit = false;
     protected int node = 0;
     protected int toNode = 0;
     protected long objectseq = 0;
@@ -139,7 +125,6 @@ public class AdminSLA
         try {
             validateSla();
             testExists();
-            System.out.println("after testExists");
             add();
             if (commit) connection.commit();
             else connection.rollback();
@@ -172,12 +157,12 @@ public class AdminSLA
         throws TException
     {
         invOwner = getOwner(ownerID, connection, logger);
-        System.out.println(invOwner.dump("testExists invOwner"));
+        log4j.debug(invOwner.dump("testExists invOwner"));
         slaCollection = getCollection(slaID, connection, logger);
         if (slaCollection == null) {
-            System.out.println("SlaCollection null");
+            log4j.debug("SlaCollection null");
         } else {
-            System.out.println(slaCollection.dump("testExists sla"));
+            log4j.debug(slaCollection.dump("testExists sla"));
         }
     }
     
@@ -209,7 +194,7 @@ public class AdminSLA
     public void addCollection()
         throws TException
     {
-        System.out.println("addCollection entered");
+        log4j.debug("addCollection entered");
         try {
             Properties slaCollectionProp = loadProperties("sla");
             
@@ -219,11 +204,10 @@ public class AdminSLA
             slaCollection.setArk(slaID);
             slaCollection.setName(name);
             slaCollection.setMnemonic(mnemonic);
-            System.out.println(slaCollection.dump("***sla collection dump***"));
+            //System.out.println(slaCollection.dump("***sla collection dump***"));
             
             long collectseq = dbAdd.insert(slaCollection);
             slaCollection.setId(collectseq);
-            System.out.println(slaCollection.dump("build"));
             String msg = slaCollection.dump("addCollection");
             System.out.println(msg);
             log4j.debug(msg);
@@ -240,7 +224,7 @@ public class AdminSLA
     public void addCollectionObject()
         throws TException
     {
-        System.out.println("addCollectionObject entered");
+        log4j.debug("addCollectionObject entered");
         try {
             Properties objectProp = loadProperties("sla_ark");
             
@@ -271,16 +255,6 @@ public class AdminSLA
             e.printStackTrace();
             throw new TException.GENERAL_EXCEPTION(e);
         }
-    }
-
-    public AdminSLA setCommit(Boolean commit) {
-        this.commit = commit;
-        System.out.println("setCommit called:" + commit);
-        return this;
-    }
-
-    public Boolean getCommit() {
-        return commit;
     }
 
     public InvObject getSlaObject() {

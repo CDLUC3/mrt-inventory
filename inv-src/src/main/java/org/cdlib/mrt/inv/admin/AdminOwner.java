@@ -29,8 +29,6 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.admin;
 
-import org.cdlib.mrt.inv.action.*;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,23 +36,11 @@ import java.util.List;
 import java.util.Properties;
 
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
-import org.cdlib.mrt.inv.utility.DBAdd;
-import org.cdlib.mrt.inv.service.Role;
-//import org.cdlib.mrt.queue.DistributedLock.Ignorer;
-import org.cdlib.mrt.inv.utility.InvDBUtil;
-import org.cdlib.mrt.log.utility.AddStateEntryGen;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import static org.cdlib.mrt.inv.admin.AdminShare.AdminType.sla;
-import static org.cdlib.mrt.inv.admin.AdminShare.getMembers;
 
 
 /**
@@ -77,7 +63,6 @@ public class AdminOwner
     //protected String mnemonic = null;
     protected List<Identifier> members = null;
             
-    protected Boolean commit = false;
     protected int node = 0;
     protected int toNode = 0;
     protected long objectseq = 0;
@@ -129,7 +114,7 @@ public class AdminOwner
     
     
     
-    protected void processOwner()
+    public void processOwner()
         throws TException
     {
         try {
@@ -268,16 +253,6 @@ public class AdminOwner
         }
     }
     
-
-    public AdminOwner setCommit(Boolean commit) {
-        this.commit = commit;
-        System.out.println(MESSAGE + "setCommit called:" + commit);
-        return this;
-    }
-
-    public Boolean getCommit() {
-        return commit;
-    }
 
     public InvObject getOwnerObject() {
         return ownerObject;

@@ -80,6 +80,8 @@ public abstract class ContentAbs
     public static final String GCOPIES = "inv_glacier_copies";
     public static final String GTRANS = "inv_glacier_transactions";
     protected LoggerInf logger = null;
+    public enum RespStatus {ok, fail, commit, rollback, processing, unknown }
+    protected RespStatus respStatus = null;
     
     protected ContentAbs(LoggerInf logger) 
     {
@@ -135,6 +137,9 @@ public abstract class ContentAbs
         try {
             jsonhead.put("header", header);
             jsonhead.put("dbName", getDBName());
+            if (respStatus != null) {
+                jsonhead.put("respStatus", respStatus.toString());
+            }
             
             JSONObject json = new JSONObject();
             Properties prop = retrieveProp();
@@ -163,5 +168,22 @@ public abstract class ContentAbs
         if (!DEBUG) return;
         System.out.println(MESSAGE + msg);
     }
+
+    public RespStatus getRespStatus() {
+        return respStatus;
+    }
+
+    public void setRespStatus(RespStatus respStatus) {
+        this.respStatus = respStatus;
+    }
+
+    public void setRespStatus(String respStatusS) {
+        if (StringUtil.isAllBlank(respStatusS)) {
+            this.respStatus = RespStatus.unknown;
+        } else {
+            this.respStatus = RespStatus.valueOf(respStatusS);
+        }
+    }
+    
 }
 

@@ -80,6 +80,7 @@ public class AdminShare
     protected Exception exception = null;
     protected AdminType processType = null;
     protected DBAdd dbAdd = null;
+    protected Boolean commit = false;
 
     protected static final Logger log4j = LogManager.getLogger(); 
     
@@ -201,7 +202,7 @@ public class AdminShare
     {
         InvOwner invOwner = null;
         try {
-            System.out.println("getOwner.ownerID=" + ownerID.getValue());
+            log4j.debug("getOwner.ownerID=" + ownerID.getValue());
             invOwner = InvDBUtil.getOwner(ownerID, connection, logger);
             return invOwner;
             
@@ -311,13 +312,13 @@ public class AdminShare
     protected InvCollectionObject addMember(InvObject invObject, Identifier collectionID)
         throws TException
     {
-        System.out.println("addMember entered:" + invObject.getArk().getValue());
+        System.out.println(invObject.dump("memberObject"));
         try {
             InvCollection memberCollection = getCollection(collectionID, connection, logger);
             if (memberCollection == null) {
                 throw new TException.INVALID_OR_MISSING_PARM("Collection for member does not exist:" + collectionID.getValue());
             }
-            System.out.println(memberCollection.dump("addMember"));
+            System.out.println(memberCollection.dump("memberCollection"));
             InvCollectionObject invCollectionObject 
                     = InvDBUtil.getCollectionObject(invObject.getId(), memberCollection.getId(), connection, logger);
             if (invCollectionObject != null) {
@@ -331,7 +332,7 @@ public class AdminShare
             invCollectionObject.setCollectionID(memberCollection.getId());
             long id = dbAdd.insert(invCollectionObject);
             invCollectionObject.setId(id);
-            System.out.println(invCollectionObject.dump("addMember"));
+            System.out.println(invCollectionObject.dump("***Add member***"));
             
             return invCollectionObject;
             
@@ -359,6 +360,16 @@ public class AdminShare
         } catch (Exception ex) {
             throw new TException.INVALID_OR_MISSING_PARM("Bad json:" + ex);
         }
+    }
+
+    public AdminShare setCommit(Boolean commit) {
+        this.commit = commit;
+        System.out.println("setCommit called:" + commit);
+        return this;
+    }
+
+    public Boolean getCommit() {
+        return commit;
     }
 }
 

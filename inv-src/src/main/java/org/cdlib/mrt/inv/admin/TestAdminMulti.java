@@ -68,8 +68,8 @@ public class TestAdminMulti
             String name = "test admin Collection private";
             String mnemonic = "ta-collectprv";
             AdminCollection adminCollection = AdminCollection.getAdminCollectionPrivate(newCollectionID, 
-                    ownerOwnerID, name, mnemonic, membersS, connection, logger)
-                .setCommit(commit);
+                    ownerOwnerID, name, mnemonic, membersS, connection, logger);
+            adminCollection.setCommit(commit);
             
             adminCollection.processCollection();
             InvCollection respCollection = adminCollection.getCollectCollection();
@@ -98,8 +98,8 @@ public class TestAdminMulti
             String name = "test admin Collection public";
             String mnemonic = "ta-collectpub";
             AdminCollection adminCollection = AdminCollection.getAdminCollectionPublic(newCollectionID, 
-                    ownerOwnerID, name, mnemonic, membersS, connection, logger)
-                .setCommit(commit);
+                    ownerOwnerID, name, mnemonic, membersS, connection, logger);
+            adminCollection.setCommit(commit);
             
             adminCollection.processCollection();
  
@@ -125,8 +125,8 @@ public class TestAdminMulti
             String name = "test admin Owner";
 
             AdminOwner adminOwner = AdminOwner.getAdminOwner(newOwnerID, 
-                    ownerOwnerID, name, membersS, connection, logger)
-                .setCommit(commit);
+                    ownerOwnerID, name, membersS, connection, logger);
+            adminOwner.setCommit(commit);
             adminOwner.processOwner();
 
 
@@ -151,8 +151,8 @@ public class TestAdminMulti
             Identifier mem1 = new Identifier(mem1S);
             ArrayList<Identifier> members = new ArrayList<>();
             members.add(mem1);
-            AdminSLA adminSLA = AdminSLA.getAdminSLA(slaID,ownerID, name, mnemonic, members, connection, logger)
-                .setCommit(true);
+            AdminSLA adminSLA = AdminSLA.getAdminSLA(slaID,ownerID, name, mnemonic, members, connection, logger);
+            adminSLA.setCommit(true);
             adminSLA.processSla();
  
             
