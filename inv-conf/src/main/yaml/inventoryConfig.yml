@@ -29,8 +29,10 @@ inv-info:
     
   admin:
     ownerOwner: "{!SSM: inventory/config/admin/ownerOwner !DEFAULT: none}"
+    ownerCollection: "{!SSM: inventory/config/admin/ownerCollection !DEFAULT: none}"
     slaCollection: "{!SSM: inventory/config/admin/slaCollection !DEFAULT: none}"
     collectionCollection: "{!SSM: inventory/config/admin/collectionCollection !DEFAULT: none}"
+    systemClasses: "{!SSM: inventory/config/admin/systemClasses !DEFAULT: none}"
 
   db:
     user: "{!SSM: inv/readwrite/db-user}"
