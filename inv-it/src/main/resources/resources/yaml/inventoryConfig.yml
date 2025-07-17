@@ -29,8 +29,10 @@ inv-info:
     
   admin:
     ownerOwner: none
+    ownerCollection: none
     slaCollection: none
     collectionCollection: none
+    systemClasses: none
 
   db:
     adapter: mysql2
