@@ -615,7 +615,6 @@ public class InvService
             adminSLA.processSla();
             
             InvCollection invCollection = adminSLA.getSlaCollection();
-            invCollection.setRespStatus("ok");
             JSONObject jsonResponse = invCollection.dumpJson("addAdminSla");
             AddStateEntryGen.addLogStateEntry("addAdminSLA",jsonResponse);
             return jsonResponse;
@@ -660,8 +659,6 @@ public class InvService
             adminOwner.processOwner();
             
             InvOwner invOwner = adminOwner.getNewOwner();
-            if (commit) invOwner.setRespStatus("commit");
-            else invOwner.setRespStatus("rollback");
             JSONObject jsonResponse = invOwner.dumpJson("addAdminOwner");
             AddStateEntryGen.addLogStateEntry("addAdminOwner", jsonResponse);
             //AddStateEntryGen.addEntry("info", jsonResponse);
@@ -709,8 +706,6 @@ public class InvService
             adminCollection.processCollection();
             InvCollection invCollection = adminCollection.getCollectCollection();
             
-            if (commit) invCollection.setRespStatus("commit");
-            else invCollection.setRespStatus("rollback");
             JSONObject jsonResponse = invCollection.dumpJson("addAdminCollection");
             AddStateEntryGen.addLogStateEntry("addAdminCollection", jsonResponse);
             return jsonResponse;

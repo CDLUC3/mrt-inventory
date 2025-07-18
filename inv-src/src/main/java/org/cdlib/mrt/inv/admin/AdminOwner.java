@@ -122,10 +122,15 @@ public class AdminOwner
             testExists();
             System.out.println("after testExists");
             add();
+            if (newOwner.getRespStatus() != null) {
+                return;
+            }
             if (commit) {
-                connection.commit(); 
+                connection.commit();
+                newOwner.setRespStatus("commit");
             } else {
                 connection.rollback();
+                newOwner.setRespStatus("rollback");
             }
             System.out.println("!commit:" + commit);
             
@@ -174,7 +179,8 @@ public class AdminOwner
                 throw new TException.INVALID_OR_MISSING_PARM("Required owner missing:" + ownerArkOwnerID.getValue());
             }
             if (newOwner != null) {
-                throw new TException.INVALID_OR_MISSING_PARM("Add process and slaCollection exists:" + ownerID.getValue());
+                newOwner.setRespStatus("exists");
+                return;
             }
             addOwnerObject();
             addOwner();

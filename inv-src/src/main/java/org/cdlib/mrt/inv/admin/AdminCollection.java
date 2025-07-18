@@ -167,10 +167,17 @@ public class AdminCollection
         try {
             validateCollect();
             testExists();
-            System.out.println("after testExists");
             add();
-            if (commit) connection.commit(); // set to commit()
-            else connection.rollback();
+            if (collectCollection.getRespStatus() != null) {
+                return;
+            }
+            if (commit) {
+                connection.commit();
+                collectCollection.setRespStatus("commit");
+            } else {
+                connection.rollback();
+                collectCollection.setRespStatus("rollback");
+            }
             
         } catch (Exception ex) {
             try {
@@ -204,9 +211,9 @@ public class AdminCollection
         System.out.println(invOwner.dump("testExists invOwner"));
         collectCollection = getCollection(collectID, connection, logger);
         if (collectCollection == null) {
-            System.out.println("CollectCollection null");
+            log4j.debug("CollectCollection null");
         } else {
-            System.out.println(collectCollection.dump("testExists collect"));
+            log4j.debug(collectCollection.dump("testExists collect"));
         }
     }
     
@@ -219,7 +226,8 @@ public class AdminCollection
                 throw new TException.INVALID_OR_MISSING_PARM("Required owner missing:" + ownerID.getValue());
             }
             if (collectCollection != null) {
-                throw new TException.INVALID_OR_MISSING_PARM("Add process and collectCollection exists:" + collectID.getValue());
+                collectCollection.setRespStatus("exists");
+                return;
             }
             addCollectionObject();
             addCollection();

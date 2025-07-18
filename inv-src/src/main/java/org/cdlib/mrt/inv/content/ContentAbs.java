@@ -80,7 +80,7 @@ public abstract class ContentAbs
     public static final String GCOPIES = "inv_glacier_copies";
     public static final String GTRANS = "inv_glacier_transactions";
     protected LoggerInf logger = null;
-    public enum RespStatus {ok, fail, commit, rollback, processing, unknown }
+    public enum RespStatus {ok, fail, commit, rollback, exists, processing, unknown }
     protected RespStatus respStatus = null;
     
     protected ContentAbs(LoggerInf logger) 

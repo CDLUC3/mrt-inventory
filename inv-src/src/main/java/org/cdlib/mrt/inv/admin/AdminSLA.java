@@ -126,8 +126,16 @@ public class AdminSLA
             validateSla();
             testExists();
             add();
-            if (commit) connection.commit();
-            else connection.rollback();
+            if (slaCollection.getRespStatus() != null) {
+                return;
+            }
+            if (commit) {
+                connection.commit();
+                slaCollection.setRespStatus("commit");
+            } else {
+                connection.rollback();
+                slaCollection.setRespStatus("rollback");
+            }
             
         } catch (Exception ex) {
             try {
@@ -161,8 +169,6 @@ public class AdminSLA
         slaCollection = getCollection(slaID, connection, logger);
         if (slaCollection == null) {
             log4j.debug("SlaCollection null");
-        } else {
-            log4j.debug(slaCollection.dump("testExists sla"));
         }
     }
     
@@ -175,7 +181,9 @@ public class AdminSLA
                 throw new TException.INVALID_OR_MISSING_PARM("Required owner missing:" + ownerID.getValue());
             }
             if (slaCollection != null) {
-                throw new TException.INVALID_OR_MISSING_PARM("Add process and slaCollection exists:" + slaID.getValue());
+                slaCollection.setRespStatus("exists");
+                log4j.info(slaCollection.dump("SLA exists"));
+                return;
             }
             addCollectionObject();
             addCollection();

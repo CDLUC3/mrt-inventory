@@ -1164,7 +1164,7 @@ public class JerseyInv
             Identifier adminID = new Identifier(adminIDS);
             
             JSONObject jsonResponse = invService.addAdminSLA(adminID, name, mnemonic);
-            log4j.debug(jsonResponse);
+            //log4j.debug(jsonResponse);
             return Response 
                 .status(200).entity(jsonResponse.toString())
                     .build();      
@@ -1201,7 +1201,7 @@ public class JerseyInv
             Identifier slaID = new Identifier(slaIDS);
             
             JSONObject jsonResponse = invService.addAdminOwner(adminID, slaID, name);
-            log4j.info(jsonResponse.toString());
+            //log4j.info(jsonResponse.toString());
             return Response 
                 .status(200).entity(jsonResponse.toString())
                     .build();      
@@ -1239,7 +1239,7 @@ public class JerseyInv
             Identifier adminID = new Identifier(adminIDS);
             
             JSONObject jsonResponse = invService.addAdminCollection(collectPrivate, adminID, name, mnemonic);
-            log4j.debug(jsonResponse);
+            //log4j.debug(jsonResponse);
             return Response 
                 .status(200).entity(jsonResponse.toString())
                     .build();      
