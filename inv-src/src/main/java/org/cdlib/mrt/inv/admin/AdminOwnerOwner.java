@@ -47,21 +47,18 @@ import org.cdlib.mrt.utility.TException;
  * Run fixity
  * @author dloy
  */
-public class AdminOwner
+public class AdminOwnerOwner
         extends AdminShare
 {
 
-    protected static final String NAME = "AdminOwner";
+    protected static final String NAME = "AdminInit";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
     protected static final boolean DUMPTALLY = false;
     protected static final boolean EACHTALLY = true;
         
     protected Identifier ownerID = null;
-    protected Identifier ownerArkOwnerID = null;
     protected String name = null;
-    //protected String mnemonic = null;
-    protected List<Identifier> members = null;
             
     protected int node = 0;
     protected int toNode = 0;
@@ -69,70 +66,68 @@ public class AdminOwner
     protected HashMap<String,String> mimeList = new HashMap<>();
     protected InvOwner invOwner = null;
     protected InvObject ownerObject = null;
-    protected InvOwner newOwner = null;
+    //protected InvOwner invOwner = null;
     
-    public static AdminOwner getAdminOwner(
+    public static AdminOwnerOwner getAdminOwnerOwner(
             Identifier ownerID,
-            Identifier ownerArkOwnerID,
             String name,
-            String membersS,
             Connection connection,
             LoggerInf logger)
         throws TException
     {
-        ArrayList<Identifier> members = getMembers(membersS);
-        return new AdminOwner(ownerID, ownerArkOwnerID, name, members, connection, logger);
+        return new AdminOwnerOwner(ownerID, name, connection, logger);
     }
     
-    public static AdminOwner getAdminOwner(
+    public AdminOwnerOwner(
             Identifier ownerID,
-            Identifier ownerArkOwnerID,
             String name,
-            List<Identifier> members,
-            Connection connection,
-            LoggerInf logger)
-        throws TException
-    {
-        return new AdminOwner(ownerID, ownerArkOwnerID, name, members, connection, logger);
-    }
-    
-    public AdminOwner(
-            Identifier ownerID,
-            Identifier ownerArkOwnerID,
-            String name,
-            List<Identifier> members,
             Connection connection,
             LoggerInf logger)
         throws TException
     {
         super(AdminShare.AdminType.sla, connection, logger);
         this.ownerID = ownerID;
-        this.ownerArkOwnerID = ownerArkOwnerID;
         this.name = name;
-        this.members = members;
     }
     
     
     
-    public void processOwner()
+    public void buildOwner()
         throws TException
     {
         try {
-            validateOwner();
-            testExists();
-            System.out.println("after testExists");
-            add();
-            if (newOwner.getRespStatus() != null) {
+            invOwner = getOwner(ownerID, connection, logger);
+            ownerObject = getObject(ownerID, connection, logger);
+            
+           
+            if ((invOwner != null)  && (ownerObject != null)) {
+                invOwner.setRespStatus("exists");
+                System.out.println(invOwner.dump("***invOwnerOwner exists***"));
                 return;
             }
+            if (invOwner == null) {
+                addOwnerOne();
+            }
+            if (ownerObject == null) {
+                addOwnerObject();
+            }
+            if (invOwner.getObjectID() < 1) {
+                invOwner.setObjectID(ownerObject.getId());
+            }
             
-            if (commit == null) {}
-            else if (commit) {
+            String msg = invOwner.dump("final ownerowner");
+            System.out.println(msg);
+                        
+            if (commit == null) {
+                System.out.println("Wait commit");
+                
+            } else if (commit) {
                 connection.commit();
-                newOwner.setRespStatus("commit");
+                invOwner.setRespStatus("commit");
+                
             } else {
                 connection.rollback();
-                newOwner.setRespStatus("rollback");
+                invOwner.setRespStatus("rollback");
             }
             System.out.println("!commit:" + commit);
             
@@ -148,71 +143,22 @@ public class AdminOwner
             }
         }
     }
-
-    protected void validateOwner()
-        throws TException
-    {
-        validObjectID(ownerID,"ownerID");
-        validObjectID(ownerArkOwnerID,"ownerArkOwnerID");
-        validString(name, "name");
-        validMembers(members);
-        validConnect(connection);
-    }
     
-    protected void testExists()
+    public void addOwnerOne()
         throws TException
     {
-        invOwner = getOwner(ownerArkOwnerID, connection, logger);
-        System.out.println(invOwner.dump("testExists invOwner"));
-        newOwner = getOwner(ownerID, connection, logger);
-        if (newOwner == null) {
-            System.out.println("newOwner null");
-        } else {
-            System.out.println(newOwner.dump("testExists Owner"));
-        }
-    }
-    
-    public void add()
-        throws TException
-    {
-        System.out.println("add entered");
-        try {
-            if (invOwner == null) {
-                throw new TException.INVALID_OR_MISSING_PARM("Required owner missing:" + ownerArkOwnerID.getValue());
-            }
-            if (newOwner != null) {
-                newOwner.setRespStatus("exists");
-                return;
-            }
-            addOwnerObject();
-            addOwner();
-            addMembers(ownerObject, members);
-            
-        } catch (TException tex) {
-            throw tex;
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new TException.GENERAL_EXCEPTION(e);
-        }
-    }
-    
-    public void addOwner()
-        throws TException
-    {
-        System.out.println("addOwner entered");
+        System.out.println("addOwnerOne entered");
         try {
             
-            newOwner = new InvOwner(logger);
-            newOwner.setObjectID(ownerObject.getId());
-            newOwner.setArk(ownerID);
-            newOwner.setName(name);
-            System.out.println(newOwner.dump("***newOwner dump***"));
+            invOwner = new InvOwner(logger);
+            //invOwner.setObjectID(ownerObject.getId());
+            invOwner.setArk(ownerID);
+            invOwner.setName(name);
             
-            long ownerseq = dbAdd.insert(newOwner);
-            newOwner.setId(ownerseq);
-            System.out.println(newOwner.dump("owner build"));
-            String msg = newOwner.dump("addOwner");
+            
+            long ownerseq = dbAdd.insert(invOwner);
+            invOwner.setId(ownerseq);
+            String msg = invOwner.dump("addOwner");
             System.out.println(msg);
             log4j.debug(msg);
             
@@ -267,7 +213,7 @@ public class AdminOwner
     }
 
     public InvOwner getNewOwner() {
-        return newOwner;
+        return invOwner;
     }
     
 }

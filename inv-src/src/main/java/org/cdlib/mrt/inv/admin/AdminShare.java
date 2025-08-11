@@ -36,7 +36,9 @@ import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
@@ -72,7 +74,7 @@ public class AdminShare
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
     protected static final String  STATUS_PROCESSING = "processing";  
-    public enum AdminType { sla, owner, collection }
+    public enum AdminType { sla, owner, collection, init }
     public enum CollectionType { collection_public, collection_private }
 
     protected LoggerInf logger = null;
@@ -80,7 +82,7 @@ public class AdminShare
     protected Exception exception = null;
     protected AdminType processType = null;
     protected DBAdd dbAdd = null;
-    protected Boolean commit = false;
+    protected Boolean commit = null;
 
     protected static final Logger log4j = LogManager.getLogger(); 
     
@@ -275,14 +277,14 @@ public class AdminShare
         }
     }
     
-    protected Properties loadProperties(String propLookup)
+    protected static Properties loadProperties(String propLookup)
         throws TException
     {
         Properties properties = new Properties();
         String propName = "resources/properties/admin/" + propLookup + ".properties";
         System.out.println("Propname=" + propName);
         try {
-            InputStream input = getClass().getClassLoader().getResourceAsStream(propName);
+            InputStream input = AdminShare.class.getClassLoader().getResourceAsStream(propName);
             if(input != null) {
                 log4j.debug(PropertiesUtil.dumpProperties("loadPropertie:" + propLookup, properties));
                 properties.load(input);
@@ -290,6 +292,30 @@ public class AdminShare
             } else {
                 throw new TException.INVALID_OR_MISSING_PARM("adminType invalid:" + propLookup);
             }
+            
+        } catch (TException tex) {
+            throw tex;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new TException.GENERAL_EXCEPTION(e);
+        }
+    }
+    
+    protected static HashMap<String, Identifier> loadIdentifiers(String propLookup)
+        throws TException
+    {
+        HashMap<String,Identifier> idMap = new HashMap<>();
+        try {
+            Properties prop = loadProperties(propLookup);
+            Set keys = prop.keySet();
+            for (Object keyO : keys) {
+                String key = (String)keyO;
+                String val = prop.getProperty(key);
+                Identifier id = new Identifier(val);
+                idMap.put(key, id);
+            }
+            return idMap;
             
         } catch (TException tex) {
             throw tex;
@@ -327,12 +353,19 @@ public class AdminShare
                         + " - invObject:" + invObject.getArk().getValue()
                 );
             }
-            invCollectionObject = new InvCollectionObject(logger);
-            invCollectionObject.setObjectID(invObject.getId());
-            invCollectionObject.setCollectionID(memberCollection.getId());
-            long id = dbAdd.insert(invCollectionObject);
-            invCollectionObject.setId(id);
-            System.out.println(invCollectionObject.dump("***Add member***"));
+            long objectseq = invObject.getId();
+            long collectionseq = memberCollection.getId();
+            invCollectionObject = InvDBUtil.getCollectionObject(objectseq, collectionseq, connection, logger);
+            if (invCollectionObject == null) {
+                invCollectionObject = new InvCollectionObject(logger);
+                invCollectionObject.setObjectID(objectseq);
+                invCollectionObject.setCollectionID(collectionseq);
+                long id = dbAdd.insert(invCollectionObject);
+                invCollectionObject.setId(id);
+                System.out.println(invCollectionObject.dump("***Add member***"));
+            } else {
+                System.out.println(invCollectionObject.dump("***Member Exists***"));
+            }
             
             return invCollectionObject;
             
@@ -370,6 +403,15 @@ public class AdminShare
 
     public Boolean getCommit() {
         return commit;
+    }
+    
+    protected static void close(Connection connect)
+    {
+        try {
+            connect.close();
+        } catch (Exception e) {
+                System.out.println("close connection exception (no biggy):" + e);
+        }
     }
 }
 

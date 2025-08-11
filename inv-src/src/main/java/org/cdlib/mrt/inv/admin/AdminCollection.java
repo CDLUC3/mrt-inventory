@@ -171,7 +171,8 @@ public class AdminCollection
             if (collectCollection.getRespStatus() != null) {
                 return;
             }
-            if (commit) {
+            if (commit == null) {}
+            else if (commit) {
                 connection.commit();
                 collectCollection.setRespStatus("commit");
             } else {
@@ -208,7 +209,7 @@ public class AdminCollection
         throws TException
     {
         invOwner = getOwner(ownerID, connection, logger);
-        System.out.println(invOwner.dump("testExists invOwner"));
+        log4j.debug(invOwner.dump("testExists invOwner"));
         collectCollection = getCollection(collectID, connection, logger);
         if (collectCollection == null) {
             log4j.debug("CollectCollection null");
@@ -250,7 +251,7 @@ public class AdminCollection
             
             Properties collectCollectionProp = loadProperties(collectionType.toString());
             
-            System.out.println(PropertiesUtil.dumpProperties("Load collection prop", collectCollectionProp));
+            log4j.debug(PropertiesUtil.dumpProperties("Load collection prop", collectCollectionProp));
             collectCollection = new InvCollection(collectCollectionProp, logger);
             collectCollection.setObjectID(collectObject.getId());
             collectCollection.setArk(collectID);
@@ -278,7 +279,7 @@ public class AdminCollection
         try {
             Properties objectProp = loadProperties("collection_ark");
             
-            System.out.println(PropertiesUtil.dumpProperties("Load object prop", objectProp));
+            log4j.debug(PropertiesUtil.dumpProperties("Load object prop", objectProp));
             
             collectObject = new InvObject(objectProp, logger);
             collectObject.setOwnerID(invOwner.getId());
@@ -290,7 +291,7 @@ public class AdminCollection
             collectObject.setType(InvObject.Type.mrtCuratorial);
             collectObject.setRole(InvObject.Role.mrtClass);
             //createObject.setVersionNumber(0);
-            System.out.println(collectObject.dump("build"));
+            log4j.debug(collectObject.dump("build"));
             //
             objectseq = dbAdd.insert(collectObject);
             collectObject.setId(objectseq);

@@ -32,6 +32,7 @@ package org.cdlib.mrt.inv.service;
 import java.util.Properties;
 
 import org.cdlib.mrt.core.ServiceStatus;
+import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
@@ -77,7 +78,7 @@ public class InventoryConfig
     protected Properties zooProperties = null;
     protected JSONObject stateJsonObject = null;
     protected JSONObject jdb = null;
-    protected LinkedHashMap<String, String> adminMap = null;
+    protected LinkedHashMap<String, Identifier> adminMap = null;
     protected DPRFileDB db = null;
     protected ZooManager zooManager = null;
     protected ZooHandler zooHandler = null;
@@ -249,7 +250,8 @@ public class InventoryConfig
             String key = keys.next();
             String val = adminJson.getString(key);
             if (val.equals("none")) continue;
-            adminMap.put(key, val);
+            Identifier id = new Identifier(val);
+            adminMap.put(key, id);
         }
     }
     
@@ -489,7 +491,7 @@ public class InventoryConfig
         this.logger = logger;
     }
 
-    public LinkedHashMap<String, String> getAdminMap() {
+    public LinkedHashMap<String, Identifier> getAdminMap() {
         return adminMap;
     }
 

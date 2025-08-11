@@ -129,7 +129,9 @@ public class AdminSLA
             if (slaCollection.getRespStatus() != null) {
                 return;
             }
-            if (commit) {
+                        
+            if (commit == null) {}
+            else if (commit) {
                 connection.commit();
                 slaCollection.setRespStatus("commit");
             } else {

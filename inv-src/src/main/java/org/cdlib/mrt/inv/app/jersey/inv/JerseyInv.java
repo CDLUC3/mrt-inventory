@@ -393,6 +393,16 @@ public class JerseyInv
     }
     
     @POST
+    @Path("admin/init")
+    public Response callAdminInit(
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        return addAdminInit( cs, sc);
+    }
+    
+    @POST
     @Path("reset")
     public Response callResetState(
             @DefaultValue("-none-") @QueryParam("log4jlevel") String log4jlevel,
@@ -1239,6 +1249,34 @@ public class JerseyInv
             Identifier adminID = new Identifier(adminIDS);
             
             JSONObject jsonResponse = invService.addAdminCollection(collectPrivate, adminID, name, mnemonic);
+            //log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+   
+    public Response addAdminInit(
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+         LoggerInf logger = defaultLogger;
+        try {
+            log("adminInit entered:");
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            
+            JSONObject jsonResponse = invService.addAdminInit();
             //log4j.debug(jsonResponse);
             return Response 
                 .status(200).entity(jsonResponse.toString())

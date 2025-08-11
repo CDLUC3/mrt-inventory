@@ -63,6 +63,7 @@ import org.cdlib.mrt.inv.action.ProcessObject;
 import org.cdlib.mrt.inv.action.SaveNode;
 import org.cdlib.mrt.inv.action.Versions;
 import org.cdlib.mrt.inv.admin.AdminCollection;
+import org.cdlib.mrt.inv.admin.AdminInit;
 import org.cdlib.mrt.inv.admin.AdminOwner;
 import org.cdlib.mrt.inv.admin.AdminSLA;
 import org.cdlib.mrt.inv.content.ContentAbs;
@@ -598,15 +599,14 @@ public class InvService
         throws TException
     {   
         try {
-            LinkedHashMap<String,String> map = inventoryConfig.getAdminMap();
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
             Connection connection = inventoryConfig.getConnection(false);
             //!if (connection.isValid(1000)) System.out.println("valid connection");
             //!else System.out.println("valid connection");
             //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
-            Identifier ownerID = new Identifier(map.get("ownerOwner")); 
-            String slaCollectionS = map.get("slaCollection");
-            Identifier slaCollectionID = new Identifier(slaCollectionS);
-            Identifier systemClassesID = new Identifier(map.get("systemClasses"));
+            Identifier ownerID = map.get("ownerOwner"); 
+            Identifier slaCollectionID = map.get("slaCollection");
+            Identifier systemClassesID = map.get("systemClasses");
             ArrayList<Identifier> membersOf = new ArrayList<>();
             membersOf.add(slaCollectionID);
             membersOf.add(systemClassesID); 
@@ -641,14 +641,14 @@ public class InvService
     {   
         try {
             boolean commit = true;
-            LinkedHashMap<String,String> map = inventoryConfig.getAdminMap();
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
             Connection connection = inventoryConfig.getConnection(false);
             //!if (connection.isValid(1000)) System.out.println("valid connection");
             //!else System.out.println("valid connection");
             //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
-            Identifier ownerOwnerID = new Identifier(map.get("ownerOwner"));
-            Identifier ownerCollectionID = new Identifier(map.get("ownerCollection"));
-            Identifier systemClassesID = new Identifier(map.get("systemClasses"));
+            Identifier ownerOwnerID = map.get("ownerOwner");
+            Identifier ownerCollectionID = map.get("ownerCollection");
+            Identifier systemClassesID = map.get("systemClasses");
             ArrayList<Identifier> membersOf = new ArrayList<>();
             membersOf.add(ownerCollectionID);  
             membersOf.add(systemClassesID); 
@@ -688,14 +688,14 @@ public class InvService
     {   
         try {
             boolean commit = true;
-            LinkedHashMap<String,String> map = inventoryConfig.getAdminMap();
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
             Connection connection = inventoryConfig.getConnection(false);
             //!if (connection.isValid(1000)) System.out.println("valid connection");
             //!else System.out.println("valid connection");
             //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
-            Identifier ownerOwnerID = new Identifier(map.get("ownerOwner"));
-            Identifier collectionCollectionID = new Identifier(map.get("collectionCollection"));
-            Identifier systemClassesID = new Identifier(map.get("systemClasses"));
+            Identifier ownerOwnerID = map.get("ownerOwner");
+            Identifier collectionCollectionID = map.get("collectionCollection");
+            Identifier systemClassesID = map.get("systemClasses");
             ArrayList<Identifier> membersOf = new ArrayList<>();
             membersOf.add(collectionCollectionID); 
             membersOf.add(systemClassesID); 
@@ -717,6 +717,36 @@ public class InvService
             
         } catch (Exception ex) {
             System.out.println("addAdminCollection Exception:" + ex);
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+ 
+    }
+    
+    @Override
+    public JSONObject addAdminInit()
+        throws TException
+    {   
+        try {
+            boolean commit = true;
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
+            Connection connection = inventoryConfig.getConnection(false);
+            AdminInit adminInit = AdminInit.getAdminInit(map,connection,logger);
+            adminInit.setCommit(commit);
+            adminInit.build();
+            JSONObject jsonResponse = adminInit.getBuildResponseJson();
+            System.out.println("AFTER MAIN");
+            System.out.println(jsonResponse.toString(2));
+            AddStateEntryGen.addLogStateEntry("addAdminInit", jsonResponse);
+            return jsonResponse;
+            
+        } catch (TException tex) {
+            System.out.println("addAdminInit Exception:" + tex);
+            tex.printStackTrace();
+            throw tex;
+            
+        } catch (Exception ex) {
+            System.out.println("addAdminInit Exception:" + ex);
             ex.printStackTrace();
             throw new TException(ex);
         }

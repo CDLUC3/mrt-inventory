@@ -337,6 +337,14 @@ public interface InvServiceInf
         throws TException;
     
     /**
+     * Build base inv admin owner, collections
+     * @return JSON for all constructed parts
+     * @throws TException 
+     */
+    public JSONObject addAdminInit()
+        throws TException;
+    
+    /**
      * @return Zoo Manager for this service
      */
     public ZooManager getZooManager();

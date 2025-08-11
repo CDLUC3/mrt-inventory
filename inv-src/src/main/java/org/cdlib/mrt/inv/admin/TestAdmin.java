@@ -25,9 +25,7 @@ public class TestAdmin
      
     public static void main(String[] argv) { // owner
         
-       main_sla(argv);
-        
-      
+       main_owner_owner(argv);
     }
      
      
@@ -188,6 +186,41 @@ public class TestAdmin
             
         
         }
+    }
+     
+    public static void main_owner_owner(String[] argv) { // owner
+        
+
+        InventoryConfig config = null;
+        Connection connection = null;
+        LoggerInf logger = null;
+    	try {
+            
+            config = InventoryConfig.useYaml();
+            config.dbStartup();
+            connection = config.getConnection(false);
+            logger = config.getLogger();
+            Identifier ownerOwnerID = new Identifier("ark:/13030/testOwnOwn"); // Owner Merritt Admin
+            String name = "test admin Owner Owner";
+            
+            AdminOwnerOwner adminOwner = AdminOwnerOwner.getAdminOwnerOwner( 
+                    ownerOwnerID, name, connection, logger);
+            adminOwner.buildOwner();
+ 
+            
+        } catch (Exception ex) {
+                // TODO Auto-generated catch block
+                
+                System.out.println("Exception:" + ex);
+                ex.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex)  { }
+            
+        
+        }
+      
     }
     
     public static JSONObject setJsonPublic()
