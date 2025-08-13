@@ -133,21 +133,30 @@ public class AdminSLA
             if (commit == null) {}
             else if (commit) {
                 connection.commit();
+                log4j.debug("AdminSLA commit.1");
                 slaCollection.setRespStatus("commit");
             } else {
                 connection.rollback();
                 slaCollection.setRespStatus("rollback");
+                log4j.debug("AdminSLA rollback 1");
             }
             
         } catch (Exception ex) {
             try {
                 connection.rollback();
                 log4j.info("Exception rollback:" + ex);
+                System.out.println("AdminSLA rollback 2");
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
                 System.out.println(MESSAGE + msg);
+            }
+            log4j.error(ex.toString(), ex);
+            if (ex instanceof TException) {
+                throw (TException)ex;
+            } else {
+                throw new TException(ex);
             }
         }
     }
@@ -172,12 +181,13 @@ public class AdminSLA
         if (slaCollection == null) {
             log4j.debug("SlaCollection null");
         }
+        slaObject = getObject(slaID, connection, logger);
     }
     
     public void add()
         throws TException
     {
-        System.out.println("add entered");
+        log4j.debug("add entered");
         try {
             if (invOwner == null) {
                 throw new TException.INVALID_OR_MISSING_PARM("Required owner missing:" + ownerID.getValue());
@@ -205,6 +215,19 @@ public class AdminSLA
         throws TException
     {
         log4j.debug("addCollection entered");
+        if (slaCollection != null) {
+            slaCollection.setRespStatus("exists");
+            if (slaCollection.getObjectID() < 1) {
+                slaCollection.setObjectID(slaObject.getId());
+                dbAdd.replace(slaCollection);
+                System.out.println("replace slaCollection objectID(" + slaObject.getId() + "):" 
+                        + slaObject.getArk().getValue());
+            }
+            String msg = slaCollection.dump("SLA Collection exists");
+            System.out.println(msg);
+            log4j.info(msg);
+            return;
+        }
         try {
             Properties slaCollectionProp = loadProperties("sla");
             
@@ -218,9 +241,10 @@ public class AdminSLA
             
             long collectseq = dbAdd.insert(slaCollection);
             slaCollection.setId(collectseq);
-            String msg = slaCollection.dump("addCollection");
+            slaCollection.setRespStatus("ok");
+            String msg = slaCollection.dump("SLA Collection built");
             System.out.println(msg);
-            log4j.debug(msg);
+            log4j.info(msg);
             
         } catch (TException tex) {
             throw tex;
@@ -235,6 +259,13 @@ public class AdminSLA
         throws TException
     {
         log4j.debug("addCollectionObject entered");
+        if (slaObject != null) {
+            slaObject.setRespStatus("exists");
+            String msg = slaCollection.dump("SLA Object exists");
+            System.out.println(msg);
+            log4j.info(msg);
+            return;
+        }
         try {
             Properties objectProp = loadProperties("sla_ark");
             
@@ -254,7 +285,8 @@ public class AdminSLA
             //
             objectseq = dbAdd.insert(slaObject);
             slaObject.setId(objectseq);
-            String msg = slaObject.dump("addCollectionObject");
+            slaObject.setRespStatus("ok");
+            String msg = slaObject.dump("SLA Object built");
             System.out.println(msg);
             log4j.debug(msg);
             

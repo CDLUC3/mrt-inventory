@@ -98,36 +98,25 @@ public class AdminOwnerOwner
         try {
             invOwner = getOwner(ownerID, connection, logger);
             ownerObject = getObject(ownerID, connection, logger);
-            
-           
-            if ((invOwner != null)  && (ownerObject != null)) {
-                invOwner.setRespStatus("exists");
-                System.out.println(invOwner.dump("***invOwnerOwner exists***"));
-                return;
-            }
-            if (invOwner == null) {
-                addOwnerOne();
-            }
-            if (ownerObject == null) {
-                addOwnerObject();
-            }
+            addOwner();
+            addOwnerObject();
             if (invOwner.getObjectID() < 1) {
                 invOwner.setObjectID(ownerObject.getId());
             }
             
-            String msg = invOwner.dump("final ownerowner");
-            System.out.println(msg);
                         
             if (commit == null) {
-                System.out.println("Wait commit");
+                System.out.println("AdminOwnerOwner wait commit");
                 
             } else if (commit) {
                 connection.commit();
                 invOwner.setRespStatus("commit");
+                System.out.println("AdminOwnerOwner commit.1");
                 
             } else {
                 connection.rollback();
                 invOwner.setRespStatus("rollback");
+                System.out.println("AdminOwnerOwner rollback");
             }
             System.out.println("!commit:" + commit);
             
@@ -135,19 +124,31 @@ public class AdminOwnerOwner
             try {
                 connection.rollback();
                 log4j.info("Exception rollback:" + ex);
+                System.out.println("AdminOwnerOwner rollback 3");
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
                 System.out.println(MESSAGE + msg);
             }
+            log4j.error(ex.toString(), ex);
+            if (ex instanceof TException) {
+                throw (TException)ex;
+            } else {
+                throw new TException(ex);
+            }
         }
     }
     
-    public void addOwnerOne()
+    public void addOwner()
         throws TException
     {
-        System.out.println("addOwnerOne entered");
+        log4j.debug("addOwnerOne entered");
+        if (invOwner != null) {
+            invOwner.setRespStatus("exists");
+            log4j.info(invOwner.dump("invOwnerOwner exists"));
+            return;
+        }
         try {
             
             invOwner = new InvOwner(logger);
@@ -158,6 +159,7 @@ public class AdminOwnerOwner
             
             long ownerseq = dbAdd.insert(invOwner);
             invOwner.setId(ownerseq);
+            invOwner.setRespStatus("ok");
             String msg = invOwner.dump("addOwner");
             System.out.println(msg);
             log4j.debug(msg);
@@ -174,7 +176,14 @@ public class AdminOwnerOwner
     public void addOwnerObject()
         throws TException
     {
-        System.out.println("addOwnerObject entered");
+        log4j.debug("addOwnerObject entered");
+        if (ownerObject != null) {
+            ownerObject.setRespStatus("exists");
+            String msg = ownerObject.dump("ownerObject exists");
+            System.out.println(msg);
+            log4j.info(msg);
+            return;
+        }
         try {
             Properties objectProp = loadProperties("owner_ark");
             
@@ -190,11 +199,12 @@ public class AdminOwnerOwner
             ownerObject.setType(InvObject.Type.mrtSystem);
             ownerObject.setRole(InvObject.Role.mrtClass);
             //createObject.setVersionNumber(0);
-            System.out.println(ownerObject.dump("build"));
+            //System.out.println(ownerObject.dump("build"));
             //
             objectseq = dbAdd.insert(ownerObject);
             ownerObject.setId(objectseq);
-            String msg = ownerObject.dump("addOwnerObject");
+            ownerObject.setRespStatus("ok");
+            String msg = ownerObject.dump("ownerObject built");
             System.out.println(msg);
             log4j.debug(msg);
             

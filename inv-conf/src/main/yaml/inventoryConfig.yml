@@ -28,11 +28,23 @@ inv-info:
     trace: 5
     
   admin:
-    ownerOwner: "{!SSM: inventory/config/admin/ownerOwner !DEFAULT: none}"
-    ownerCollection: "{!SSM: inventory/config/admin/ownerCollection !DEFAULT: none}"
-    slaCollection: "{!SSM: inventory/config/admin/slaCollection !DEFAULT: none}"
-    collectionCollection: "{!SSM: inventory/config/admin/collectionCollection !DEFAULT: none}"
-    systemClasses: "{!SSM: inventory/config/admin/systemClasses !DEFAULT: none}"
+    #ownerOwner: "{!SSM: inventory/config/admin/ownerOwner !DEFAULT: none}"
+    #ownerCollection: "{!SSM: inventory/config/admin/ownerCollection !DEFAULT: none}"
+    #slaCollection: "{!SSM: inventory/config/admin/slaCollection !DEFAULT: none}"
+    #collectionCollection: "{!SSM: inventory/config/admin/collectionCollection !DEFAULT: none}"
+    #systemClasses: "{!SSM: inventory/config/admin/systemClasses !DEFAULT: none}"
+    
+    ownerOwner: ark:/13030/j2rn30xp
+    ownerCollection: ark:/13030/j2cc0900
+    slaCollection: ark:/13030/j2h41690
+    collectionCollection: ark:/13030/j27p88qw
+    systemClasses: ark:/13030/j2mw23mp
+    
+    #ownerOwner: ark:/99999/testownown
+    #ownerCollection: ark:/99999/testowncol
+    #slaCollection: ark:/99999/testslacol
+    #collectionCollection: ark:/99999/testcolcol
+    #systemClasses: ark:/99999/testsyscls
 
   db:
     user: "{!SSM: inv/readwrite/db-user}"

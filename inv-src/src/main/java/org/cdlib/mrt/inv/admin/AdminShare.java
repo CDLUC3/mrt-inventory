@@ -162,7 +162,10 @@ public class AdminShare
         throws TException
     {
         try {
-            connection.setAutoCommit(false);
+            if (connection.getAutoCommit()) {
+                connection.setAutoCommit(false);
+                System.out.println("reset autocommit false");
+            }
         } catch (Exception e) {
             throw new TException.INVALID_OR_MISSING_PARM("unable to turn off autocommit:" + e);
         }
@@ -329,7 +332,7 @@ public class AdminShare
     protected void addMembers(InvObject invObject, List<Identifier> collectionIDs)
         throws TException
     {
-        System.out.println("addMembers entered");
+        log4j.debug("addMembers entered");
         for(Identifier collectionID : collectionIDs) {
             addMember(invObject, collectionID);
         }
@@ -348,10 +351,11 @@ public class AdminShare
             InvCollectionObject invCollectionObject 
                     = InvDBUtil.getCollectionObject(invObject.getId(), memberCollection.getId(), connection, logger);
             if (invCollectionObject != null) {
-                throw new TException.INVALID_OR_MISSING_PARM("CollectionObject already exists for:" 
+                System.out.println("CollectionObject already exists for:" 
                         + " - collectionID:" + collectionID.getValue()
                         + " - invObject:" + invObject.getArk().getValue()
                 );
+                return invCollectionObject;
             }
             long objectseq = invObject.getId();
             long collectionseq = memberCollection.getId();

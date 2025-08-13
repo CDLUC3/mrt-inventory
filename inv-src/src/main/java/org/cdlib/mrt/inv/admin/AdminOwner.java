@@ -129,9 +129,11 @@ public class AdminOwner
             if (commit == null) {}
             else if (commit) {
                 connection.commit();
+                System.out.println("AdminOwner commit.1");
                 newOwner.setRespStatus("commit");
             } else {
                 connection.rollback();
+                System.out.println("AdminOwner rollback 1");
                 newOwner.setRespStatus("rollback");
             }
             System.out.println("!commit:" + commit);
@@ -144,7 +146,12 @@ public class AdminOwner
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
-                System.out.println(MESSAGE + msg);
+            }
+            log4j.error(ex.toString(), ex);
+            if (ex instanceof TException) {
+                throw (TException)ex;
+            } else {
+                throw new TException(ex);
             }
         }
     }
@@ -175,7 +182,7 @@ public class AdminOwner
     public void add()
         throws TException
     {
-        System.out.println("add entered");
+        log4j.debug("add entered");
         try {
             if (invOwner == null) {
                 throw new TException.INVALID_OR_MISSING_PARM("Required owner missing:" + ownerArkOwnerID.getValue());
@@ -200,7 +207,7 @@ public class AdminOwner
     public void addOwner()
         throws TException
     {
-        System.out.println("addOwner entered");
+        log4j.debug("addOwner entered");
         try {
             
             newOwner = new InvOwner(logger);
@@ -228,7 +235,7 @@ public class AdminOwner
     public void addOwnerObject()
         throws TException
     {
-        System.out.println("addOwnerObject entered");
+        log4j.debug("addOwnerObject entered");
         try {
             Properties objectProp = loadProperties("owner_ark");
             

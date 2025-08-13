@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Properties;
 
 import org.cdlib.mrt.core.Identifier;
+import static org.cdlib.mrt.inv.admin.TestAdminMulti.buildCollectPrv;
+import static org.cdlib.mrt.inv.admin.TestAdminMulti.close;
 import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
@@ -65,7 +67,6 @@ public class AdminInit
     protected Identifier ownerID = null;
     protected Identifier ownerArkOwnerID = null;
     protected InvOwner ownerOwnerInv = null;
-    protected InvObject ownerOwnerObjectInv = null;
     protected InvCollection systemCollection = null;
     protected InvCollection slaCollection = null;
     protected InvCollection ownerCollection = null;
@@ -92,12 +93,10 @@ public class AdminInit
         AdminInit adminInit = null;
     	try {
             config = InventoryConfig.useYaml();
-            LinkedHashMap<String,Identifier> map = config.getAdminMap();
             config.dbStartup();
             connection = config.getConnection(false);
             logger = config.getLogger();
-            adminInit = AdminInit.getAdminInit(map,connection,logger);
-            //adminInit.setCommit(true);
+            adminInit = AdminInit.getAdminInit("init",connection,logger);
             adminInit.setCommit(false);
             adminInit.build();
             JSONObject buildResponse = adminInit.getBuildResponseJson();
@@ -114,6 +113,62 @@ public class AdminInit
             close(connection);
         } 
       
+    }
+    public static void main_old(String[] argv) { // owner
+        
+       
+        InventoryConfig config = null;
+        Connection connection = null;
+        LoggerInf logger = null;
+        AdminInit adminInit = null;
+    	try {
+            HashMap<String,Identifier> initList = loadIdentifiers("init");
+            config = InventoryConfig.useYaml();
+            config.dbStartup();
+            connection = config.getConnection(false);
+            logger = config.getLogger();
+            adminInit = AdminInit.getAdminInit(initList,connection,logger);
+            adminInit.setCommit(false);
+            adminInit.build();
+            JSONObject buildResponse = adminInit.getBuildResponseJson();
+            System.out.println("AFTER MAIN");
+            System.out.println(buildResponse.toString(2));
+            
+        } catch (Exception ex) {
+                // TODO Auto-generated catch block
+                
+                System.out.println("Exception:" + ex);
+                ex.printStackTrace();
+                
+        } finally {
+            close(connection);
+        } 
+      
+    }
+    
+    public static AdminInit getAdminInit(
+            String initListProp,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        HashMap<String,Identifier> initList = null;
+        try {
+            initList = loadIdentifiers(initListProp);
+            
+        } catch (TException tex) {
+                System.out.println("Exception:" + tex);
+                throw tex;
+                
+        } catch (Exception ex) {
+                // TODO Auto-generated catch block
+                
+                System.out.println("Exception:" + ex);
+                ex.printStackTrace();
+                throw new TException(ex);
+                
+        }
+        return new AdminInit(initList, connection, logger);
     }
     
     public static AdminInit getAdminInit(
@@ -150,7 +205,6 @@ public class AdminInit
             buildSLACollection();
             buildOwnerCollection();
             buildCollectionCollection();
-            addOwnerOwnerToCollections();
             buildResponseJson = buildResponse();
             
         } catch (Exception ex) {
@@ -161,12 +215,7 @@ public class AdminInit
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
-            }
-            log4j.error(ex.toString(), ex);
-            if (ex instanceof TException) {
-                throw (TException)ex;
-            } else {
-                throw new TException(ex);
+                System.out.println(MESSAGE + msg);
             }
         }
     }
@@ -190,15 +239,12 @@ public class AdminInit
             if (commit == null) {
                 connection.rollback();
                 response.put("respStatus", "unknown");
-                System.out.println("AdminInit rollback 1");
             } else if (commit) {
                 connection.commit();
-                System.out.println("AdminInit commit.1");
                 response.put("respStatus", "commit");
             } else {
                 connection.rollback();
                 response.put("respStatus", "rollback");
-                System.out.println("AdminInit rollback 2");
             }
             response.put("header", "AdminInit");
             AddStateEntryGen.addLogStateEntry("AdminInit",response);
@@ -212,8 +258,8 @@ public class AdminInit
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
+                System.out.println(MESSAGE + msg);
             }
-            log4j.error(ex.toString(), ex);
             if (ex instanceof  TException) {
                 throw (TException) ex;
             } else {
@@ -235,7 +281,7 @@ public class AdminInit
             adminOwner.setCommit(null);
             adminOwner.buildOwner();
             ownerOwnerInv = adminOwner.getNewOwner();
-            ownerOwnerObjectInv = adminOwner.getOwnerObject();
+            ownerOwnerInv.setRespStatus("ok");
             
         } catch (Exception ex) {
             try {
@@ -245,12 +291,7 @@ public class AdminInit
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
-            }
-            log4j.error(ex.toString(), ex);
-            if (ex instanceof TException) {
-                throw (TException)ex;
-            } else {
-                throw new TException(ex);
+                System.out.println(MESSAGE + msg);
             }
         }
     }
@@ -272,23 +313,17 @@ public class AdminInit
             adminCollection.setCommit(null);
             adminCollection.processCollection();
             systemCollection = adminCollection.getCollectCollection();
+            systemCollection.setRespStatus("ok");
             
         } catch (Exception ex) {
             try {
                 connection.rollback();
                 log4j.info("Exception rollback:" + ex);
-                System.out.println("AdminInit rollback 4");
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
                 System.out.println(MESSAGE + msg);
-            }
-            log4j.error(ex.toString(), ex);
-            if (ex instanceof TException) {
-                throw (TException)ex;
-            } else {
-                throw new TException(ex);
             }
         }
     }
@@ -311,23 +346,17 @@ public class AdminInit
             adminCollection.setCommit(null);
             adminCollection.processCollection();
             slaCollection = adminCollection.getCollectCollection();
+            slaCollection.setRespStatus("ok");
             
         } catch (Exception ex) {
             try {
                 connection.rollback();
                 log4j.info("Exception rollback:" + ex);
-                System.out.println("AdminInit rollback 5");
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
                 System.out.println(MESSAGE + msg);
-            }
-            log4j.error(ex.toString(), ex);
-            if (ex instanceof TException) {
-                throw (TException)ex;
-            } else {
-                throw new TException(ex);
             }
         }
     }
@@ -351,23 +380,17 @@ public class AdminInit
             adminCollection.setCommit(null);
             adminCollection.processCollection();
             ownerCollection = adminCollection.getCollectCollection();
+            ownerCollection.setRespStatus("ok");
             
         } catch (Exception ex) {
             try {
                 connection.rollback();
                 log4j.info("Exception rollback:" + ex);
-                System.out.println("AdminInit rollback 6");
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
                 System.out.println(MESSAGE + msg);
-            }
-            log4j.error(ex.toString(), ex);
-            if (ex instanceof TException) {
-                throw (TException)ex;
-            } else {
-                throw new TException(ex);
             }
         }
     }
@@ -391,26 +414,17 @@ public class AdminInit
             adminCollection.setCommit(null);
             adminCollection.processCollection();
             collectionCollection = adminCollection.getCollectCollection();
-            if (collectionCollection.getRespStatus() == null) {
-                collectionCollection.setRespStatus("ok");
-            }
+            collectionCollection.setRespStatus("ok");
             
         } catch (Exception ex) {
             try {
                 connection.rollback();
                 log4j.info("Exception rollback:" + ex);
-                System.out.println("AdminInit rollback 7");
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
                 System.out.println(MESSAGE + msg);
-            }
-            log4j.error(ex.toString(), ex);
-            if (ex instanceof TException) {
-                throw (TException)ex;
-            } else {
-                throw new TException(ex);
             }
         }
     }
@@ -430,46 +444,6 @@ public class AdminInit
     }
 */
 
-    public void addOwnerOwnerToCollections()
-        throws TException
-    {
-        try {
-            ArrayList<Identifier> toCollection = new ArrayList<>();
-            toCollection.add(ownerCollection.getArk());
-            toCollection.add(slaCollection.getArk());
-            toCollection.add(systemCollection.getArk());
-            addMembers(ownerOwnerObjectInv,toCollection);
-            
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            try {
-                connection.rollback();
-                log4j.info("Exception rollback:" + ex);
-                System.out.println("AdminInit rollback 8");
-                
-            } catch (Exception rex) {
-                String msg = "Rollback fails:" + rex;
-                log4j.info("Rollback fails:" + rex);
-                System.out.println(MESSAGE + msg);
-            }
-            log4j.error(ex.toString(), ex);
-            if (ex instanceof TException) {
-                throw (TException) ex;
-            } else {
-                throw new TException(ex);
-            }
-        }
-    }
-    
-    protected void addMembers(InvObject invObject, List<Identifier> collectionIDs)
-        throws TException
-    {
-        log4j.debug("addMembers entered");
-        for(Identifier collectionID : collectionIDs) {
-            addMember(invObject, collectionID);
-        }
-    }
-    
     public JSONObject getBuildResponseJson() {
         return buildResponseJson;
     }

@@ -156,7 +156,7 @@ public class AdminCollection
         this.mnemonic = mnemonic;
         this.members = members;
         this.collectionType = collectionType;
-        System.out.println("AdminCollection:" + this.collectionType.toString());
+        log4j.debug("AdminCollection:" + this.collectionType.toString());
     }
     
     
@@ -174,10 +174,12 @@ public class AdminCollection
             if (commit == null) {}
             else if (commit) {
                 connection.commit();
+                log4j.debug("AdminCollection commit.");
                 collectCollection.setRespStatus("commit");
             } else {
                 connection.rollback();
                 collectCollection.setRespStatus("rollback");
+                log4j.debug("AdminCollection rollback 1");
             }
             
         } catch (Exception ex) {
@@ -189,7 +191,12 @@ public class AdminCollection
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
                 log4j.info("Rollback fails:" + rex);
-                System.out.println(MESSAGE + msg);
+            }
+            log4j.error(ex.toString(), ex);
+            if (ex instanceof TException) {
+                throw (TException)ex;
+            } else {
+                throw new TException(ex);
             }
         }
     }
@@ -216,19 +223,21 @@ public class AdminCollection
         } else {
             log4j.debug(collectCollection.dump("testExists collect"));
         }
+        collectObject = getObject(collectID, connection, logger);
+        if (collectObject == null) {
+            log4j.debug("collectObject null");
+        } else {
+            log4j.debug(collectObject.dump("testExists collect"));
+        }
     }
     
     public void add()
         throws TException
     {
-        System.out.println("add entered");
+        log4j.debug("add entered");
         try {
             if (invOwner == null) {
                 throw new TException.INVALID_OR_MISSING_PARM("Required owner missing:" + ownerID.getValue());
-            }
-            if (collectCollection != null) {
-                collectCollection.setRespStatus("exists");
-                return;
             }
             addCollectionObject();
             addCollection();
@@ -246,7 +255,20 @@ public class AdminCollection
     public void addCollection()
         throws TException
     {
-        System.out.println("addCollection entered");
+        log4j.debug("addCollection entered");
+        if (collectCollection != null) {
+            if (collectCollection.getObjectID() < 1) {
+                collectCollection.setObjectID(collectObject.getId());
+                dbAdd.replace(collectCollection);
+                System.out.println("replace collectCollection objectID(" + collectObject.getId() + "):" 
+                        + collectCollection.getArk().getValue());
+            }
+            collectCollection.setRespStatus("exists");
+            String msg = collectCollection.dump("Collection exists");
+            System.out.println(msg);
+            log4j.debug(msg);
+            return;
+        }
         try {
             
             Properties collectCollectionProp = loadProperties(collectionType.toString());
@@ -259,6 +281,7 @@ public class AdminCollection
             collectCollection.setMnemonic(mnemonic);
             long collectseq = dbAdd.insert(collectCollection);
             collectCollection.setId(collectseq);
+            collectCollection.setRespStatus("ok");
             String msg = collectCollection.dump("addCollection");
             System.out.println(msg);
             log4j.debug(msg);
@@ -275,7 +298,15 @@ public class AdminCollection
     public void addCollectionObject()
         throws TException
     {
-        System.out.println("addCollectionObject entered");
+       log4j.debug("addCollectionObject entered");
+        
+        if (collectObject != null) {
+            collectObject.setRespStatus("exists");
+            String msg = collectObject.dump("collectObject exists");
+            System.out.println(msg);
+            log4j.info(msg);
+            return;
+        }
         try {
             Properties objectProp = loadProperties("collection_ark");
             
@@ -295,7 +326,8 @@ public class AdminCollection
             //
             objectseq = dbAdd.insert(collectObject);
             collectObject.setId(objectseq);
-            String msg = collectObject.dump("addCollectionObject");
+            collectObject.setRespStatus("ok");
+            String msg = collectObject.dump("collectObject built");
             System.out.println(msg);
             log4j.debug(msg);
             

@@ -735,8 +735,6 @@ public class InvService
             adminInit.setCommit(commit);
             adminInit.build();
             JSONObject jsonResponse = adminInit.getBuildResponseJson();
-            System.out.println("AFTER MAIN");
-            System.out.println(jsonResponse.toString(2));
             AddStateEntryGen.addLogStateEntry("addAdminInit", jsonResponse);
             return jsonResponse;
             
