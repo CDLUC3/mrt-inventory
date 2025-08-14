@@ -42,10 +42,10 @@ public class TestAdminConfig
     	try {
             
             config = InventoryConfig.useYaml();
-            LinkedHashMap<String,String> map = config.getAdminMap();
+            LinkedHashMap<String,Identifier> map = config.getAdminMap();
             Set<String> keys = map.keySet();
             for (String key : keys) {
-                String val = map.get(key);
+                Identifier val = map.get(key);
                 System.out.println(key + " = " + val);
             }
  
