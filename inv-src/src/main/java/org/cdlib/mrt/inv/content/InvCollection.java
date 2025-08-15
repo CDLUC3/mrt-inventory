@@ -34,8 +34,10 @@ import java.util.Properties;
 
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.utility.LoggerInf;
+import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
+import org.json.JSONObject;
 /**
  * Container class for inv Object content
  * @author dloy
@@ -164,11 +166,67 @@ public class InvCollection
             setHarvestPrivilege(prop.getProperty("harvest_privilege"));
             setStorageTier(prop.getProperty("storage_tier"));
         } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.logError(StringUtil.stackTrace(ex), 2);
+            throw new TException(ex);
+        }
+    }
+    
+    public void setNotNullProp(Properties prop)
+        throws TException
+    {
+        if ((prop == null) || (prop.isEmpty())) return;
+        try {
+            if (prop.getProperty("id") != null) setId(prop.getProperty("id"));
+            if (prop.getProperty("inv_object_id") != null) setObjectID(prop.getProperty("inv_object_id"));
+            if (prop.getProperty("ark") != null) setArk(prop.getProperty("ark"));
+            if (prop.getProperty("name") != null) setName(prop.getProperty("name"));
+            if (prop.getProperty("mnemonic") != null) setMnemonic(prop.getProperty("mnemonic"));
+            if (prop.getProperty("read_privilege") != null) setRead(prop.getProperty("read_privilege"));
+            if (prop.getProperty("write_privilege") != null) setWrite(prop.getProperty("write_privilege"));
+            if (prop.getProperty("download_privilege") != null) setDownload(prop.getProperty("download_privilege"));
+            if (prop.getProperty("harvest_privilege") != null) setHarvestPrivilege(prop.getProperty("harvest_privilege"));
+            if (prop.getProperty("storage_tier") != null) setStorageTier(prop.getProperty("storage_tier"));
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
             logger.logError(StringUtil.stackTrace(ex), 2);
             throw new TException(ex);
         }
     }
 
+    public void setJson(JSONObject inJson)
+        throws TException
+    {
+        if (inJson == null) return;
+        Properties prop = new Properties();
+        setJsonProp(inJson, prop, "id");
+        setJsonProp(inJson, prop, "inv_object_id");
+        setJsonProp(inJson, prop, "name");
+        setJsonProp(inJson, prop, "mnemonic");
+        setJsonProp(inJson, prop, "ark");
+        setJsonProp(inJson, prop, "read_privilege");
+        setJsonProp(inJson, prop, "write_privilege");
+        setJsonProp(inJson, prop, "download_privilege");
+        setJsonProp(inJson, prop, "storage_tier");
+        if (!prop.isEmpty()) {
+            setNotNullProp(prop);
+        }
+    }
+    
+    public static void setJsonProp(JSONObject json, Properties prop, String key)
+    {
+        if (json == null) return;
+        try {
+            if (StringUtil.isAllBlank(key)) return;
+            String val = (String)json.get(key);
+            prop.setProperty(key, val);
+            
+        } catch (Exception ex) {
+            return;
+        }
+    }
+    
     public Properties retrieveProp()
         throws TException
     {
@@ -202,6 +260,10 @@ public class InvCollection
     public void setArk(String arkS)
         throws TException
     {
+        if (StringUtil.isAllBlank(arkS)) {
+            this.ark = null;
+            return;
+        }
         this.ark = new Identifier(arkS);
     }
 

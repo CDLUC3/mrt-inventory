@@ -36,10 +36,18 @@ import java.sql.Connection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Properties;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.cdlib.mrt.cloud.ManifestSAX;
 
 import org.cdlib.mrt.utility.FileUtil;
+import org.cdlib.mrt.log.utility.AddStateEntryGen;
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.cloud.VersionMap;
 import org.cdlib.mrt.core.Identifier;
@@ -54,7 +62,14 @@ import org.cdlib.mrt.inv.action.LocalMap;
 import org.cdlib.mrt.inv.action.ProcessObject;
 import org.cdlib.mrt.inv.action.SaveNode;
 import org.cdlib.mrt.inv.action.Versions;
+import org.cdlib.mrt.inv.admin.AdminCollection;
+import org.cdlib.mrt.inv.admin.AdminInit;
+import org.cdlib.mrt.inv.admin.AdminOwner;
+import org.cdlib.mrt.inv.admin.AdminSLA;
+import org.cdlib.mrt.inv.content.ContentAbs;
+import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.taskdb.TaskDb;
+import org.cdlib.mrt.inv.content.InvOwner;
 import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
@@ -81,7 +96,9 @@ public class InvService
     protected LoggerInf logger = null;
     protected Exception exception = null;
     protected InventoryConfig inventoryConfig = null;
-
+    protected AddStateEntryGen logSaveEntry = null;
+    protected static final Logger log4j = LogManager.getLogger();  
+    
     public static InvService getInvService(InventoryConfig inventoryConfig)
             throws TException
     {
@@ -572,6 +589,166 @@ public class InvService
         } finally {
             inventoryConfig.closeConnect(connection);
         }
+    }
+    
+    @Override
+    public JSONObject addAdminSLA(
+            Identifier adminID, 
+            String name, 
+            String mnemonic)
+        throws TException
+    {   
+        try {
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
+            Connection connection = inventoryConfig.getConnection(false);
+            //!if (connection.isValid(1000)) System.out.println("valid connection");
+            //!else System.out.println("valid connection");
+            //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
+            Identifier ownerID = map.get("ownerOwner"); 
+            Identifier slaCollectionID = map.get("slaCollection");
+            Identifier systemClassesID = map.get("systemClasses");
+            ArrayList<Identifier> membersOf = new ArrayList<>();
+            membersOf.add(slaCollectionID);
+            membersOf.add(systemClassesID); 
+            AdminSLA adminSLA = AdminSLA.getAdminSLA(adminID,ownerID, name, mnemonic, membersOf, connection, logger);
+            adminSLA.setCommit(true);
+            adminSLA.processSla();
+            
+            InvCollection invCollection = adminSLA.getSlaCollection();
+            JSONObject jsonResponse = invCollection.dumpJson("addAdminSla");
+            AddStateEntryGen.addLogStateEntry("addAdminSLA",jsonResponse);
+            return jsonResponse;
+            
+        } catch (TException tex) {
+            System.out.println("addAdminSLA Exception:" + tex);
+            tex.printStackTrace();
+            throw tex;
+            
+        } catch (Exception ex) {
+            System.out.println("addAdminSLA Exception:" + ex);
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+ 
+    }
+    
+    @Override
+    public JSONObject addAdminOwner(
+            Identifier adminID, 
+            Identifier slaID,
+            String name)
+        throws TException
+    {   
+        try {
+            boolean commit = true;
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
+            Connection connection = inventoryConfig.getConnection(false);
+            //!if (connection.isValid(1000)) System.out.println("valid connection");
+            //!else System.out.println("valid connection");
+            //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
+            Identifier ownerOwnerID = map.get("ownerOwner");
+            Identifier ownerCollectionID = map.get("ownerCollection");
+            Identifier systemClassesID = map.get("systemClasses");
+            ArrayList<Identifier> membersOf = new ArrayList<>();
+            membersOf.add(ownerCollectionID);  
+            membersOf.add(systemClassesID); 
+            membersOf.add(slaID);
+            AdminOwner adminOwner = AdminOwner.getAdminOwner(adminID, 
+                    ownerOwnerID, name, membersOf, connection, logger);
+            adminOwner.setCommit(commit);
+            adminOwner.processOwner();
+            
+            InvOwner invOwner = adminOwner.getNewOwner();
+            JSONObject jsonResponse = invOwner.dumpJson("addAdminOwner");
+            AddStateEntryGen.addLogStateEntry("addAdminOwner", jsonResponse);
+            //AddStateEntryGen.addEntry("info", jsonResponse);
+            //AddStateEntryGen.addLogJson(Level.INFO, "addAdminOwner", jsonResponse);
+            return jsonResponse;
+            
+        } catch (TException tex) {
+            System.out.println("addAdminOwner Exception:" + tex);
+            tex.printStackTrace();
+            throw tex;
+            
+        } catch (Exception ex) {
+            System.out.println("addAdminOwner Exception:" + ex);
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+ 
+    }
+    
+    @Override
+    public JSONObject addAdminCollection(
+            boolean collectPrivate,
+            Identifier adminID, 
+            String name,
+            String mnemonic)
+        throws TException
+    {   
+        try {
+            boolean commit = true;
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
+            Connection connection = inventoryConfig.getConnection(false);
+            //!if (connection.isValid(1000)) System.out.println("valid connection");
+            //!else System.out.println("valid connection");
+            //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
+            Identifier ownerOwnerID = map.get("ownerOwner");
+            Identifier collectionCollectionID = map.get("collectionCollection");
+            Identifier systemClassesID = map.get("systemClasses");
+            ArrayList<Identifier> membersOf = new ArrayList<>();
+            membersOf.add(collectionCollectionID); 
+            membersOf.add(systemClassesID); 
+            
+            AdminCollection adminCollection = AdminCollection.getAdminCollection(
+                    collectPrivate, adminID, ownerOwnerID, name, mnemonic, membersOf, connection, logger);
+            adminCollection.setCommit(commit);
+            adminCollection.processCollection();
+            InvCollection invCollection = adminCollection.getCollectCollection();
+            
+            JSONObject jsonResponse = invCollection.dumpJson("addAdminCollection");
+            AddStateEntryGen.addLogStateEntry("addAdminCollection", jsonResponse);
+            return jsonResponse;
+            
+        } catch (TException tex) {
+            System.out.println("addAdminCollection Exception:" + tex);
+            tex.printStackTrace();
+            throw tex;
+            
+        } catch (Exception ex) {
+            System.out.println("addAdminCollection Exception:" + ex);
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+ 
+    }
+    
+    @Override
+    public JSONObject addAdminInit()
+        throws TException
+    {   
+        try {
+            boolean commit = true;
+            LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
+            Connection connection = inventoryConfig.getConnection(false);
+            AdminInit adminInit = AdminInit.getAdminInit(map,connection,logger);
+            adminInit.setCommit(commit);
+            adminInit.build();
+            JSONObject jsonResponse = adminInit.getBuildResponseJson();
+            AddStateEntryGen.addLogStateEntry("addAdminInit", jsonResponse);
+            return jsonResponse;
+            
+        } catch (TException tex) {
+            System.out.println("addAdminInit Exception:" + tex);
+            tex.printStackTrace();
+            throw tex;
+            
+        } catch (Exception ex) {
+            System.out.println("addAdminInit Exception:" + ex);
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+ 
     }
     
     @Override

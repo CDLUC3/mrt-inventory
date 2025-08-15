@@ -345,6 +345,64 @@ public class JerseyInv
     }
     
     @POST
+    @Path("admin/sla")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response callAddAdminSLA(
+            @DefaultValue("") @FormDataParam("adminid") String adminIDS,
+            @DefaultValue("") @FormDataParam("name") String name,
+            @DefaultValue("") @FormDataParam("mnemonic") String mnemonic,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        return adminSLA(adminIDS, name, mnemonic, cs, sc);
+    }
+    
+    @POST
+    @Path("admin/owner")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response callAddAdminOwner(
+            @DefaultValue("") @FormDataParam("adminid") String adminIDS,
+            @DefaultValue("") @FormDataParam("slaid") String slaIDS,
+            @DefaultValue("") @FormDataParam("name") String name,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        return adminOwner(adminIDS, slaIDS, name, cs, sc);
+    }
+    
+    @POST
+    @Path("admin/collection/{coltype}")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response callAddAdminCollection(
+            @PathParam("coltype") String coltypeS,
+            @DefaultValue("") @FormDataParam("adminid") String adminIDS,
+            @DefaultValue("") @FormDataParam("name") String name,
+            @DefaultValue("") @FormDataParam("mnemonic") String mnemonic,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        coltypeS = coltypeS.toLowerCase();
+        boolean collectPrivate = true;
+        if (coltypeS.equals("public")) {
+            collectPrivate = false;
+        }
+        return adminCollection(collectPrivate, adminIDS, name, mnemonic, cs, sc);
+    }
+    
+    @POST
+    @Path("admin/init")
+    public Response callAdminInit(
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        return addAdminInit( cs, sc);
+    }
+    
+    @POST
     @Path("reset")
     public Response callResetState(
             @DefaultValue("-none-") @QueryParam("log4jlevel") String log4jlevel,
@@ -1094,7 +1152,145 @@ public class JerseyInv
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
-    
+   
+    public Response adminSLA(
+            String adminIDS,
+            String name,
+            String mnemonic,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+         LoggerInf logger = defaultLogger;
+        try {
+            log("addTask entered:"
+                    + " - adminIDS=" + adminIDS
+                    + " - name=" + name
+                    + " - mnemonic=" + mnemonic
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            Identifier adminID = new Identifier(adminIDS);
+            
+            JSONObject jsonResponse = invService.addAdminSLA(adminID, name, mnemonic);
+            //log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+   
+    public Response adminOwner(
+            String adminIDS,
+            String slaIDS,
+            String name,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+         LoggerInf logger = defaultLogger;
+        try {
+            log("adminOwner entered:"
+                    + " - adminIDS=" + adminIDS
+                    + " - slaIDS=" + slaIDS
+                    + " - name=" + name
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            Identifier adminID = new Identifier(adminIDS);
+            Identifier slaID = new Identifier(slaIDS);
+            
+            JSONObject jsonResponse = invService.addAdminOwner(adminID, slaID, name);
+            //log4j.info(jsonResponse.toString());
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+   
+    public Response adminCollection(
+            boolean collectPrivate,
+            String adminIDS,
+            String name,
+            String mnemonic,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+         LoggerInf logger = defaultLogger;
+        try {
+            log("adminCollection entered:"
+                    + " - colpriv=" + collectPrivate
+                    + " - adminIDS=" + adminIDS
+                    + " - name=" + name
+                    + " - mnemonic=" + mnemonic
+                    );
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            Identifier adminID = new Identifier(adminIDS);
+            
+            JSONObject jsonResponse = invService.addAdminCollection(collectPrivate, adminID, name, mnemonic);
+            //log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+   
+    public Response addAdminInit(
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+         LoggerInf logger = defaultLogger;
+        try {
+            log("adminInit entered:");
+            InvServiceInit invServiceInit = InvServiceInit.getInvServiceInit(sc);
+            InvServiceInf invService = invServiceInit.getInvService();
+            logger = invService.getLogger();
+            
+            JSONObject jsonResponse = invService.addAdminInit();
+            //log4j.debug(jsonResponse);
+            return Response 
+                .status(200).entity(jsonResponse.toString())
+                    .build();      
+            
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
     
     public Response addTask(
             String taskName,

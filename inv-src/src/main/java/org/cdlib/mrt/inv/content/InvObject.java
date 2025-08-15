@@ -179,6 +179,7 @@ public class InvObject
             }
             setType(prop.getProperty("object_type"));
             setAggregateRole(prop.getProperty("aggregate_role"));
+            setRole(prop.getProperty("role"));
             setVersionNumber(prop.getProperty("version_number"));
             setWho(prop.getProperty("erc_who"));
             setWhat(prop.getProperty("erc_what"));
@@ -204,11 +205,12 @@ public class InvObject
         if (getType() != null) prop.setProperty("object_type", getType().toString());
         if (getRole() != null) prop.setProperty("role", getRole().toString());
         if (getAggregateRole() != null) prop.setProperty("aggregate_role", getAggregateRole().toString());
-        if (getVersionNumber() != 0) prop.setProperty("version_number", "" + getVersionNumber());
+        prop.setProperty("version_number", "" + getVersionNumber());
         if (getWho() != null) prop.setProperty("erc_who", getWho());
         if (getWhen() != null) prop.setProperty("erc_what", getWhat());
         if (getWhen() != null) prop.setProperty("erc_when", getWhen());
         if (getWhere() != null) prop.setProperty("erc_where", getWhere());
+        if (getType() != null) prop.setProperty("object_type", getType().toString());
         setModified();
         prop.setProperty("modified", getModifiedDB());
         return prop;
@@ -266,6 +268,7 @@ public class InvObject
     public void setArk(String arkS)
         throws TException
     {
+        if (StringUtil.isAllBlank(arkS)) return;
         this.ark = new Identifier(arkS);
     }
 

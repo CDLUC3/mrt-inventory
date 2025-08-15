@@ -32,6 +32,7 @@ package org.cdlib.mrt.inv.service;
 import java.util.Properties;
 
 import org.cdlib.mrt.core.ServiceStatus;
+import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
@@ -40,6 +41,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.cdlib.mrt.core.DateState;
 
@@ -76,6 +78,7 @@ public class InventoryConfig
     protected Properties zooProperties = null;
     protected JSONObject stateJsonObject = null;
     protected JSONObject jdb = null;
+    protected LinkedHashMap<String, Identifier> adminMap = null;
     protected DPRFileDB db = null;
     protected ZooManager zooManager = null;
     protected ZooHandler zooHandler = null;
@@ -97,9 +100,12 @@ public class InventoryConfig
             InventoryConfig inventoryConfig = new InventoryConfig();
 
             JSONObject jInvInfo = getYamlJson();
-            System.out.println("***getYamlJson:\n" + jInvInfo.toString(3));
+            //System.out.println("***getYamlJson:\n" + jInvInfo.toString(3));
             JSONObject jInvLogger = jInvInfo.getJSONObject("fileLogger");
             LoggerInf logger = inventoryConfig.setLogger(jInvLogger);
+            
+            JSONObject jsonAdmin = jInvInfo.getJSONObject("admin");
+            inventoryConfig.setAdminMap(jsonAdmin);
             
             inventoryConfig.setLog4j(jInvLogger);
             inventoryConfig.setLogger(logger);
@@ -130,7 +136,7 @@ public class InventoryConfig
        throws TException
     {
         try {
-            String propName = "resources/inventoryConfig.yml";
+            String propName = "resources/yaml/inventoryConfig.yml";
             Test test=new Test();
             InputStream propStream =  test.getClass().getClassLoader().
                     getResourceAsStream(propName);
@@ -232,6 +238,23 @@ public class InventoryConfig
             throw new TException(ex);
         }
     }
+    
+    protected void setAdminMap(JSONObject adminJson)
+        throws TException
+    {
+         adminMap = new LinkedHashMap<>();
+         if (adminJson == null) return;
+         Iterator<String> keys = adminJson.keys();
+
+        while(keys.hasNext()) {
+            String key = keys.next();
+            String val = adminJson.getString(key);
+            if (val.equals("none")) continue;
+            Identifier id = new Identifier(val);
+            adminMap.put(key, id);
+        }
+    }
+    
     
     protected void setZookeeper(JSONObject jzooServer, JSONObject jzooClient, LoggerInf logger)
        throws TException
@@ -466,6 +489,10 @@ public class InventoryConfig
     
     public void setLogger(LoggerInf logger) {
         this.logger = logger;
+    }
+
+    public LinkedHashMap<String, Identifier> getAdminMap() {
+        return adminMap;
     }
 
     public JSONObject getJdb() {

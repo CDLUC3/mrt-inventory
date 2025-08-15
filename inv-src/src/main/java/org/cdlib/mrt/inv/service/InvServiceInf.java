@@ -292,7 +292,58 @@ public interface InvServiceInf
             String taskName, 
             String taskItem)
         throws TException;
-            
+    
+    /**
+     * 
+     * @param adminID sla ark for SLA collection
+     * @param name name of sla
+     * @param mnemonic mnemonic of sla
+     * @return SLA Collection JSON
+     * @throws TException 
+     */
+    public JSONObject addAdminSLA(
+            Identifier adminID, 
+            String name, 
+            String mnemonic)
+        throws TException;
+    
+    /**
+     * Add new admin owner
+     * @param adminID ownerID
+     * @param slaID slaID for this owner
+     * @param name owner name
+     * @return Owner JSON
+     * @throws TException 
+     */
+    public JSONObject addAdminOwner(
+            Identifier adminID, 
+            Identifier slaID,
+            String name)
+        throws TException;
+    
+    /**
+     * Add new collection
+     * @param collectPrivate true=private collection; false=public collection
+     * @param adminID new collection ID
+     * @param name name of collection
+     * @param mnemonic mnemonic of collection
+     * @return JSON for newly created collection
+     */
+    public JSONObject addAdminCollection(
+            boolean collectPrivate,
+            Identifier adminID, 
+            String name,
+            String mnemonic)
+        throws TException;
+    
+    /**
+     * Build base inv admin owner, collections
+     * @return JSON for all constructed parts
+     * @throws TException 
+     */
+    public JSONObject addAdminInit()
+        throws TException;
+    
     /**
      * @return Zoo Manager for this service
      */

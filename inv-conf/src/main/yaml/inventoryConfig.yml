@@ -9,8 +9,8 @@ inv-info:
     baseURI: "{!SSM: inventory/config/baseURI}"
   
   zooserver:
+    #queueService: "uc3-mrtdocker-dev03.cdlib.org:2181"  
     queueService: "{!SSM: inventory/zoo/queueService !DEFAULT: localhost:2181}"
-    #queueService: "localhost:2181"
     queueName: "{!SSM: inventory/zoo/queueName}"
     queueTimeout: "{!SSM: inventory/zoo/Timeout !DEFAULT: 3600000}"
     lockName: "{!SSM: inventory/zoo/lockName !DEFAULT: /mrt.lock}"
@@ -26,6 +26,25 @@ inv-info:
     name: inv
     qualifier: yyMMdd
     trace: 5
+    
+  admin:
+    #ownerOwner: "{!SSM: inventory/config/admin/ownerOwner !DEFAULT: none}"
+    #ownerCollection: "{!SSM: inventory/config/admin/ownerCollection !DEFAULT: none}"
+    #slaCollection: "{!SSM: inventory/config/admin/slaCollection !DEFAULT: none}"
+    #collectionCollection: "{!SSM: inventory/config/admin/collectionCollection !DEFAULT: none}"
+    #systemClasses: "{!SSM: inventory/config/admin/systemClasses !DEFAULT: none}"
+    
+    ownerOwner: ark:/13030/j2rn30xp
+    ownerCollection: ark:/13030/j2cc0900
+    slaCollection: ark:/13030/j2h41690
+    collectionCollection: ark:/13030/j27p88qw
+    systemClasses: ark:/13030/j2mw23mp
+    
+    #ownerOwner: ark:/99999/testownown
+    #ownerCollection: ark:/99999/testowncol
+    #slaCollection: ark:/99999/testslacol
+    #collectionCollection: ark:/99999/testcolcol
+    #systemClasses: ark:/99999/testsyscls
 
   db:
     user: "{!SSM: inv/readwrite/db-user}"
@@ -58,8 +77,15 @@ inv-info-docker: &docker
     path: /tdr/tmpdir
     name: inv
     qualifier: yyMMdd
-    trace: 5
-
+    trace: 5 
+    
+  admin:
+    ownerOwner: ark:/13030/j2rn30xp
+    ownerCollection: ark:/13030/j2cc0900
+    slaCollection: ark:/13030/j2h41690
+    collectionCollection: ark:/13030/j27p88qw
+    systemClasses: ark:/13030/j2mw23mp
+    
   db:
     adapter: mysql2
     host: db-container

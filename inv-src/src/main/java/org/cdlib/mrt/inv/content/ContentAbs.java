@@ -33,9 +33,12 @@ package org.cdlib.mrt.inv.content;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Set;
 
 
+import org.json.JSONObject;
 
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.Identifier;
@@ -77,6 +80,8 @@ public abstract class ContentAbs
     public static final String GCOPIES = "inv_glacier_copies";
     public static final String GTRANS = "inv_glacier_transactions";
     protected LoggerInf logger = null;
+    public enum RespStatus {ok, fail, commit, rollback, exists, processing, unknown }
+    protected RespStatus respStatus = null;
     
     protected ContentAbs(LoggerInf logger) 
     {
@@ -125,11 +130,60 @@ public abstract class ContentAbs
             return ex.toString();
         }
     }
+    
+    public JSONObject dumpJson(String header) 
+    {
+        JSONObject jsonhead = new JSONObject();
+        try {
+            jsonhead.put("header", header);
+            jsonhead.put("dbName", getDBName());
+            if (respStatus != null) {
+                jsonhead.put("respStatus", respStatus.toString());
+            }
+            
+            JSONObject json = new JSONObject();
+            Properties prop = retrieveProp();
+            Enumeration e = prop.propertyNames();
+            String key = null;
+            String value = null;
+
+            while( e.hasMoreElements() )
+            {
+               key = (String)e.nextElement();
+               value = prop.getProperty(key);
+               if (value != null) {
+                   json.put(key,value);
+               }
+            }
+            jsonhead.put("content", json);
+            return jsonhead;
+            
+        } catch (Exception ex) {
+            return null;
+        }
+    }
 
     protected void log(String msg)
     {
         if (!DEBUG) return;
         System.out.println(MESSAGE + msg);
     }
+
+    public RespStatus getRespStatus() {
+        return respStatus;
+    }
+
+    public void setRespStatus(RespStatus respStatus) {
+        this.respStatus = respStatus;
+    }
+
+    public void setRespStatus(String respStatusS) {
+        if (StringUtil.isAllBlank(respStatusS)) {
+            this.respStatus = RespStatus.unknown;
+        } else {
+            this.respStatus = RespStatus.valueOf(respStatusS);
+        }
+    }
+    
 }
 
