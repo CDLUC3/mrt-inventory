@@ -80,10 +80,12 @@ inv-info-docker: &docker
     trace: 5 
     
   admin:
-    ownerOwner: none
-    slaCollection: none
-    collectionCollection: none
-
+    ownerOwner: ark:/13030/j2rn30xp
+    ownerCollection: ark:/13030/j2cc0900
+    slaCollection: ark:/13030/j2h41690
+    collectionCollection: ark:/13030/j27p88qw
+    systemClasses: ark:/13030/j2mw23mp
+    
   db:
     adapter: mysql2
     host: db-container

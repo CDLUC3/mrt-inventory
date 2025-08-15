@@ -10,8 +10,8 @@
   <url>http://uc3.cdlib.org</url>
 
   <properties>
-    <merritt-core.version>3.0-SNAPSHOT</merritt-core.version>
     <merritt-bom.version>3.0-SNAPSHOT</merritt-bom.version>
+    <merritt-core.version>3.1-SNAPSHOT</merritt-core.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <itDockerRegistry>it-docker-registry</itDockerRegistry>
     <propertyDir>test</propertyDir>
