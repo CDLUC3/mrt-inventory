@@ -126,18 +126,18 @@ public class AdminSLA
             validateSla();
             testExists();
             add();
-            if (slaCollection.getRespStatus() != null) {
-                return;
-            }
                         
-            if (commit == null) {}
-            else if (commit) {
+            if (commit == null) {
+                System.out.println("COMMIT processSla: null");
+            } else if (commit) {
                 connection.commit();
+                System.out.println("COMMIT processSla: commit");
                 log4j.debug("AdminSLA commit.1");
                 slaCollection.setRespStatus("commit");
             } else {
                 connection.rollback();
                 slaCollection.setRespStatus("rollback");
+                System.out.println("COMMIT processSla: rollback");
                 log4j.debug("AdminSLA rollback 1");
             }
             
