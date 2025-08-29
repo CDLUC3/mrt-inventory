@@ -122,12 +122,10 @@ public class AdminOwner
             testExists();
             System.out.println("after testExists");
             add();
-            if (newOwner.getRespStatus() != null) {
-                return;
-            }
             
-            if (commit == null) {}
-            else if (commit) {
+            if (commit == null) {
+                System.out.println("COMMIT processOwner: null");
+            } else if (commit) {
                 connection.commit();
                 System.out.println("AdminOwner commit.1");
                 newOwner.setRespStatus("commit");

@@ -168,18 +168,19 @@ public class AdminCollection
             validateCollect();
             testExists();
             add();
-            if (collectCollection.getRespStatus() != null) {
-                return;
-            }
-            if (commit == null) {}
-            else if (commit) {
+            if (commit == null) {
+                System.out.println("COMMIT processCollection: null");
+            } else if (commit) {
+                System.out.println("COMMIT processCollection: true");
                 connection.commit();
+                System.out.println("COMMIT processCollection PERFORMED");
                 log4j.debug("AdminCollection commit.");
                 collectCollection.setRespStatus("commit");
             } else {
+                System.out.println("COMMIT: false");
                 connection.rollback();
                 collectCollection.setRespStatus("rollback");
-                log4j.debug("AdminCollection rollback 1");
+                log4j.debug("AdminCollection processCollection rollback 1");
             }
             
         } catch (Exception ex) {
