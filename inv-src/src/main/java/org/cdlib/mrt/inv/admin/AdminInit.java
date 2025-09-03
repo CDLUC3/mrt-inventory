@@ -306,11 +306,11 @@ public class AdminInit
             ArrayList<Identifier> membersOf = new ArrayList<>();
             membersOf.add(systemClassesID); 
             
-            AdminCollection adminCollection = AdminCollection.getAdminCollection(
-                    true, slaCollectionID, ownerOwnerID, name, mnemonic, membersOf, connection, logger);
-            adminCollection.setCommit(null);
-            adminCollection.processCollection();
-            slaCollection = adminCollection.getCollectCollection();
+            AdminSLA adminSLA = AdminSLA.getAdminSLA(
+                    slaCollectionID, ownerOwnerID, name, mnemonic, membersOf, connection, logger);
+            adminSLA.setCommit(null);
+            adminSLA.processSla();
+            slaCollection = adminSLA.getSlaCollection();
             
         } catch (Exception ex) {
             try {
