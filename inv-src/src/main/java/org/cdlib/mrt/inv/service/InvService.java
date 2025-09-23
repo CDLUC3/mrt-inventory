@@ -598,9 +598,10 @@ public class InvService
             String mnemonic)
         throws TException
     {   
+        Connection connection = null;
         try {
             LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
-            Connection connection = inventoryConfig.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             //!if (connection.isValid(1000)) System.out.println("valid connection");
             //!else System.out.println("valid connection");
             //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
@@ -628,6 +629,11 @@ public class InvService
             System.out.println("addAdminSLA Exception:" + ex);
             ex.printStackTrace();
             throw new TException(ex);
+            
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex) { }
         }
  
     }
@@ -639,10 +645,12 @@ public class InvService
             String name)
         throws TException
     {   
+        
+        Connection connection = null;
         try {
             boolean commit = true;
             LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
-            Connection connection = inventoryConfig.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             //!if (connection.isValid(1000)) System.out.println("valid connection");
             //!else System.out.println("valid connection");
             //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
@@ -674,6 +682,11 @@ public class InvService
             System.out.println("addAdminOwner Exception:" + ex);
             ex.printStackTrace();
             throw new TException(ex);
+            
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex) { }
         }
  
     }
@@ -686,10 +699,11 @@ public class InvService
             String mnemonic)
         throws TException
     {   
+        Connection connection = null;
         try {
             boolean commit = true;
             LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
-            Connection connection = inventoryConfig.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             //!if (connection.isValid(1000)) System.out.println("valid connection");
             //!else System.out.println("valid connection");
             //Identifier slaID = new Identifier("ark:/99999/testsla"); // CDL UC3
@@ -719,6 +733,11 @@ public class InvService
             System.out.println("addAdminCollection Exception:" + ex);
             ex.printStackTrace();
             throw new TException(ex);
+            
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex) { }
         }
  
     }
@@ -727,10 +746,11 @@ public class InvService
     public JSONObject addAdminInit()
         throws TException
     {   
+        Connection connection = null;
         try {
             boolean commit = true;
             LinkedHashMap<String,Identifier> map = inventoryConfig.getAdminMap();
-            Connection connection = inventoryConfig.getConnection(false);
+            connection = inventoryConfig.getConnection(false);
             AdminInit adminInit = AdminInit.getAdminInit(map,connection,logger);
             adminInit.setCommit(commit);
             adminInit.build();
@@ -747,6 +767,11 @@ public class InvService
             System.out.println("addAdminInit Exception:" + ex);
             ex.printStackTrace();
             throw new TException(ex);
+            
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex) { }
         }
  
     }
