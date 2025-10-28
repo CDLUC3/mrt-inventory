@@ -50,8 +50,8 @@ phases:
   build:
     on-failure: ABORT
     commands:
-    - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
-    # - mvn -ntp clean install
+    # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
+    - mvn -ntp clean install
     - |
       if [[ "${BRANCHTAG}" == "main" ]]
       then
@@ -159,7 +159,6 @@ phases:
     - |
       for pkg in mrt-invwar mrt-inventoryconf
       do
-        echo "## Code Artifact Packages for $pkg" >> $RPT
         for ver in `aws codeartifact list-package-versions \
           --domain=cdlib-uc3-mrt --repository=uc3-mrt-java \
           --format=maven --namespace=org.cdlib.mrt \
