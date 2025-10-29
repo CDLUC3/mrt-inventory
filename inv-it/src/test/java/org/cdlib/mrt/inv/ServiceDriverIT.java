@@ -476,6 +476,10 @@ public class ServiceDriverIT {
             jj.unlock(zk);
             
             jj = Job.acquireJob(zk, JobState.Processing);
+            jj.setStatus(zk, jj.status().success());
+            jj.unlock(zk);
+            
+            jj = Job.acquireJob(zk, JobState.Storing);
             jj.setInventory(zk, manifest, "tbd");
             jj.setStatus(zk, jj.status().success());
             jj.unlock(zk);
