@@ -1,7 +1,7 @@
 which-inv-info: "{!ENV: MERRITT_INV_INFO !DEFAULT: inv-info}"
   
 inv-info:
-  storageBase: "{!SSM: store/config/baseURI}"
+  storageBase: "{!SSM: inventory/config/storeURI}"
   state:
     id: inv
     name: UC3
