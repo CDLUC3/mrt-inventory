@@ -40,6 +40,8 @@ import org.cdlib.mrt.utility.StringUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -69,6 +71,8 @@ public class InventoryConfig
     private static final String NAME = "InventoryConfig";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    
+    protected static String storageBase = null;
 
     // Hack for creating locks
     public static String qService = null;
@@ -88,7 +92,6 @@ public class InventoryConfig
     //protected FileManager fileManager = null;
     protected LoggerInf logger = null;
     protected boolean shutdown = true;
-    protected String storageBase = null;
     protected InvServiceState serviceState = null;
     protected static final DateState serviceStartTime = new DateState();
     private static class Test{ };
@@ -477,6 +480,25 @@ public class InventoryConfig
 
     public void setStateJsonObject(JSONObject stateJsonObject) {
         this.stateJsonObject = stateJsonObject;
+    }
+
+    public static String getCopyStorageBase() {
+        if (storageBase == null) return null;
+        else return new String(storageBase);
+    }
+    
+    public static String storageUrl() {
+        if (storageBase == null) return null;
+        try {
+            URI baseURI = new URI(storageBase);
+            URL baseURL = baseURI.toURL();
+            String base = baseURL.getProtocol() 
+                        + "://" + baseURL.getHost()
+                        + ":" + baseURL.getPort();
+            return base;
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     public String getStorageBase() {

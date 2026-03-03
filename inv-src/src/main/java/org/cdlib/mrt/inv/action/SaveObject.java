@@ -29,6 +29,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.action;
 
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.Connection;
@@ -70,6 +71,7 @@ import org.cdlib.mrt.inv.extract.StoreState;
 import org.cdlib.mrt.inv.utility.DBAdd;
 import org.cdlib.mrt.inv.extract.StoreFile;
 import org.cdlib.mrt.inv.service.InvProcessState;
+import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.core.Tika;
 import static org.cdlib.mrt.inv.action.InvActionAbs.getVersionMap;
@@ -273,21 +275,26 @@ public class SaveObject
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "processItem - storage_url missing");
             }
             try {
-                manifestURL = new URL(urlS);
+                //manifestURL = new URL(urlS);
+                URI manifestURI = new URI(urlS);
+                manifestURL = manifestURI.toURL();
                 if (DEBUG) System.out.println("manifestURL=" + manifestURL);
             } catch (Exception ex) {
                 String msg = "processItem - URL invalid:" + urlS;
                 logger.logError(msg, 0);
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + msg);
             }
-            String urlPath = manifestURL.getPath();
-            this.storageBase = 
-                    manifestURL.getProtocol() 
-                    + "://" + manifestURL.getHost()
-                    + ":" + manifestURL.getPort()
-                    ;
+            this.storageBase  = InventoryConfig.storageUrl();
+            if (this.storageBase == null) {
+                 this.storageBase = 
+                        manifestURL.getProtocol() 
+                        + "://" + manifestURL.getHost()
+                        + ":" + manifestURL.getPort()
+                        ;
+            }
             
             if (DEBUG) System.out.println("storageBase=" + storageBase);
+            String urlPath = manifestURL.getPath();
             String parts[] = urlPath.split("\\/");
             if (DEBUG) System.out.println("parts[] length=" + parts.length);        
             if (parts.length < 4) {
