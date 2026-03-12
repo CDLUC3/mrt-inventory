@@ -34,7 +34,7 @@ phases:
     - DOCKTAG=$BRANCHTAG
     - COMMITDATE=`git --no-pager log -1 --pretty='format:%cd' --date='format:%Y-%m-%d %H:%M:%S'`
     - echo "Branchtag ${BRANCHTAG}; COMMITDATE=${COMMITDATE}; REPONAME=${REPONAME}; BRANCHNAME=${BRANCHNAME}"
-    - BUILDDATE=$(TZ='America/Los_Angeles' date +"%Y%m%d-%H%M%S")
+    - BUILDDATE=$(TZ='America/Los_Angeles' date +"%Y%m%d")
     - echo "BUILDDATE=$BUILDDATE"
 
     - |
