@@ -95,6 +95,10 @@ phases:
         --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
         -t ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} .
 
+      docker build --push --quiet \
+        --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
+        -t ${ECR_REGISTRY}/${REPONAME}:archive-${BRANCHTAG}-${BUILDDATE} .
+
       if [[ "$BRANCHTAG" == "main" ]]
       then
         docker build --quiet --push \
@@ -149,28 +153,6 @@ phases:
             --query "service.deployments[0].[id,taskDefinition,status,desiredCount,createdAt]" \
             --force-new-deployment || echo "Skip ecs-ephemeral Deployment"
         fi  
-      fi
-
-      if [[ "$BRANCHTAG" == "$TAG_ECS_STG" ]]
-      then
-        docker build --quiet --push \
-          --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-          -t ${ECR_REGISTRY}/${REPONAME}:ecs-stg .
-
-        docker build --quiet --push \
-          --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-          -t ${ECR_REGISTRY}/${REPONAME}:archive-ecs-stg-${BRANCHTAG}-${BUILDDATE} .
-      fi
-
-      if [[ "$BRANCHTAG" == "$TAG_ECS_PRD" ]]
-      then
-        docker build --quiet --push \
-          --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-          -t ${ECR_REGISTRY}/${REPONAME}:ecs-prd .
-
-        docker build --quiet --push \
-          --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-          -t ${ECR_REGISTRY}/${REPONAME}:archive-ecs-prd-${BRANCHTAG}-${BUILDDATE} .
       fi
 
     - |
@@ -230,23 +212,11 @@ phases:
             then
               docker build --quiet --push \
                 --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-                -t ${ECR_REGISTRY}/${REPONAME}:$stack .
+                -t ${ECR_REGISTRY}/${REPONAME}:${TAG_ECS} .
 
-              case "$stack" in
-                ecs-stg|ecs-prd)
-                  pushed=$(date -d $(aws ecr describe-images --repository-name ${REPONAME} \
-                    --image-ids imageTag=$stack 
-                    --query "imageDetails[0].imagePushedAt" --output text) +%s || echo 0)
-                  current=$(date +%s)
-
-                  # do not archive more than once per hour
-                  if [[ $current -gt $(($pushed + 3600)) ]]
-                  then
-                    docker build --quiet --push \
-                      --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-                      -t ${ECR_REGISTRY}/${REPONAME}:archive-${stack}-${TAG_ECS}-${BUILDDATE} .
-                  fi
-              esac
+              docker build --quiet --push \
+                --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
+                -t ${ECR_REGISTRY}/${REPONAME}:archive-${TAG_ECS}-${BUILDDATE} .
             fi
           fi
         done
