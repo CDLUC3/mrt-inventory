@@ -54,7 +54,7 @@ inv-info:
     encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
   
 inv-info-docker: &docker
-  storageBase: http://store:8080/store
+  storageBase: http://{!ENV: SVC_ACCESS !DEFAULT: store:8080/store}
   state:
     id: inv
     name: UC3
