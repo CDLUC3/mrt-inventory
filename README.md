@@ -13,34 +13,6 @@ This service also provides an API to resolve local identifiers submitted with Me
 ## Original System Specifications
 - [Merritt Inventory Service](https://github.com/CDLUC3/mrt-doc/blob/main/doc/Merritt-inventory-latest.pdf)
 
-## Component Diagram
-
-```mermaid
-%%{init: {'theme': 'neutral', 'securityLevel': 'loose', 'themeVariables': {'fontFamily': 'arial'}}}%%
-graph TD
-  ING(Ingest)
-  click ING href "https://github.com/CDLUC3/mrt-ingest" "source code"
-  ST(Storage)
-  click ST href "https://github.com/CDLUC3/mrt-store" "source code"
-  ZOOINV>Zookeeper Inventory]
-  click ZOOINV href "https://github.com/CDLUC3/mrt-zoo" "source code"
-  INV(Inventory)
-  click INV href "https://github.com/CDLUC3/mrt-inventory" "source code"
-  RDS[(Inventory DB)]
-
-  subgraph flowchart
-    ING --> |Local Id Request| INV
-    ZOOINV --> |acquire task| INV
-    INV --> |retrieve manifest| ST
-    ST --> |manifest file| INV
-    INV --> RDS
-  end
-  
-  style RDS fill:#F68D2F
-  style ZOOINV fill:cyan
-  style INV stroke:red,stroke-width:4px
-```
-
 ## Dependencies
 
 This code depends on the following Merritt Libraries.
