@@ -31,8 +31,6 @@ package org.cdlib.mrt.inv.utility;
 
 import java.io.File;
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1123,7 +1121,10 @@ public class InvDBUtil
         throws TException
     {
         log("getFile entered");
-        String sql = "select * from " +  ContentAbs.FILES
+        // this is to address slow queries when ingesting tens of thousands of files
+        // https://github.com/CDLUC3/mrt-doc-private/issues/296
+        String useindex = " force index (id_idx1,pathname) ";
+        String sql = "select * from " +  ContentAbs.FILES + useindex
                 + " where inv_object_id = \'" + objectseq + "\'"
                 + " and inv_version_id = \'" + versionseq + "\'"
                 + " and BINARY pathname = \'" + mySQLEsc(pathName) + "\'"
