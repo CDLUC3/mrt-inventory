@@ -33,6 +33,8 @@ package org.cdlib.mrt.inv.utility;
 import org.cdlib.mrt.utility.*;
 import com.zaxxer.hikari.*;
 import java.sql.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -44,6 +46,8 @@ public class HikariConnectionPool
 
     protected static final String NAME = "HickariConnectionPool";
     protected static final String MESSAGE = NAME + ": ";
+    protected static final Logger log4j = LogManager.getLogger(); 
+    
     private String url, user, password;
     final private long timeout=120000;
     protected HikariDataSource connectionPool = null;
@@ -118,7 +122,7 @@ public class HikariConnectionPool
             }
         } catch (Exception ex) {
             System.out.println("Exception on closeConnection: " + ex);
-            ex.printStackTrace();
+            log4j.error("Exception on closeConnection: " + ex, ex);
             
         } finally {
             connectionPool = null;

@@ -31,8 +31,9 @@ package org.cdlib.mrt.inv.extract;
 
 
 import java.io.File;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
@@ -46,6 +47,7 @@ public class StoreOwner
     private static final String NAME = "StoreOwner";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     protected Identifier ownerObjectID = null;
     protected LoggerInf logger = null;
@@ -85,9 +87,9 @@ public class StoreOwner
                 + URLEncoder.encode("system/mrt-owner.txt", "utf-8")
                 + "?fixity=no"
                 ;
-            if (DEBUG) System.out.println("getStoreERC:" + urlS);
+            log4j.debug("getStoreERC:" + urlS);
             String ownerS = StoreExtract.getString(urlS, logger, 3);
-            if (DEBUG) System.out.println("ownerS:" + ownerS);
+            log4j.debug("ownerS:" + ownerS);
             StoreOwner storeOwner = new StoreOwner(ownerS, logger);
             return storeOwner;
             
@@ -120,7 +122,7 @@ public class StoreOwner
             setOwnerObjectID(ownerS);
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }

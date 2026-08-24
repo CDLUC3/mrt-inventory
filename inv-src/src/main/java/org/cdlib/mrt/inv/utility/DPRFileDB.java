@@ -31,6 +31,8 @@ package org.cdlib.mrt.inv.utility;
 
 import java.sql.Connection;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.security.SecurityUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
@@ -49,6 +51,7 @@ public class DPRFileDB
             + "The summer soldier and the sunshine patriot will, "
             + "in this crisis, shrink from the service of their country; "
             + "but he that stands by it now, deserves the love and thanks of man and woman.";
+    protected static final Logger log4j = LogManager.getLogger(); 
     protected LoggerInf logger = null;
     protected HikariConnectionPool pool = null;
     //protected DBConnectionPool pool = null;
@@ -119,9 +122,7 @@ public class DPRFileDB
         } catch(Exception e) {
             String msg = "Exception"
                 + " - exception:" + e;
-
-            logger.logError(MESSAGE + "getOperation - " + msg, 0);
-            e.printStackTrace();
+            log4j.error(msg, e);
             return null;
         }
 
@@ -134,9 +135,9 @@ public class DPRFileDB
         if(pool == null) return null;
         Connection connect = null;
         try {
-            if (DEBUG) System.out.println("Before getSingleConnection");
+            log4j.debug("Before getSingleConnection");
             connect = getSingleConnection(autoCommit);
-            if (DEBUG) System.out.println("After getSingleConnection");
+            log4j.debug("After getSingleConnection");
             if (connect == null) {
                 for (int i=0; i<5; i++) {
                     System.out.println(MESSAGE + ">>>>getConnectionWithReconnect retry:" + i);
@@ -155,8 +156,9 @@ public class DPRFileDB
             return connect;
 
          } catch (Exception ex) {
-             ex.printStackTrace();
-                 throw new TException.SQL_EXCEPTION("Reconnect attempted and fails:" + ex);
+             
+            log4j.error("Exception:" + ex, ex);
+            throw new TException.SQL_EXCEPTION("Reconnect attempted and fails:" + ex);
          }
      }
      
@@ -170,7 +172,7 @@ public class DPRFileDB
      public void attemptReconnection()
          throws TException
      {
-         if (DEBUG) System.out.println("attemptReconnection entered");
+         log4j.debug("attemptReconnection entered");
          shutDown();
          try {
             setPool();
@@ -191,9 +193,7 @@ public class DPRFileDB
         } catch(Exception e) {
             String msg = "Exception"
                 + " - exception:" + e;
-
-            logger.logError(MESSAGE + "getOperation - " + msg, 0);
-            e.printStackTrace();
+            log4j.error(msg, e);
             throw new TException.GENERAL_EXCEPTION(msg, e);
         }
 

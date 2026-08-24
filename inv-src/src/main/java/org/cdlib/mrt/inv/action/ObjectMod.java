@@ -29,59 +29,16 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.action;
 
-import java.net.URL;
-import java.net.URLDecoder;
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-
-import org.cdlib.mrt.core.DateState;
-import org.cdlib.mrt.core.FileComponent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.core.ComponentContent;
-import org.cdlib.mrt.cloud.MatchMap;
-import org.cdlib.mrt.cloud.VersionMap;
-import org.cdlib.mrt.inv.content.ContentAbs;
-import org.cdlib.mrt.inv.content.InvCollection;
-import org.cdlib.mrt.inv.content.InvCollectionObject;
-import org.cdlib.mrt.inv.content.InvDK;
-import org.cdlib.mrt.inv.content.InvDKVersion;
-import org.cdlib.mrt.inv.content.InvDua;
-import org.cdlib.mrt.inv.content.InvFile;
-import org.cdlib.mrt.inv.content.InvAudit;
-import org.cdlib.mrt.inv.content.InvIngest;
-import org.cdlib.mrt.inv.content.InvMeta;
-import org.cdlib.mrt.inv.content.InvNode;
-import org.cdlib.mrt.inv.content.InvNodeObject;
 import org.cdlib.mrt.inv.content.InvObject;
-import org.cdlib.mrt.inv.content.InvOwner;
-import org.cdlib.mrt.inv.content.InvVersion;
-import org.cdlib.mrt.inv.extract.StoreCollections;
-import org.cdlib.mrt.inv.extract.StoreDua;
-import org.cdlib.mrt.inv.extract.StoreDuaTemplate;
-import org.cdlib.mrt.inv.extract.StoreERC;
-import org.cdlib.mrt.inv.extract.StoreIngest;
-import org.cdlib.mrt.inv.extract.StoreMeta;
-import org.cdlib.mrt.inv.extract.StoreMom;
-import org.cdlib.mrt.inv.extract.StoreOwner;
-import org.cdlib.mrt.inv.extract.StoreState;
 import org.cdlib.mrt.inv.utility.DBAdd;
-import org.cdlib.mrt.inv.utility.DBDelete;
-import org.cdlib.mrt.inv.extract.StoreFile;
-import org.cdlib.mrt.inv.service.InvProcessState;
-import org.cdlib.mrt.inv.service.Role;
-import org.cdlib.mrt.core.Tika;
-import static org.cdlib.mrt.inv.action.InvActionAbs.getVersionMap;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
-import org.cdlib.mrt.utility.LinkedHashList;
-import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.URLEncoder;
 
 /**
  * Run fixity
@@ -96,6 +53,7 @@ public class ObjectMod
     protected static final boolean DEBUG = false;
     protected static final boolean DUMPTALLY = false;
     protected static final boolean EACHTALLY = true;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
     protected DBAdd dbAdd = null;
     protected int nodeNumber = 0;
@@ -134,7 +92,7 @@ public class ObjectMod
             logger.logMessage(msg, 2, true);
         
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             try {
                 if (connection != null) {
                     connection.close();
@@ -201,8 +159,7 @@ public class ObjectMod
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }

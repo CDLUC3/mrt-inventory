@@ -186,8 +186,7 @@ public class AdminCollection
         } catch (Exception ex) {
             try {
                 connection.rollback();
-                log4j.info("Exception rollback:" + ex);
-                ex.printStackTrace();
+                log4j.error("Exception rollback:" + ex, ex);
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;
@@ -248,7 +247,7 @@ public class AdminCollection
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }
@@ -291,7 +290,7 @@ public class AdminCollection
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }
@@ -336,7 +335,7 @@ public class AdminCollection
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }

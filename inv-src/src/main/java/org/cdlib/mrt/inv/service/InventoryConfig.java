@@ -38,13 +38,14 @@ import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.core.DateState;
 
 
@@ -56,9 +57,7 @@ import org.cdlib.mrt.tools.SSMConfigResolver;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.TFileLogger;
 import org.cdlib.mrt.tools.YamlParser;
-import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.LoggerAbs;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -78,6 +77,7 @@ public class InventoryConfig
     public static String qService = null;
     public static String lockName = null;
     public static Integer qTimeout = null;
+    protected static final Logger log4j = LogManager.getLogger(); 
 
     protected Properties zooProperties = null;
     protected JSONObject stateJsonObject = null;
@@ -125,11 +125,11 @@ public class InventoryConfig
             return inventoryConfig;
             
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         
@@ -166,7 +166,7 @@ public class InventoryConfig
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -315,7 +315,7 @@ public class InventoryConfig
         if (!log.exists()) log.mkdir();
         String logPath = log.getCanonicalPath() + '/';
         
-        if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("LOG", logprop)
+        log4j.debug(PropertiesUtil.dumpProperties("LOG", logprop)
             + "\npath:" + path
             + "\nlogpath:" + logPath
         );
@@ -404,7 +404,7 @@ public class InventoryConfig
             if (zooHandlerThread == null) break;
             if (zooHandlerThread.isAlive()) {
                 try {
-                    if (DEBUG) System.out.println("Retry zooHandlerThread shutdown");
+                    log4j.debug("Retry zooHandlerThread shutdown");
                     Thread.sleep(500);
                 } catch (Exception ex) { }
             } else {

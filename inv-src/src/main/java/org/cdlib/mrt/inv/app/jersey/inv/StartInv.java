@@ -30,61 +30,17 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.app.jersey.inv;
 
 import org.cdlib.mrt.inv.app.InvServiceInit;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Properties;
 
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.glassfish.jersey.server.CloseableService;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.QueryParam;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.cdlib.mrt.formatter.FormatterInf;
-import org.cdlib.mrt.inv.action.InvManifestUrl;
-import org.cdlib.mrt.inv.action.AddZoo;
-import org.cdlib.mrt.inv.app.jersey.KeyNameHttpInf;
-import org.cdlib.mrt.inv.app.jersey.JerseyBase;
-import org.cdlib.mrt.inv.service.InvDeleteState;
 import org.cdlib.mrt.inv.service.InvServiceState;
 import org.cdlib.mrt.inv.service.InvServiceInf;
-import org.cdlib.mrt.inv.service.LocalContainerState;
-import org.cdlib.mrt.inv.service.LocalAfterToState;
-import org.cdlib.mrt.inv.service.PrimaryLocalState;
-import org.cdlib.mrt.inv.service.Role;
-import org.cdlib.mrt.inv.service.VersionsState;
-import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.inv.logging.LogInvPrimary;
-import org.cdlib.mrt.inv.service.InvProcessState;
-import org.cdlib.mrt.log.utility.Log4j2Util;
-import org.cdlib.mrt.utility.StateInf;
-import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.TFrame;
-import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.zk.Batch;
-import org.cdlib.mrt.zk.Job;
-import org.cdlib.mrt.zk.JobState;
-import org.cdlib.mrt.inv.zoo.ZooManager;
-import org.apache.zookeeper.ZooKeeper;
-import org.cdlib.mrt.core.ProcessStatus;
-import org.cdlib.mrt.zk.Access;
-import org.json.JSONObject;
 
 /**
  * Thin Jersey layer for inv handling
@@ -115,7 +71,7 @@ public class StartInv extends HttpServlet
             responseState = invService.startup();
             
         } catch (ServletException se) {
-            se.printStackTrace();
+            log4j.error("Exception:" + se, se);
             throw se;
 
         } catch (Exception ex) {

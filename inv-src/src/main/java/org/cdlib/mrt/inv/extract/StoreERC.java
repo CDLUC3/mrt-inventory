@@ -32,6 +32,8 @@ package org.cdlib.mrt.inv.extract;
 
 import java.io.File;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.utility.FileUtil;
@@ -49,6 +51,7 @@ public class StoreERC
     private static final String NAME = "StoreERC";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     protected String erc = null;
     protected String who = null;
@@ -91,9 +94,9 @@ public class StoreERC
                 + URLEncoder.encode("system/mrt-erc.txt", "utf-8")
                 + "?fixity=no"
                 ;
-            if (DEBUG) System.out.println("getStoreERC:" + urlS);
+            log4j.debug("getStoreERC:" + urlS);
             String ercS = StoreExtract.getString(urlS, logger, 3);
-            if (DEBUG) System.out.println("ERC:" + ercS);
+            log4j.debug("ERC:" + ercS);
             StoreERC storeERC = new StoreERC(ercS, logger);
             return storeERC;
             
@@ -140,9 +143,9 @@ public class StoreERC
                 + URLEncoder.encode("system/mrt-erc.txt", "utf-8")
                 + "?fixity=no"
                 ;
-            if (DEBUG) System.out.println("getStoreERC:" + urlS);
+            log4j.debug("getStoreERC:" + urlS);
             String ercS = StoreExtract.getString(urlS, logger, 3);
-            if (DEBUG) System.out.println("ERC:" + ercS);
+            log4j.debug("ERC:" + ercS);
             StoreERC storeERC = new StoreERC(ercS, logger);
             return storeERC;
             
@@ -184,7 +187,7 @@ public class StoreERC
             set4W();
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -199,7 +202,7 @@ public class StoreERC
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "build - erc required");
             }
             String lines[] = erc.split("\\r?\\n");
-            if (DEBUG) System.out.println("lines len=" + lines.length);
+            log4j.debug("lines len=" + lines.length);
             for (String line : lines) {
                 String [] parts = line.split("\\s*\\:\\s", 2);
                 if (parts.length != 2) continue;
@@ -239,7 +242,7 @@ public class StoreERC
             for (String entry : whoList) {
                 if (buf.length() > 0) buf.append(" ; ");
                 buf.append(entry);
-                if (DEBUG) System.out.println("Append - " + w + ":" + entry);
+                log4j.debug("Append - " + w + ":" + entry);
             }
             return buf.toString();
             

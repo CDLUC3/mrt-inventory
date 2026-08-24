@@ -30,9 +30,6 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.app.jersey.inv;
 
 import org.cdlib.mrt.inv.app.InvServiceInit;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Properties;
 
 
 import javax.servlet.ServletConfig;
@@ -48,39 +45,27 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.QueryParam;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.action.InvManifestUrl;
-import org.cdlib.mrt.inv.action.AddZoo;
 import org.cdlib.mrt.inv.app.jersey.KeyNameHttpInf;
 import org.cdlib.mrt.inv.app.jersey.JerseyBase;
 import org.cdlib.mrt.inv.service.InvDeleteState;
-import org.cdlib.mrt.inv.service.InvServiceState;
 import org.cdlib.mrt.inv.service.InvServiceInf;
 import org.cdlib.mrt.inv.service.LocalContainerState;
 import org.cdlib.mrt.inv.service.LocalAfterToState;
-import org.cdlib.mrt.inv.service.PrimaryLocalState;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.inv.service.VersionsState;
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.logging.LogInvPrimary;
-import org.cdlib.mrt.inv.service.InvProcessState;
 import org.cdlib.mrt.log.utility.Log4j2Util;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.TFrame;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.zk.Batch;
-import org.cdlib.mrt.zk.Job;
-import org.cdlib.mrt.zk.JobState;
-import org.cdlib.mrt.inv.zoo.ZooManager;
-import org.apache.zookeeper.ZooKeeper;
-import org.cdlib.mrt.core.ProcessStatus;
 import org.json.JSONObject;
 
 /**
@@ -451,7 +436,7 @@ public class JerseyInv
                     + " - status=" + currentStatus + NL
                     + " - note=" + note + NL
                     );
-        if (DEBUG) System.out.println("addVersionMultipart entered");
+        log4j.debug("addVersionMultipart entered");
         
         if (note.length() == 0) note = null;
         return addTask(
@@ -477,7 +462,7 @@ public class JerseyInv
                     + " - taskName=" + taskName + NL
                     + " - taskItem=" + taskItem + NL
                     );
-        if (DEBUG) System.out.println("addVersionMultipart entered");
+        log4j.debug("addVersionMultipart entered");
         
         return deleteTask(
                 taskName,
@@ -500,7 +485,7 @@ public class JerseyInv
                     + " - taskName=" + taskName + NL
                     + " - taskItem=" + taskItem + NL
                     );
-        if (DEBUG) System.out.println("addVersionMultipart entered");
+        log4j.debug("addVersionMultipart entered");
         
         return getTask(
                 taskName,
@@ -921,11 +906,11 @@ public class JerseyInv
 
         } catch (TException tex) {
             System.out.println("getVersions Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             return getExceptionResponse(tex, formatType, logger);
 
         } catch (Exception ex) {
-            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            log4j.error("Exception:" + ex, ex);
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
@@ -951,12 +936,11 @@ public class JerseyInv
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {
-            System.out.println("getVersions Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("getVersions Exception:" + tex, tex);
             return getExceptionResponse(tex, formatType, logger);
 
         } catch (Exception ex) {
-            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            log4j.error("Exception:" + ex, ex);
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }

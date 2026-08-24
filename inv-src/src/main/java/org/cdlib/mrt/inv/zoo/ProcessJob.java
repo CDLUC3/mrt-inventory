@@ -36,7 +36,6 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.cdlib.mrt.core.ServiceStatus;
-import org.cdlib.mrt.core.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -44,7 +43,6 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.inv.service.InventoryConfig;
-import org.cdlib.mrt.inv.zoo.ZooManager;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.log.utility.AddStateEntryGen;
 import org.cdlib.mrt.utility.TException;
@@ -151,7 +149,7 @@ public class ProcessJob
             lockKey = url2ark(manifestURLS);
             connection = getNewConnection();
             if (connection == null) return;
-            if (DEBUG) System.out.println(MESSAGE + "connection returned");
+            log4j.debug(MESSAGE + "connection returned");
             arkLock = getLockRetry(lockKey, 900);
             getSaveObjectRetry404(3);
             
@@ -176,7 +174,7 @@ public class ProcessJob
                     + " - manifestURLS:" + manifestURLS
                     + " - status:" + processStatus;
                 logger.logMessage(pmsg, 1, true);
-                if (DEBUG) System.out.println(pmsg);
+                log4j.debug(pmsg);
                 
             } catch (TException tex) {
                 saveTex = tex;
@@ -191,7 +189,7 @@ public class ProcessJob
         int retry = 0;
         try {
             if (connection == null) return;
-            if (DEBUG) System.out.println(MESSAGE + "begin process");
+            log4j.debug(MESSAGE + "begin process");
             //saveObject.process();
             //job.setStatus(zooKeeper, job.status().stateChange(JobState.Recording));
             //ark = saveObject.getObjectID();
@@ -457,7 +455,7 @@ public class ProcessJob
             return gotLock;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException(e);
         }
     }
@@ -476,7 +474,7 @@ public class ProcessJob
             System.out.println("releaseLock:" + primaryID);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.warn("Exception:" + e, e);
             
         }
         
@@ -509,7 +507,7 @@ public class ProcessJob
                 try {
                     connection.close();
                 } catch (Exception ex) {}    
-                if (DEBUG) System.out.println("Invalid connection sleep");
+                log4j.debug("Invalid connection sleep");
                 sleepConnection = true;
 
             } catch (Exception connEx) {
@@ -521,7 +519,7 @@ public class ProcessJob
                 }   
                 sleepConnection = false;
                 try {   
-                    if (DEBUG) System.out.println("Connection sleep:" + sleep);
+                    log4j.debug("Connection sleep:" + sleep);
                     Thread.sleep(sleep);
                 } catch (Exception ex) {}
             }

@@ -30,22 +30,16 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.extract;
 
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Properties;
-import org.apache.tika.detect.Detector;
-import org.apache.tika.mime.MediaType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.HTTPUtil;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.URLEncoder;
-import org.cdlib.mrt.core.Tika;
 /**
  * Container class for Storage ERC content
  * @author dloy
@@ -56,6 +50,7 @@ public class StoreDua
     private static final String NAME = "StoreDua";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     protected LoggerInf logger = null;
     protected String urlS = null;
@@ -140,7 +135,7 @@ public class StoreDua
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -162,7 +157,7 @@ public class StoreDua
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {

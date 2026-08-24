@@ -29,39 +29,14 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.utility;
 
-import java.io.File;
 import java.net.URLEncoder;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import org.cdlib.mrt.core.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.db.DBUtil;
-import org.cdlib.mrt.inv.content.ContentAbs;
-import org.cdlib.mrt.inv.content.InvAudit;
-import org.cdlib.mrt.inv.content.InvCollection;
-import org.cdlib.mrt.inv.content.InvCollectionNode;
-import org.cdlib.mrt.inv.content.InvCollectionObject;
-import org.cdlib.mrt.inv.content.InvGCopy;
-import org.cdlib.mrt.inv.content.InvDKVersion;
-import org.cdlib.mrt.inv.content.InvDua;
-import org.cdlib.mrt.inv.content.InvEmbargo;
-import org.cdlib.mrt.inv.content.InvFile;
-import org.cdlib.mrt.inv.content.InvIngest;
-import org.cdlib.mrt.inv.content.InvAddLocalID;
-import org.cdlib.mrt.inv.content.InvLocalID;
-import org.cdlib.mrt.inv.content.InvMeta;
-import org.cdlib.mrt.inv.content.InvNode;
-import org.cdlib.mrt.inv.content.InvNodeObject;
-import org.cdlib.mrt.inv.content.InvObject;
-import org.cdlib.mrt.inv.content.InvOwner;
-import org.cdlib.mrt.inv.content.InvVersion;
-import org.cdlib.mrt.inv.service.InvService;
-import org.cdlib.mrt.inv.test.TestPrimaryLocal;
-import static org.cdlib.mrt.inv.utility.InvDBUtil.DEBUG;
-import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
@@ -80,6 +55,7 @@ public class InvMimeExt
     protected static final String NAME = "InvMimeExt";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger(); 
 
 
     /**
@@ -216,7 +192,7 @@ public class InvMimeExt
         }
         ArrayList<KeyContent> list = new ArrayList<>();
         for (Properties prop : propArray) {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***out dump***", prop));
+            log4j.debug(PropertiesUtil.dumpProperties("***out dump***", prop));
             list.add(new KeyContent(mimeType, fileExtension, prop));
         }
         return list;

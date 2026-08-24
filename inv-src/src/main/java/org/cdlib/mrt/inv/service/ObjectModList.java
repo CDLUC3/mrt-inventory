@@ -6,49 +6,27 @@
 
 package org.cdlib.mrt.inv.service;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.sql.Connection;
-import java.util.Properties;
 import java.util.Vector;
 
-import org.cdlib.mrt.inv.action.IngestMod;
-import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
 
 import org.cdlib.mrt.core.ComponentContent;
-import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.TallyTable;
-import org.cdlib.mrt.utility.TFileLogger;
-import org.cdlib.mrt.utility.TFrame;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import org.cdlib.mrt.utility.FileUtil;
-import org.cdlib.mrt.utility.PropertiesUtil;
 import java.io.File;
 import java.sql.Connection;
-import java.util.List;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
-import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.TFileLogger;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TFrame;
-import org.cdlib.mrt.inv.service.InvService;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
-import org.cdlib.mrt.inv.utility.InvDBUtil;
-import org.cdlib.mrt.inv.utility.InvUtil;
 //import org.cdlib.mrt.inv.zoo.ItemRun;
 import org.cdlib.mrt.inv.action.ObjectMod;
 /**
@@ -63,6 +41,7 @@ public class ObjectModList
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
     protected LoggerInf logger = null;
     protected DPRFileDB db = null;
@@ -263,7 +242,7 @@ public class ObjectModList
         try {
             connect = db.getConnection(false);
             long objectseq = Long.parseLong(line);
-            if (DEBUG) System.out.println("IngestModList:"
+            log4j.debug("IngestModList:"
                     + " - objectseq=" + objectseq
             );
             ObjectMod objectMod = ObjectMod.getObjectMod(
@@ -296,7 +275,7 @@ public class ObjectModList
                 "resources/ObjectModList.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties startupProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", startupProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", startupProp));
             LoggerInf logger = tFrame.getLogger();
             String runPropS  = null;
             String form = null;
@@ -331,15 +310,11 @@ public class ObjectModList
             runProp.setProperty("form", form);
             System.out.println(PropertiesUtil.dumpProperties("runProp", runProp));
             ObjectModList runList = new ObjectModList(startupProp, runProp, logger);
-            if (DEBUG) System.out.println(runList.dump(MESSAGE));
+            log4j.debug(runList.dump(MESSAGE));
             runList.run();
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+            log4j.error("Exception:" + e, e);
         }
     }
 }

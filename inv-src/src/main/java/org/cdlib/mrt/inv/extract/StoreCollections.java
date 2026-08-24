@@ -33,17 +33,12 @@ package org.cdlib.mrt.inv.extract;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.FileUtil;
-import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.URLEncoder;
 
-import org.cdlib.mrt.inv.content.ContentAbs;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
@@ -56,6 +51,7 @@ public class StoreCollections
     private static final String NAME = "StoreCollection";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     protected LoggerInf logger = null;
     protected String collectionsS = null;
@@ -96,9 +92,9 @@ public class StoreCollections
                 + URLEncoder.encode("system/mrt-membership.txt", "utf-8")
                 + "?fixity=no"
                 ;
-            if (DEBUG) System.out.println("getStoreCollection:" + urlS);
+            log4j.debug("getStoreCollection:" + urlS);
             String collectionsS = StoreExtract.getString(urlS, logger, 3);
-            if (DEBUG) System.out.println("collectionsS:" + collectionsS);
+            log4j.debug("collectionsS:" + collectionsS);
             StoreCollections storeCollection = new StoreCollections(collectionsS, logger);
             return storeCollection;
             
@@ -135,7 +131,7 @@ public class StoreCollections
             list = extractCollections(collectionsS);
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -150,7 +146,7 @@ public class StoreCollections
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "build - erc required");
             }
             String lines[] = erc.split("\\r?\\n");
-            if (DEBUG) System.out.println("lines len=" + lines.length);
+            log4j.debug("lines len=" + lines.length);
             for (String line : lines) {
                 list.add(line);
             }

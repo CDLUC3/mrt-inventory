@@ -29,6 +29,8 @@ import org.cdlib.mrt.utility.TFrame;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -45,6 +47,7 @@ public class InvMainAddUrl
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
+    protected static final Logger log4j = LogManager.getLogger();
 
     /**
      * Main method
@@ -59,14 +62,14 @@ public class InvMainAddUrl
                 "resources/InvUrl.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
             InvService service = InvService.getInvService(InventoryConfig.useYaml());
             String url = get(storeLoadProp, "URL");
             System.out.println("***url=" + url);
             service.add(url);
             //service.shutdown();
             
-            if (DEBUG) System.out.println(MESSAGE 
+            log4j.debug(MESSAGE 
                     + "url:" + url + "\n"
                     );
 

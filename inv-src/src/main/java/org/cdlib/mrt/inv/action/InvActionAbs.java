@@ -34,6 +34,8 @@ import java.sql.Connection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.cloud.ManifestSAX;
 
 import org.cdlib.mrt.utility.FileUtil;
@@ -55,6 +57,7 @@ public class InvActionAbs
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
     protected static final String  STATUS_PROCESSING = "processing";
+    protected static final Logger log4j = LogManager.getLogger(); 
 
     protected LoggerInf logger = null;
     protected Connection connection = null;
@@ -125,7 +128,7 @@ public class InvActionAbs
             }
             urlS = storageBase + "/" + "manifest/" + node + "/"
                 + URLEncoder.encode(objectID.getValue(), "utf-8");
-            if (DEBUG) System.out.println("getVersionMap:" + urlS);
+            log4j.debug("getVersionMap:" + urlS);
             tempFile = FileUtil.url2TempFile(logger, urlS);
             InputStream xmlStream = new FileInputStream(tempFile);
             return ManifestSAX.buildMap(xmlStream, logger);

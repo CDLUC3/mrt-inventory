@@ -37,6 +37,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.cdlib.mrt.db.DBUtil;
@@ -52,6 +54,7 @@ public class DBDelete
     private static final String NAME = "DBDelete";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
 
     protected long objectseq = 0;
@@ -66,7 +69,7 @@ public class DBDelete
         this.connection = connection;
         this.logger = logger;
         validate();
-        if (DEBUG) System.out.println("DBDelete - objectseq=" + objectseq);
+        log4j.debug("DBDelete - objectseq=" + objectseq);
     }
     
     private void validate()
@@ -99,7 +102,7 @@ public class DBDelete
         throws TException
     {
         try {
-            if (DEBUG) System.out.println(MESSAGE + "process entered");
+            log4j.debug(MESSAGE + "process entered");
             int delCnt=0;
             delCnt += deleteEmbargoes();
             delCnt += deleteAudits();
@@ -300,7 +303,7 @@ public class DBDelete
                     "DELETE FROM " + tableName + " WHERE " + rowName + "=" + objectseq;
             
             int delCnt= delete(connection, sql, logger);
-            if (DEBUG) System.out.println(MESSAGE + "delete:" 
+            log4j.debug(MESSAGE + "delete:" 
                     + " - sql=" + sql
                     + " - delCnt=" + delCnt
                     );

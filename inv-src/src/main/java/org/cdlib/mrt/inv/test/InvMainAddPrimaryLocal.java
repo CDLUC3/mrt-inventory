@@ -33,6 +33,8 @@ import org.cdlib.mrt.utility.TFrame;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvFormatter;
@@ -51,6 +53,7 @@ public class InvMainAddPrimaryLocal
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     private LoggerInf logger = null;
     private InvService service = null;
@@ -78,7 +81,7 @@ public class InvMainAddPrimaryLocal
             LoggerInf logger = tFrame.getLogger();
             Properties storeLoadProp  = tFrame.getProperties();
             String inFileS = storeLoadProp.getProperty("inFile");
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
             InvService service = InvService.getInvService(InventoryConfig.useYaml());
             InvMainAddPrimaryLocal pl = new InvMainAddPrimaryLocal(service, logger);
             //File inFile = new File("/replic/test/localid-mapper/t5.txt");

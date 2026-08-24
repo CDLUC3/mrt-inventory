@@ -38,6 +38,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.cdlib.mrt.db.DBUtil;
@@ -54,6 +56,7 @@ public class DBAdd
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DOREPLACE = true;
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
 
     protected ArrayList<ContentAbs> addArray = new ArrayList<>();
@@ -87,8 +90,7 @@ public class DBAdd
             }
             
         } catch (Exception ex) {
-            logger.logError("Connection fails:" + ex, 0);
-            logger.logError(StringUtil.stackTrace(ex), 5);
+            log4j.error("Connection fails:" + ex, ex);
             isValid = false;
         }
         if (!isValid) {
@@ -103,7 +105,7 @@ public class DBAdd
         if (content == null) {
             throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "add - content empty");
         }
-        if (DEBUG) System.out.println(MESSAGE + "addContent:" + content.dump(content.getDBName()));
+        log4j.debug(MESSAGE + "addContent:" + content.dump(content.getDBName()));
         addArray.add(content);
     }
     
@@ -116,13 +118,11 @@ public class DBAdd
             }
             
         } catch (TException tex) {
-            logger.logError(MESSAGE + "Exception:" + tex, 0);
-            logger.logError(StringUtil.stackTrace(tex), 5);
+            log4j.error(MESSAGE + "TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            logger.logError(MESSAGE + "CException:" + ex, 0);
-            logger.logError(StringUtil.stackTrace(ex), 5);
+            log4j.error(MESSAGE + "CException:" + ex, ex);
             throw new TException(ex);
         }
     
@@ -141,7 +141,7 @@ public class DBAdd
             String sqlReplace = "replace into " + tableName + " set ";
             String values = DBUtil.buildModifyNull(prop);
             sql = sqlReplace + values;
-            if (DEBUG) System.out.println(MESSAGE + "REPLACE sql=" + sql);
+            log4j.debug(MESSAGE + "REPLACE sql=" + sql);
             if (!DOREPLACE) {
                 return 0;
             }
@@ -155,14 +155,12 @@ public class DBAdd
             return autoID;
             
         } catch (TException tex) {
-            logger.logError(MESSAGE + "Exception:" + tex, 0);
-            logger.logError(StringUtil.stackTrace(tex), 5);
+            log4j.error(MESSAGE + "TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            logger.logError(MESSAGE
-                        + "Fail sql=" + sql + "CException:" + ex, 0);
-            logger.logError(StringUtil.stackTrace(ex), 5);
+            log4j.error(MESSAGE
+                        + "Fail sql=" + sql + "CException:" + ex, ex);
             throw new TException.SQL_EXCEPTION(ex);
         }
     
@@ -181,7 +179,7 @@ public class DBAdd
             String sqlInsert = "insert into " + tableName + " set ";
             String values = DBUtil.buildModifyNull(prop);
             sql = sqlInsert + values;
-            if (DEBUG) System.out.println(MESSAGE + "REPLACE sql=" + sql);
+            log4j.debug(MESSAGE + "REPLACE sql=" + sql);
             if (!DOREPLACE) {
                 return 0;
             }
@@ -195,14 +193,12 @@ public class DBAdd
             return autoID;
             
         } catch (TException tex) {
-            logger.logError(MESSAGE + "Exception:" + tex, 0);
-            logger.logError(StringUtil.stackTrace(tex), 5);
+            log4j.error(MESSAGE + "TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            logger.logError(MESSAGE
-                        + "Fail sql=" + sql + "CException:" + ex, 0);
-            logger.logError(StringUtil.stackTrace(ex), 5);
+            log4j.error(MESSAGE
+                        + "Fail sql=" + sql + "CException:" + ex, ex);
             throw new TException.SQL_EXCEPTION(ex);
         }
     
@@ -220,22 +216,20 @@ public class DBAdd
             String sqlReplace = "update " + tableName + " set ";
             String values = DBUtil.buildModifyNull(prop);
             sql = sqlReplace + values + " where id=" + idS;
-            if (DEBUG) System.out.println(MESSAGE + "UPDATE sql=" + sql);
+            log4j.debug(MESSAGE + "UPDATE sql=" + sql);
             DBUtil.exec(connection, sql, logger);
             return id;
             
         } catch (TException tex) {
-            logger.logError(MESSAGE + "Exception:" + tex, 0);
-            logger.logError(StringUtil.stackTrace(tex), 5);
+            log4j.error(MESSAGE + "Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
             String msg = "Exception"
                 + " - sql=" + sql
                 + " - exception:" + ex;
 
-            logger.logError(MESSAGE + "exec - " + msg, 0);
+            log4j.error(MESSAGE + "exec - " + msg, ex);
             System.out.println(msg);
             throw new TException.SQL_EXCEPTION(msg, ex);
         }
@@ -253,22 +247,20 @@ public class DBAdd
             String sqlReplace = "update " + tableName + " set ";
             String values = DBUtil.buildModifyNull(prop);
             sql = sqlReplace + values + " where id=" + idS;
-            if (DEBUG) System.out.println(MESSAGE + "UPDATE sql=" + sql);
+            log4j.debug(MESSAGE + "UPDATE sql=" + sql);
             DBUtil.exec(connection, sql, logger);
             return id;
             
         } catch (TException tex) {
-            logger.logError(MESSAGE + "Exception:" + tex, 0);
-            logger.logError(StringUtil.stackTrace(tex), 5);
+            log4j.error(MESSAGE + "Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
             String msg = "Exception"
                 + " - sql=" + sql
                 + " - exception:" + ex;
 
-            logger.logError(MESSAGE + "exec - " + msg, 0);
+            log4j.error(MESSAGE + "exec - " + msg, ex);
             System.out.println(msg);
             throw new TException.SQL_EXCEPTION(msg, ex);
         }
@@ -297,7 +289,7 @@ public class DBAdd
             if (rs.next()){
                 autoID=rs.getInt(1);
             }
-            if (DEBUG) System.out.println("****autoID=" + autoID);
+            log4j.debug("****autoID=" + autoID);
             return autoID;
 
         } catch(Exception e) {
@@ -305,7 +297,7 @@ public class DBAdd
                 + " - sql=" + replaceCmd
                 + " - exception:" + e;
 
-            logger.logError(MESSAGE + "exec - " + msg, 0);
+            log4j.error(MESSAGE + "exec - " + msg, e);
             System.out.println(msg);
             throw new TException.SQL_EXCEPTION(msg, e);
             
@@ -336,8 +328,7 @@ public class DBAdd
                     String warnMsg = MESSAGE + "WARNING Deadlock(" + retry + "):"
                             + " - sql=" + replaceCmd
                             + " - msg=" + msg;
-                    System.out.println(warnMsg);
-                    logger.logError(warnMsg, 0);
+                    log4j.warn(warnMsg);
                     try {
                         Thread.sleep(retry*2000);
                     } catch (Exception ex) { }
@@ -346,14 +337,14 @@ public class DBAdd
                 if (msg.contains("foreign key constraint")) {
                     String warnMsg = MESSAGE + "WARNING foreign key constraint(" + retry + "): sql=" + replaceCmd;
                     System.out.println(warnMsg);
-                    logger.logError(warnMsg, 0);
+                    log4j.warn(warnMsg);
                     try {
                         Thread.sleep(retry*15000);
                     } catch (Exception ex) { }
                     continue;
                 }
                 System.out.println(MESSAGE + "execDeadlockRetry - Non Deadlock exception:" + se);
-                se.printStackTrace();
+                log4j.error(MESSAGE + "execDeadlockRetry - Non Deadlock exception:" + se, se);
                 throw se;
             }
 	}
@@ -378,14 +369,12 @@ public class DBAdd
             return id;
             
         } catch (TException tex) {
-            logger.logError(MESSAGE + "Exception:" + tex, 0);
-            logger.logError(StringUtil.stackTrace(tex), 5);
+            log4j.error(MESSAGE + "Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            logger.logError(MESSAGE
-                        + "Fail sql=" + sql + "CException:" + ex, 0);
-            logger.logError(StringUtil.stackTrace(ex), 5);
+            log4j.error(MESSAGE
+                        + "Fail sql=" + sql + "CException:" + ex, ex);
             throw new TException.SQL_EXCEPTION(ex);
         }
     
@@ -402,23 +391,17 @@ public class DBAdd
             return props;
             
         } catch (TException tex) {
-            logger.logError(MESSAGE + "Exception:" + tex, 0);
-            logger.logError(StringUtil.stackTrace(tex), 5);
+            log4j.error(MESSAGE + "Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
             String msg = MESSAGE
                         + "Fail sql=" + sql + "CException:" + ex;
-            logger.logError(msg, 0);
-            logger.logError(StringUtil.stackTrace(ex), 5);
             System.out.println(msg);
-            ex.printStackTrace();
+            log4j.error(msg, ex);
             throw new TException.SQL_EXCEPTION(ex);
         }
     
     }
-
-
-
 }
 

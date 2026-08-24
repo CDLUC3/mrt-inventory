@@ -44,6 +44,7 @@ public class HikariConnectionPool
 
     protected static final String NAME = "HickariConnectionPool";
     protected static final String MESSAGE = NAME + ": ";
+    protected static final Logger log4j = LogManager.getLogger(); 
     private String url, user, password;
     final private long timeout=120000;
     protected HikariDataSource connectionPool = null;
@@ -117,8 +118,7 @@ public class HikariConnectionPool
                 System.out.println(MESSAGE + "closeConnection performed");
             }
         } catch (Exception ex) {
-            System.out.println("Exception on closeConnection: " + ex);
-            ex.printStackTrace();
+            log4j.error("Exception on closeConnection: " + ex);
             
         } finally {
             connectionPool = null;

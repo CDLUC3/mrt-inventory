@@ -39,6 +39,8 @@ import org.cdlib.mrt.utility.TFrame;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.db.DBUtil;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.action.NodeObjectFlip;
@@ -74,6 +76,7 @@ public class DeleteUCLA_original
     protected int objcnt = 0;
     protected long afterObjectSeq = 0;
     
+    protected static final Logger log4j = LogManager.getLogger();
     protected int batchCnt=0;
     protected int nodeObjectCnt = 0;
     protected int updateCnt = 0;
@@ -169,13 +172,11 @@ public class DeleteUCLA_original
             System.out.println(msg);
         
         } catch (TException tex) {
-            System.out.println("Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -197,11 +198,7 @@ public class DeleteUCLA_original
             delUCLA.process();
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+            log4j.error("Exception:" + e, e);
         }
     }
     
@@ -217,7 +214,7 @@ public class DeleteUCLA_original
             tFrame = new TFrame(propertyList, "InvLoad");
             LoggerInf logger = tFrame.getLogger();
             Properties invProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", invProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", invProp));
             
             db = new DPRFileDB(logger, invProp);
             DeleteUCLA_original du = new DeleteUCLA_original(invProp, 21, logger);
@@ -227,11 +224,8 @@ public class DeleteUCLA_original
             
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+            log4j.error("Exception:" + e, e);
+            
         } finally {
             try {
                 db.shutDown();
@@ -258,7 +252,7 @@ public class DeleteUCLA_original
 
             afterObjectSeq = 0;
             for(batchCnt=1; batchCnt <= maxBatch; batchCnt++) {
-                if (DEBUG) System.out.println("*************process:" + batchCnt
+                log4j.debug("*************process:" + batchCnt
                         + " - nodeSeq:" + nodeSeq
                 );
                 try {
@@ -286,13 +280,11 @@ public class DeleteUCLA_original
                     }
                 //Construct BufferedReader from InputStreamReader
                 } catch (TException tex) {
-                    System.out.println("Exception:" + tex);
-                    tex.printStackTrace();
+                    log4j.error("TException:" + tex, tex);
                     throw tex;
 
                 } catch (Exception ex) {
-                    System.out.println("Exception:" + ex);
-                    ex.printStackTrace();
+                    log4j.error("Exception:" + ex, ex);
                     throw new TException(ex);
 
                 } finally {
@@ -331,7 +323,7 @@ public class DeleteUCLA_original
             LoggerInf logger)
         throws TException
     {
-        if (DEBUG) System.out.println("getObjectNodesUCLA entered"
+        log4j.debug("getObjectNodesUCLA entered"
                     + " - objectCnt:" + objectCnt
                     + " - afterObjectSeq:" + afterObjectSeq
                     + " - nodeSeq:" + nodeSeq
@@ -356,7 +348,7 @@ public class DeleteUCLA_original
         ArrayList<Long> list = new ArrayList<>();
         for (Properties prop : propArray) {
             String objectSeqS = prop.getProperty("inv_object_id");
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***getbjectNodesUCLA***", prop));
+            log4j.debug(PropertiesUtil.dumpProperties("***getbjectNodesUCLA***", prop));
             Long objectSeq = Long.parseLong(objectSeqS);
             list.add(objectSeq);
         }
@@ -407,7 +399,7 @@ public class DeleteUCLA_original
                     + "and inv_object_id= " + objectSeq +  ";";
             
             int deleteCnt = DBUtil.update(connection, deleteSql, logger);
-            if (DEBUG) System.out.println("deleteNodeObject:" + deleteCnt);
+            log4j.debug("deleteNodeObject:" + deleteCnt);
             return deleteCnt;
             
         } catch (TException tex) {
@@ -429,7 +421,7 @@ public class DeleteUCLA_original
                     + "where inv_node_id=" + nodeSeq + " "
                     + "and inv_object_id=" + objectSeq +  ";";
             int deleteCnt = DBUtil.update(connection, deleteSql, logger);
-            if (DEBUG) System.out.println("deleteAudit:" + deleteCnt);
+            log4j.debug("deleteAudit:" + deleteCnt);
             return deleteCnt;
             
         } catch (TException tex) {

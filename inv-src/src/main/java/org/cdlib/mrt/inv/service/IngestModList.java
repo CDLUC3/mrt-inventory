@@ -17,6 +17,8 @@ import org.cdlib.mrt.core.ComponentContent;
 import java.io.File;
 import java.sql.Connection;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -38,6 +40,7 @@ public class IngestModList
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
     protected LoggerInf logger = null;
     protected DPRFileDB db = null;
@@ -243,7 +246,7 @@ public class IngestModList
             connect = db.getConnection(false);
             long versionseq = Long.parseLong(parts[0]);
             String ingestURL = parts[1];
-            if (DEBUG) System.out.println("IngestModList:"
+            log4j.debug("IngestModList:"
                     + " - versionseq=" + versionseq
                     + " - ingestURL=" + ingestURL
             );
@@ -278,7 +281,7 @@ public class IngestModList
                 "resources/IngestModList.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties startupProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", startupProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", startupProp));
             LoggerInf logger = tFrame.getLogger();
             String runPropS  = null;
             String form = null;
@@ -313,15 +316,11 @@ public class IngestModList
             runProp.setProperty("form", form);
             System.out.println(PropertiesUtil.dumpProperties("runProp", runProp));
             IngestModList runList = new IngestModList(startupProp, runProp, logger);
-            if (DEBUG) System.out.println(runList.dump(MESSAGE));
+            log4j.debug(runList.dump(MESSAGE));
             runList.run();
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+                log4j.error("Main: Encountered exception:" + e, e);
         }
     }
 }

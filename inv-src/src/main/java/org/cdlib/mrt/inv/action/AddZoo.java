@@ -29,17 +29,13 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.action;
 
-import java.util.Properties;
 import org.apache.zookeeper.ZooKeeper;
 
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.inv.zoo.ZooManager;
-import org.cdlib.mrt.utility.ZooCodeUtil;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.PropertiesUtil;
-import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.zk.Batch;
 import org.cdlib.mrt.zk.Job;
 import org.cdlib.mrt.zk.JobState;
@@ -66,6 +62,7 @@ public class AddZoo
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
     protected static final boolean LIST = true;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
     
     protected ZooManager zooManager = null;
@@ -75,8 +72,6 @@ public class AddZoo
     protected Exception saveEx = null;
     protected String manifestUrl = null;
     protected LoggerInf logger = null;
- 
-    protected static final Logger log4j = LogManager.getLogger();   
     
     public static AddZoo getAddZoo(
             String manifestUrl,
@@ -152,7 +147,7 @@ public class AddZoo
             return ProcessStatus.completed;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             saveEx = ex;
             return ProcessStatus.failed;
         }

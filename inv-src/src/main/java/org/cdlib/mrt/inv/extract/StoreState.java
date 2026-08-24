@@ -32,6 +32,8 @@ package org.cdlib.mrt.inv.extract;
 
 import java.io.InputStream;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.utility.HTTPUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -47,6 +49,7 @@ public class StoreState
     private static final String NAME = "StoreState";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     protected LoggerInf logger = null;
     protected String urlS = null;
     protected Properties stateProp = new Properties();
@@ -112,7 +115,7 @@ public class StoreState
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -134,7 +137,7 @@ public class StoreState
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {

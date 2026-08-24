@@ -40,6 +40,8 @@ import java.net.URL;
 import org.glassfish.jersey.server.CloseableService;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.formatter.FormatterAbs;
 import org.cdlib.mrt.formatter.FormatterInf;
@@ -81,6 +83,7 @@ public class JerseyBase
 
     protected LoggerInf defaultLogger = new TFileLogger("Jersey", 10, 10);
     protected JerseyCleanup jerseyCleanup = new JerseyCleanup();
+    protected static final Logger log4j = LogManager.getLogger(); 
 
 
 
@@ -575,7 +578,7 @@ public class JerseyBase
      */
     protected void log(String msg)
     {
-        if (DEBUG) System.out.println("[JerseyStorage]>" + msg);
+        log4j.debug("[JerseyStorage]>" + msg);
         //logger.logMessage(msg, 0, true);
     }
 

@@ -74,7 +74,6 @@ import org.cdlib.mrt.inv.service.InvProcessState;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.core.Tika;
-import static org.cdlib.mrt.inv.action.InvActionAbs.getVersionMap;
 //import org.cdlib.mrt.queue.DistributedLock.Ignorer;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.inv.utility.InvUtil;
@@ -278,7 +277,7 @@ public class SaveObject
                 //manifestURL = new URL(urlS);
                 URI manifestURI = new URI(urlS);
                 manifestURL = manifestURI.toURL();
-                if (DEBUG) System.out.println("manifestURL=" + manifestURL);
+                log4j.debug("manifestURL=" + manifestURL);
             } catch (Exception ex) {
                 String msg = "processItem - URL invalid:" + urlS;
                 logger.logError(msg, 0);
@@ -293,17 +292,17 @@ public class SaveObject
                         ;
             }
             
-            if (DEBUG) System.out.println("storageBase=" + storageBase);
+            log4j.debug("storageBase=" + storageBase);
             String urlPath = manifestURL.getPath();
             String parts[] = urlPath.split("\\/");
-            if (DEBUG) System.out.println("parts[] length=" + parts.length);        
+            log4j.debug("parts[] length=" + parts.length);        
             if (parts.length < 4) {
                 String msg = "processItem - URL format invalid:" + urlS;
                 logger.logError(msg, 0);
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + msg);
             }
             for (int i=0; i < parts.length; i++) {
-                if (DEBUG) System.out.println("part[" + i + "]:" + parts[i]);
+                log4j.debug("part[" + i + "]:" + parts[i]);
                         
                 if (parts[i].equals("manifest")) {
                     extractManifestParts(parts, i);
@@ -553,7 +552,7 @@ public class SaveObject
                 dbAdd.update(invObject);
             }
             
-            if (DEBUG) System.out.println("invObject.setOwnerID=" + invObject.getOwnerID());
+            log4j.debug("invObject.setOwnerID=" + invObject.getOwnerID());
             setInvCollections(objectseq);
             setInvVersions(objectseq);
             setInvEmbargoes(objectseq);
@@ -664,7 +663,7 @@ public class SaveObject
         throws TException
     {
         try {
-            if (DEBUG) System.out.println("StoreERC dump:" + storeERC.dump("test"));
+            log4j.debug("StoreERC dump:" + storeERC.dump("test"));
             invObject.setWho(storeERC.getWho());
             invObject.setWhat(storeERC.getWhat());
             invObject.setWhen(storeERC.getWhen());
@@ -685,7 +684,7 @@ public class SaveObject
             InvNode invNode = InvDBUtil.getNode(node, connection, logger);
             bump("getNode");
             if (invNode == null) {
-                if (DEBUG) System.out.println("***invNode null");
+                log4j.debug("***invNode null");
                 StoreState storeState = StoreState.getStoreState(storageBase, node, logger);
                 bump("StoreState");
                 log("StoreState:" + storeState.dump("test"));
@@ -698,7 +697,7 @@ public class SaveObject
                 invNode.setId(nodeseq);
             }
             nodeseq = invNode.getId();
-            if (DEBUG) System.out.println("***nodeseq=" + nodeseq + " - node=" + node);
+            log4j.debug("***nodeseq=" + nodeseq + " - node=" + node);
             InvNodeObject invNodeObject = InvDBUtil.getNodeObject(nodeseq, objectseq, storageRole.toString(), connection, logger);
             bump("getNodeObject");
             if (invNodeObject == null) {
@@ -717,8 +716,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -767,8 +765,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -782,13 +779,13 @@ public class SaveObject
             InvNode invNode = InvDBUtil.getNode(node, connection, logger);
             bump("getInvNode");
             if (invNode == null) {
-                if (DEBUG) System.out.println("***invNode null");
+                log4j.debug("***invNode null");
                 StoreState storeState = StoreState.getStoreState(storageBase, node, logger);
                 bump("StoreState");
                 log("StoreState:" + storeState.dump("test"));
                 invNode = new InvNode(logger);
                 invNode.setState(storeState);
-                if (DEBUG) System.out.println("invNode:"
+                log4j.debug("invNode:"
                         + " - getNodeForm=" + invNode.getNodeForm()
                         + " - getSourceNode=" + invNode.getSourceNode()
                         + " - getTargetNode=" + invNode.getTargetNode()
@@ -844,8 +841,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -855,7 +851,7 @@ public class SaveObject
     {
         try {
             log("getInvNodeObject entered");
-            if (DEBUG) System.out.println("***nodeseq=" + nodeseq + " - node=" + node);
+            log4j.debug("***nodeseq=" + nodeseq + " - node=" + node);
             InvNodeObject invNodeObject = InvDBUtil.getNodeObject(nodeseq, objectseq, connection, logger);
             bump("getInvNodeObject");
             if (invNodeObject == null) {
@@ -874,8 +870,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -890,8 +885,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -921,8 +915,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -951,7 +944,7 @@ public class SaveObject
             //if (oldOwner != null) return oldOwner;
             StoreOwner storeOwner = StoreOwner.getStoreOwner(storageBase, node, objectID, logger);
             bump("StoreOwner");
-            if (DEBUG) System.out.println("storeOwner:" + storeOwner.dump("test"));
+            log4j.debug("storeOwner:" + storeOwner.dump("test"));
             if (oldOwner != null) {
                 if (oldOwner.getArk().getValue().equals(storeOwner.getOwnerObjectID().getValue())) {
                     return oldOwner;
@@ -973,8 +966,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -989,7 +981,7 @@ public class SaveObject
             StoreCollections storeCollections 
                     = StoreCollections.getStoreCollections(storageBase, node, objectID, logger);
             List<String> collections = storeCollections.getList();
-            if (DEBUG) System.out.println("storeCollection size=:" + collections.size());
+            log4j.debug("storeCollection size=:" + collections.size());
             for (String collection: collections) {
                 setInvCollection(objectseq, collection);
             }
@@ -999,8 +991,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1047,8 +1038,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1068,7 +1058,7 @@ public class SaveObject
                 invCollection.setArk(collectionS);
                 long id = dbAdd.insert(invCollection);
                 bump("insertCollection");
-                if (DEBUG) System.out.println("REPLACE COLLECTION id=" + id);
+                log4j.debug("REPLACE COLLECTION id=" + id);
                 invCollection.setId(id);
                 
             }
@@ -1082,7 +1072,7 @@ public class SaveObject
                 invCollectionObject.setCollectionID(collectionseq);
                 long id = dbAdd.insert(invCollectionObject);
                 bump("insertCollectionObject");
-                if (DEBUG) System.out.println("REPLACE COLLECTIONOBJECT id=" + id);
+                log4j.debug("REPLACE COLLECTIONOBJECT id=" + id);
                 
             }
             
@@ -1090,8 +1080,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1133,8 +1122,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1163,8 +1151,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1200,7 +1187,7 @@ public class SaveObject
                 invIngests.setVersionID(versionseq);
                 long id = dbAdd.insert(invIngests);
                 bump("insertIngest");
-                if (DEBUG) System.out.println("REPLACE INGESTS id=" + id);
+                log4j.debug("REPLACE INGESTS id=" + id);
                 invIngests.setId(id);
             }
             
@@ -1208,8 +1195,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1269,7 +1255,7 @@ public class SaveObject
                 bump("getDua2");
             }
             if (invDua == null) {
-                if (DEBUG) System.out.println("DUA null"
+                log4j.debug("DUA null"
                         + " - objectseq=" + objectseq
                         + " - collectionseq=" + collectionseq
                         );
@@ -1288,7 +1274,7 @@ public class SaveObject
                 invDua.setObjectID(objectseq);
                 long id = dbAdd.insert(invDua);
                 bump("insertDua");
-                if (DEBUG) System.out.println("REPLACE DUAS id=" + id);
+                log4j.debug("REPLACE DUAS id=" + id);
                 invDua.setId(id);
                 setDuaTemplate(invDua, version);
             }
@@ -1297,8 +1283,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1334,8 +1319,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1363,12 +1347,12 @@ public class SaveObject
                 invCollection.setId(collectionseq);
             }
             long collectionObjectID = invCollection.getObjectID();
-            if (DEBUG) System.out.println("****CollectionObjectID=" + collectionObjectID);
+            log4j.debug("****CollectionObjectID=" + collectionObjectID);
             if (collectionObjectID <= 0) {
                 invCollection.setObjectID(objectseq);
                 collectionseq = dbAdd.insert(invCollection);
                 bump("insertCollection2");
-                if (DEBUG) System.out.println("setCollectionObject REPLACE COLLECTION id=" + collectionseq);
+                log4j.debug("setCollectionObject REPLACE COLLECTION id=" + collectionseq);
             }
             return collectionseq;
             
@@ -1376,8 +1360,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1414,7 +1397,7 @@ public class SaveObject
                     invFile.setVersionID(versionseq);
                     invFile.setFileComponent(component, isBillable);
                     mimeType = invFile.getMimeType();
-                    if (DEBUG) System.out.println("2**mimeType=" + mimeType);
+                    log4j.debug("2**mimeType=" + mimeType);
                     if (isBillable) {
                         saveFileCnt++;
                         if (mimeType != null) {
@@ -1476,12 +1459,11 @@ public class SaveObject
             }
             
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j2.error("Exception:" + tex,  tex);
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1521,8 +1503,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1552,8 +1533,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1587,8 +1567,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }
@@ -1625,8 +1604,7 @@ public class SaveObject
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
         
@@ -1688,7 +1666,7 @@ public class SaveObject
         if (invNode.getSourceNodeSeq() != null) { // virtual;
             boolean sourceMatch = isMatchNodeseq(invNode.getSourceNodeSeq(), nodes);
             boolean targetMatch = isMatchNodeseq(invNode.getTargetNodeSeq(), nodes);
-            if (DEBUG) System.out.println("virtual match"
+            log4j.debug("virtual match"
                     + " - sourceMatch:" + sourceMatch
                     + " - targetMatch:" + targetMatch
                     );
@@ -1699,7 +1677,7 @@ public class SaveObject
             );
         }
         boolean idMatch = isMatchNodeseq(invNode.getId(), nodes);
-        if (DEBUG) System.out.println("physical match"
+        log4j.debug("physical match"
                     + " - invNode.getId():" + invNode.getId()
                     + " - idMatch:" + idMatch
                 );
@@ -1739,11 +1717,11 @@ public class SaveObject
             return false;
             
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j2.error("Exception:" + tex,  tex);
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j2.error("Exception:" + ex,  ex);
             throw new TException(ex);
         }
     }

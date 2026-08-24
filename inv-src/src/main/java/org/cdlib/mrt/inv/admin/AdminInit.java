@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Properties;
 
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.content.InvCollection;
@@ -42,7 +41,6 @@ import org.cdlib.mrt.inv.content.InvObject;
 import org.cdlib.mrt.inv.content.InvOwner;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.log.utility.AddStateEntryGen;
-import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
 import org.json.JSONObject;
@@ -105,10 +103,7 @@ public class AdminInit
             System.out.println(buildResponse.toString(2));
             
         } catch (Exception ex) {
-                // TODO Auto-generated catch block
-                
-                System.out.println("Exception:" + ex);
-                ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
                 
         } finally {
             close(connection);
@@ -441,11 +436,9 @@ public class AdminInit
             addMembers(ownerOwnerObjectInv,toCollection);
             
         } catch (Exception ex) {
-            ex.printStackTrace();
             try {
                 connection.rollback();
-                log4j.info("Exception rollback:" + ex);
-                System.out.println("AdminInit rollback 8");
+                log4j.error("AdminInit rollback 8 - Exception rollback:" + ex, ex);
                 
             } catch (Exception rex) {
                 String msg = "Rollback fails:" + rex;

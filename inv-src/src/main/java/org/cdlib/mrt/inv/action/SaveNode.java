@@ -29,10 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.inv.action;
 
-import java.io.File;
 import java.sql.Connection;
 import java.util.Properties;
-import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.content.InvNode;
 import org.cdlib.mrt.inv.extract.StoreState;
 import org.cdlib.mrt.inv.utility.DBAdd;
@@ -161,11 +159,11 @@ public class SaveNode
             System.out.println(PropertiesUtil.dumpProperties("canInvNode", canInvNode.retrieveProp()));
             
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         

@@ -32,9 +32,10 @@ package org.cdlib.mrt.inv.utility;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.db.DBUtil;
 import org.cdlib.mrt.inv.content.ContentAbs;
@@ -76,6 +77,7 @@ public class InvDBUtil
     protected static final String NAME = "InvDBUtil";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger(); 
 
     protected static final String NL = System.getProperty("line.separator");
 
@@ -594,8 +596,7 @@ public class InvDBUtil
             return getObject(objectID, connection, logger); 
 
         } catch (Exception ex) {
-            System.out.println("getEntry Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             return null;
         }
     }
@@ -1276,7 +1277,7 @@ public class InvDBUtil
             return Long.parseLong(numberS);
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -1687,8 +1688,7 @@ public class InvDBUtil
             return sql;
 
         } catch (Exception ex) {
-            System.out.println("getEntry Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             return null;
         }
     }
@@ -1721,10 +1721,8 @@ public class InvDBUtil
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.logError(MESSAGE
-                        + "Fail sql=" + sql + "CException:" + ex, 0);
-            logger.logError(StringUtil.stackTrace(ex), 5);
+            log4j.error(MESSAGE
+                        + "Fail sql=" + sql + "CException:" + ex, ex);
             throw new TException.SQL_EXCEPTION(ex);
         }
     
@@ -2415,8 +2413,7 @@ public class InvDBUtil
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }

@@ -32,14 +32,15 @@ package org.cdlib.mrt.inv.action;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.core.Identifier;
+import static org.cdlib.mrt.inv.action.InvActionAbs.log4j;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.inv.content.InvLocalID;
 import org.cdlib.mrt.inv.service.LocalContainerState;
-import org.cdlib.mrt.inv.service.PrimaryLocalState;
 import org.cdlib.mrt.inv.utility.DBAdd;
 import org.cdlib.mrt.inv.utility.DBDelete;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
@@ -55,6 +56,7 @@ public class LocalMap
     protected static final String NAME = "LocalMap";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
     SaveObject saveObject = null;
  
@@ -103,7 +105,7 @@ public class LocalMap
             if (primaryID != null) {
                 if (primaryID.getValue().equals(objectIDS)) {
                     lcs.setExists(true);
-                    if (DEBUG) System.out.println("Exists:" + primaryID.getValue());
+                    log4j.debug("Exists:" + primaryID.getValue());
                     //return lcs;
                 } else {
                     throw new TException.REQUEST_INVALID(MESSAGE
@@ -117,12 +119,12 @@ public class LocalMap
                 primaryID = new Identifier(objectIDS);
                 lcs.setExists(false);
             }
-            if (DEBUG) System.out.println("Set exists:" + lcs.isExists());
+            log4j.debug("Set exists:" + lcs.isExists());
             List<String> listLocal = getLocalIDs(localIDs);
             DBAdd dbAdd = new DBAdd(connection, logger);
             ArrayList<InvLocalID> invLocalIDList = new ArrayList<>();
             for (String localID : listLocal) {
-                if (DEBUG) System.out.println("LocalMap Add:" + localID);
+                log4j.debug("LocalMap Add:" + localID);
                 InvLocalID invLocalID = getInvLocalID(objectIDS, ownerIDS, localID, logger);
                 long localid = dbAdd.replace(invLocalID);
                 invLocalID.setId(localid);
@@ -140,12 +142,11 @@ public class LocalMap
                                 true,
                                 invLocalIDList);
             state.setExists(lcs.isExists());
-            if (DEBUG) System.out.println(state.dump("Test"));
+            log4j.debug(state.dump("Test"));
             return state;
             
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             try {
                 connection.rollback();
             } catch (Exception cex) {
@@ -180,12 +181,11 @@ public class LocalMap
             long deleteCnt = deletePrimary(objectID.getValue(), connection, logger);
             connection.commit();
             local.setDeleteCnt(deleteCnt);
-            if (DEBUG) System.out.println(local.dump("Test"));
+            log4j.debug(local.dump("Test"));
             return local;
             
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             try {
                 connection.rollback();
             } catch (Exception cex) {
@@ -257,14 +257,14 @@ public class LocalMap
             Identifier primaryID = null;
             boolean match = true;
             for (String localID : listLocal) {
-                if (DEBUG) System.out.println("LocalList localID:" + localID);
+                log4j.debug("LocalList localID:" + localID);
                 InvLocalID invLocalID = InvDBUtil.getPrimaryFromLocal(
                     ownerID, 
                     localID,
                     connection, 
                     logger);
                 if (invLocalID == null) {
-                    if (DEBUG) System.out.println("invLocalID == null");
+                    log4j.debug("invLocalID == null");
                     match = false;
                     continue;
                 }
@@ -292,8 +292,7 @@ public class LocalMap
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("LocalMap exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -333,11 +332,11 @@ public class LocalMap
             return LocalContainerState.buildLocalContainerState(objectID, invLocalIDList);
         
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j.error("Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -375,7 +374,7 @@ public class LocalMap
                     "DELETE FROM " + tableName + " WHERE " + rowName + "='" + rowValue + "'";
             
             int delCnt= DBDelete.delete(connection, sql, logger);
-            System.out.println(MESSAGE + "delete:" 
+            log4j.info(MESSAGE + "delete:" 
                     + " - sql=" + sql
                     + " - delCnt=" + delCnt
                     );

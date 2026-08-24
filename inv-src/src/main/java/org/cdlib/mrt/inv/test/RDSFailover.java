@@ -8,6 +8,8 @@ package org.cdlib.mrt.inv.test;
 
 import java.sql.Connection;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.cdlib.mrt.db.DBUtil;
@@ -31,6 +33,7 @@ public class RDSFailover
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
+    protected static final Logger log4j = LogManager.getLogger(); 
 
     protected DPRFileDB db = null;
     protected LoggerInf logger = null;
@@ -46,12 +49,8 @@ public class RDSFailover
             //System.out.println(itemRun.dump("test"));
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
-                throw new TException(e);
+            log4j.error("TException:" + e, e);
+            throw new TException(e);
         }
         
     }
@@ -115,7 +114,7 @@ public class RDSFailover
         try {
             connect = db.getConnection(true);
             sql = "select current_timestamp,inv_object_id,inv_version_id from inv_files  where id = " + id + ";";
-            System.out.println("\n***Test(" + id + ") sql=" + sql);
+            log4j.info("\n***Test(" + id + ") sql=" + sql);
             
             if (id==10) connect.close();
             Properties [] props = DBUtil.cmd(connect, sql, logger);

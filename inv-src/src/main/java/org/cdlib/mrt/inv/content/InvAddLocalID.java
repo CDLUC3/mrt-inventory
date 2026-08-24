@@ -30,24 +30,14 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.content;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
-import org.cdlib.mrt.inv.utility.InvUtil;
-import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.LinkedHashList;
-import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.MessageDigestValue;
-import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.XMLUtil;
-import org.cdlib.mrt.utility.XSLTUtil;
 /**
  * Container class for inv Object content
  * @author dloy
@@ -57,6 +47,7 @@ public class InvAddLocalID
     private static final String NAME = "InvAddLocalID";
     private static final String MESSAGE = NAME + ": ";
     private static final int MAXW = 5394;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
 
     public long objectseq = 0; 
@@ -82,7 +73,7 @@ public class InvAddLocalID
             setLocalIDs(prop.getProperty("locals"));
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -99,7 +90,7 @@ public class InvAddLocalID
             return retProp;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }

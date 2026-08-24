@@ -168,7 +168,7 @@ public class AdminOwnerOwner
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }
@@ -212,7 +212,7 @@ public class AdminOwnerOwner
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }

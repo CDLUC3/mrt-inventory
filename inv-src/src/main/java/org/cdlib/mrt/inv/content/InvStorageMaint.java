@@ -148,7 +148,7 @@ public class InvStorageMaint
     {
         super(logger);
         this.maintType = type;
-        if (DEBUG) System.out.println(entry.dump("InvStorageMaint"));
+        log4j.debug(entry.dump("InvStorageMaint"));
         this.key = entry.getKey();
         this.size = entry.getSize();
         this.nodeid = nodeID;
@@ -169,7 +169,7 @@ public class InvStorageMaint
         throws TException
     {
         if ((prop == null) || (prop.size() == 0)) return;
-        if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("setProp", prop));
+        log4j.debug(PropertiesUtil.dumpProperties("setProp", prop));
         try {
             setId(prop.getProperty("id"));
             setNodeid(prop.getProperty("inv_node_id"));
