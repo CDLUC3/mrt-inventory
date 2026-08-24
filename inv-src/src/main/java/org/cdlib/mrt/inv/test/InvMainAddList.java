@@ -30,6 +30,8 @@ import org.cdlib.mrt.utility.TFrame;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -46,6 +48,7 @@ public class InvMainAddList
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
 
     /**
      * Main method
@@ -61,7 +64,7 @@ public class InvMainAddList
                 "resources/InvTestList.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
             InvService service = InvService.getInvService(InventoryConfig.useYaml());
             for (int i=1; true; i++) {
                 String objectIDS = get(storeLoadProp, "objectID." + i);
@@ -75,7 +78,7 @@ public class InvMainAddList
                 } catch (Exception ex) {
                     continue;
                 }
-                if (DEBUG) System.out.println(MESSAGE 
+                log4j.debug(MESSAGE 
                         + "ObjectID:" + objectID.getValue() + "\n"
                     );
             }

@@ -32,56 +32,16 @@ package org.cdlib.mrt.inv.action;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-
-import org.cdlib.mrt.core.DateState;
-import org.cdlib.mrt.core.FileComponent;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.core.ComponentContent;
-import org.cdlib.mrt.cloud.MatchMap;
-import org.cdlib.mrt.cloud.VersionMap;
-import org.cdlib.mrt.inv.content.ContentAbs;
-import org.cdlib.mrt.inv.content.InvCollection;
-import org.cdlib.mrt.inv.content.InvCollectionObject;
-import org.cdlib.mrt.inv.content.InvDK;
-import org.cdlib.mrt.inv.content.InvDKVersion;
-import org.cdlib.mrt.inv.content.InvDua;
-import org.cdlib.mrt.inv.content.InvFile;
-import org.cdlib.mrt.inv.content.InvAudit;
 import org.cdlib.mrt.inv.content.InvIngest;
-import org.cdlib.mrt.inv.content.InvMeta;
-import org.cdlib.mrt.inv.content.InvNode;
-import org.cdlib.mrt.inv.content.InvNodeObject;
-import org.cdlib.mrt.inv.content.InvObject;
-import org.cdlib.mrt.inv.content.InvOwner;
 import org.cdlib.mrt.inv.content.InvVersion;
-import org.cdlib.mrt.inv.extract.StoreCollections;
-import org.cdlib.mrt.inv.extract.StoreDua;
-import org.cdlib.mrt.inv.extract.StoreDuaTemplate;
-import org.cdlib.mrt.inv.extract.StoreERC;
 import org.cdlib.mrt.inv.extract.StoreIngest;
-import org.cdlib.mrt.inv.extract.StoreMeta;
-import org.cdlib.mrt.inv.extract.StoreMom;
-import org.cdlib.mrt.inv.extract.StoreOwner;
-import org.cdlib.mrt.inv.extract.StoreState;
 import org.cdlib.mrt.inv.utility.DBAdd;
-import org.cdlib.mrt.inv.utility.DBDelete;
-import org.cdlib.mrt.inv.extract.StoreFile;
-import org.cdlib.mrt.inv.service.InvProcessState;
-import org.cdlib.mrt.inv.service.Role;
-import org.cdlib.mrt.core.Tika;
-import static org.cdlib.mrt.inv.action.InvActionAbs.getVersionMap;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.URLEncoder;
 
 /**
  * Run fixity
@@ -167,7 +127,7 @@ public class IngestMod
             }
             try {
                 url = new URL(urlS);
-                if (DEBUG) System.out.println("manifestURL=" + url);
+                log4j.debug("manifestURL=" + url);
             } catch (Exception ex) {
                 String msg = "extractParts - URL invalid:" + urlS;
                 logger.logError(msg, 0);
@@ -180,9 +140,9 @@ public class IngestMod
                     + ":" + url.getPort()
                     ;
             
-            if (DEBUG) System.out.println("storageBase=" + storageBase);
+            log4j.debug("storageBase=" + storageBase);
             String parts[] = urlPath.split("\\/");
-            if (DEBUG) System.out.println("parts[] length=" + parts.length);        
+            log4j.debug("parts[] length=" + parts.length);        
             if (parts.length < 4) {
                 String msg = "processItem - URL format invalid:" + urlS;
                 logger.logError(msg, 0);
@@ -190,7 +150,7 @@ public class IngestMod
             }
             for (int i=0; i < parts.length; i++) {
                 if (parts[i].length() == 0) continue;
-                if (DEBUG) System.out.println("part[" + i + "]:" + parts[i]);
+                log4j.debug("part[" + i + "]:" + parts[i]);
                         
                 if (parts[i].equals("content")) {
                     extractManifestParts(parts, i);
@@ -221,7 +181,7 @@ public class IngestMod
             String objectIDS = URLDecoder.decode(objectIDSE, "utf-8");
             this.objectID = new Identifier(objectIDS);
             this.versionNumber = Integer.parseInt(versionS);
-            if (DEBUG) System.out.println("extractManifestParts(:"
+            log4j.debug("extractManifestParts(:"
                     +  " - nodeNumber:" + this.nodeNumber
                     +  " - objectID:" + this.objectID.getValue()
                     +  " - versionNumber:" + this.versionNumber
@@ -286,7 +246,7 @@ public class IngestMod
                     + " - versionseq=" + versionseq
                     );
             }
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("invIngestOld", invIngestsOld.retrieveProp()));
+            log4j.debug(PropertiesUtil.dumpProperties("invIngestOld", invIngestsOld.retrieveProp()));
             StoreIngest storeIngest = StoreIngest.getStoreIngest(
                 storageBase, 
                 nodeNumber, 
@@ -299,7 +259,7 @@ public class IngestMod
             invIngests.setId(invIngestsOld.getId());
             invIngests.setObjectID(invIngestsOld.getObjectID());
             invIngests.setVersionID(invIngestsOld.getVersionID());
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("invIngests", invIngests.retrieveProp()));
+            log4j.debug(PropertiesUtil.dumpProperties("invIngests", invIngests.retrieveProp()));
             long id = dbAdd.update(invIngests);
             
             
@@ -307,8 +267,7 @@ public class IngestMod
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }

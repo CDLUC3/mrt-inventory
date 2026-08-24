@@ -30,16 +30,12 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.cdlib.mrt.inv.utility;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
-import org.cdlib.mrt.utility.DeleteOnCloseFileInputStream;
-import org.cdlib.mrt.utility.FileUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
@@ -242,6 +238,7 @@ public class NodeIOInv
     protected static final String MESSAGE = NAME + ": ";
     private static boolean DEBUG = false;
     private static boolean DEBUG_ACCESS = false;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
     protected HashMap<Long,AccessNode> map = new HashMap<>();
     protected String nodeName = null;
@@ -298,8 +295,7 @@ public class NodeIOInv
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -322,8 +318,7 @@ public class NodeIOInv
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -342,8 +337,7 @@ public class NodeIOInv
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -364,8 +358,7 @@ public class NodeIOInv
             return cloudProp;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         
@@ -385,8 +378,7 @@ public class NodeIOInv
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         
@@ -410,8 +402,7 @@ public class NodeIOInv
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         
@@ -427,7 +418,7 @@ public class NodeIOInv
         throws TException
     {
         try {
-            if (DEBUG) System.out.println("Add:" + line);
+            log4j.debug("Add:" + line);
             String[] parts = line.split("\\s*\\|\\s*");
             if ((parts.length < 2) || (parts.length > 3)) {
                 throw new TException.INVALID_OR_MISSING_PARM("addMapENtry requires 2 or 3 parts:" + line);
@@ -440,8 +431,7 @@ public class NodeIOInv
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         
@@ -451,7 +441,7 @@ public class NodeIOInv
         throws TException
     {
         try {
-            if (DEBUG) System.out.println("Add:" + line);
+            log4j.debug("Add:" + line);
             String[] parts = line.split("\\s*\\|\\s*");
             if ((parts.length < 2) || (parts.length > 3)) {
                 throw new TException.INVALID_OR_MISSING_PARM("addMapENtry requires 2 or 3 parts:" + line);
@@ -463,7 +453,7 @@ public class NodeIOInv
                 container = parts[2];
             };
             AccessNode copyNode = getAccessNode(nodeNumber, container, propName);
-            if (DEBUG) System.out.println(copyNode.dump("copyNode"));
+            log4j.debug(copyNode.dump("copyNode"));
             map.put(nodeNumber, copyNode);
             
             
@@ -471,8 +461,7 @@ public class NodeIOInv
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         
@@ -503,12 +492,11 @@ public class NodeIOInv
             
             
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         

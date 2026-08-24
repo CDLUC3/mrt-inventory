@@ -116,7 +116,7 @@ public class InvStorageScan
         throws TException
     {
         if ((prop == null) || (prop.size() == 0)) return;
-        if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("setProp", prop));
+        log4j.debug(PropertiesUtil.dumpProperties("setProp", prop));
         try {
             setId(prop.getProperty("id"));
             setNodeid(prop.getProperty("inv_node_id"));

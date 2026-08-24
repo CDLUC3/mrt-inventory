@@ -109,7 +109,7 @@ public class ZooHandler
     {
         
         try {
-            if (DEBUG) System.out.println("processItem entered");
+            log4j.debug("processItem entered");
             if (zooManager.getZookeeperStatus() == ServiceStatus.shutdown) {
                 return ProcessStatus.shutdown;
             }
@@ -119,8 +119,7 @@ public class ZooHandler
                 processJob  = ProcessJob.getProcessJob(job, zooManager, db);
                 
             } catch (Exception ex) {
-                System.out.println(MESSAGE + "Exception:" + ex);
-                ex.printStackTrace();
+                log4j.error("Exception:" + ex, ex);
                 return ProcessStatus.format;
             }
             if (processJob.isShutdown()) return ProcessStatus.shutdown;

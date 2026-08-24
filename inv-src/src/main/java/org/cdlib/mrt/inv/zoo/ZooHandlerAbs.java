@@ -40,7 +40,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.cdlib.mrt.core.ServiceStatus;
 import org.cdlib.mrt.core.ProcessStatus;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.zk.Job;
 import org.cdlib.mrt.zk.JobState;
@@ -67,7 +66,7 @@ public abstract class ZooHandlerAbs
     
  
 
-    private static final Logger log4j = LogManager.getLogger();
+    protected static final Logger log4j = LogManager.getLogger();
 
     protected ZooHandlerAbs (
             ZooManager zooManager,
@@ -118,7 +117,7 @@ public abstract class ZooHandlerAbs
                     if (job == null) {
                         System.out.println(MESSAGE + "No Recording found");
                         Thread.sleep(pollTime);
-                        if (DEBUG) System.out.println("consume continue");
+                        log4j.debug("consume continue");
                         continue;
                     }
                     cleCnt = 0;
@@ -126,37 +125,33 @@ public abstract class ZooHandlerAbs
                 } catch (java.util.NoSuchElementException nsee) {
                     if (STATUS) System.out.println("ZooHandler sleep:" + pollTime);
                     Thread.sleep(pollTime);
-                    if (DEBUG) System.out.println("consume continue");
+                    log4j.debug("consume continue");
                     continue;
                 }
                 log4j.info("Recording job found:" + job.data());
                 ProcessStatus status = processJob(job);
-                if (DEBUG) System.out.println("ZooHandler Status:" + status.toString());
+                log4j.debug("ZooHandler Status:" + status.toString());
                 if ((status == ProcessStatus.unknown) || (status == ProcessStatus.shutdown)) {
                     System.out.println("Job status unknown");
                 }
                 esuCnt = 0;
                 
             } catch (KeeperException.SessionExpiredException see) {
-                see.printStackTrace(System.err);
-                System.err.println("[warn] RecordConsumeData" + MESSAGE + "Session expired.  Attempting to recreate session.");
+                log4j.warn("[warn] RecordConsumeData" + MESSAGE + "Session expired.  Attempting to recreate session.", see);
                 try {
                     zooManager.setZoo();
 
                 } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                    System.out.println("[error] Consuming queue data: Could not recreate session.");
+                    log4j.error("[error] Consuming queue data: Could not recreate session. exectpion:" + e, e);
                 }
             
             } catch (KeeperException.ConnectionLossException cle) {
-                cle.printStackTrace(System.err);
-                System.err.println("[warn] RecordConsumeData" + MESSAGE + "Connection loss.  Attempting to reconnect.");
+                log4j.warn("[warn] RecordConsumeData" + MESSAGE + "Connection loss.  Attempting to reconnect.", cle);
                 try {
                     zooManager.setZoo();
 
                 } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                    System.out.println("[error] Consuming queue data: Could not reconnect.");
+                    log4j.error("[error] Consuming queue data: Could not reconnect.:" + e, e);
                 }
                 
             } catch (Exception ex) {

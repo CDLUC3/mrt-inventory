@@ -29,44 +29,13 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 **********************************************************/
 package org.cdlib.mrt.inv.action;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-
-import org.jdom.Attribute;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
-import org.jdom.xpath.XPath;
-
-import org.cdlib.mrt.cloud.ManInfo;
-import org.cdlib.mrt.cloud.VersionMap;
-import org.cdlib.mrt.core.ComponentContent;
-import org.cdlib.mrt.core.DateState;
-import org.cdlib.mrt.core.FileComponent;
-import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.core.MessageDigest;
-import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.TFileLogger;
-import org.jdom.Namespace;
-import org.jdom.output.Format;
 import java.io.File;  
 import javax.xml.transform.Transformer;  
 import javax.xml.transform.TransformerFactory;  
 import javax.xml.transform.stream.StreamResult;  
 import javax.xml.transform.stream.StreamSource;  
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This object imports the formatTypes.xml and builds a local table of supported format types.
@@ -80,6 +49,7 @@ import javax.xml.transform.stream.StreamSource;
 public class DataCiteXML
 {
   
+    protected static final Logger log4j = LogManager.getLogger(); 
     /** 
      * Simple transformation method. 
      * @param sourcePath - Absolute path to source xml file. 
@@ -96,7 +66,7 @@ public class DataCiteXML
             transformer.transform(new StreamSource(new File(sourcePath)),  
                                   new StreamResult(new File(resultDir)));  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log4j.error("Exception:" + e, e);  
         }  
     }  
   

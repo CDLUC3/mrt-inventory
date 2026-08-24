@@ -32,20 +32,16 @@ package org.cdlib.mrt.inv.content;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Properties;
 
 
 import org.cdlib.mrt.inv.utility.InvUtil;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.MessageDigestValue;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.XMLUtil;
-import org.cdlib.mrt.utility.XSLTUtil;
 /**
  * Container class for inv Object content
  * @author dloy
@@ -186,7 +182,7 @@ public class InvObject
             setWhen(prop.getProperty("erc_when"));
             setWhere(prop.getProperty("erc_where"));
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -412,7 +408,7 @@ public class InvObject
             InputStream stream = new ByteArrayInputStream(bytes);
             MessageDigestValue mdv = new MessageDigestValue(stream, "md5", logger);
             String md5 = mdv.getChecksum();
-            if (DEBUG) System.out.println("md5=" + md5);
+            log4j.debug("md5=" + md5);
             md5_3 = md5.substring(0,3);
             
         } catch (TException tex) {

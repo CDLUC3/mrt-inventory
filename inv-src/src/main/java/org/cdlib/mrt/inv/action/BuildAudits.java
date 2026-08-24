@@ -134,7 +134,7 @@ public class BuildAudits
             LoggerInf logger)
         throws TException
     {
-        if (DEBUG) System.out.println("+++getStorageBase entered");
+        log4j.debug("+++getStorageBase entered");
         try {
             if (StringUtil.isNotEmpty(storageBase)) {
                 return storageBase;
@@ -187,7 +187,7 @@ public class BuildAudits
     protected void setObject()
         throws TException
     {
-        if (DEBUG) System.out.println("+++setObject entered");
+        log4j.debug("+++setObject entered");
         try {
             invObject = InvDBUtil.getObject(objectID, connection, logger);
             if (invObject == null) {
@@ -227,7 +227,7 @@ public class BuildAudits
         throws TException
     {
         try {
-            if (DEBUG) System.out.println("+++build entered" 
+            log4j.debug("+++build entered" 
                     + " - nodeObjects.size=" + nodeObjects.size()
                     + " - files.size=" + files.size()
                     );
@@ -252,7 +252,7 @@ public class BuildAudits
     public void addAudit(InvNodeObject invNodeObject, InvFile file)
         throws TException
     {
-        if (DEBUG) System.out.println("+++addAudit entered:"
+        log4j.debug("+++addAudit entered:"
                 + " - nodeid=" + invNodeObject.getId()
                 + " - fileid=" + file.getId()
                 );
@@ -275,7 +275,7 @@ public class BuildAudits
             log(invObject.dump("Created object"));
             long auditseq = dbAdd.replace(audit);
             logger.logMessage("Create inv_audit url=" + url, 1);
-            if (DEBUG) System.out.println(audit.dump("+++created object+++"));
+            log4j.debug(audit.dump("+++created object+++"));
             
             audit.setId(auditseq);
             auditCnt++;
@@ -312,7 +312,7 @@ public class BuildAudits
             throw tex;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
         

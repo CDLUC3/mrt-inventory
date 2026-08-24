@@ -38,12 +38,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Properties;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 import org.cdlib.mrt.cloud.ManifestSAX;
 
 import org.cdlib.mrt.utility.FileUtil;
@@ -53,7 +49,6 @@ import org.cdlib.mrt.cloud.VersionMap;
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.action.AddLocalAfterTo;
 import org.cdlib.mrt.inv.action.AddObject;
-import org.cdlib.mrt.inv.action.AddZoo;
 import org.cdlib.mrt.inv.action.BuildAudits;
 import org.cdlib.mrt.inv.action.DeleteObject;
 import org.cdlib.mrt.inv.action.InvSelect;
@@ -66,7 +61,6 @@ import org.cdlib.mrt.inv.admin.AdminCollection;
 import org.cdlib.mrt.inv.admin.AdminInit;
 import org.cdlib.mrt.inv.admin.AdminOwner;
 import org.cdlib.mrt.inv.admin.AdminSLA;
-import org.cdlib.mrt.inv.content.ContentAbs;
 import org.cdlib.mrt.inv.content.InvCollection;
 import org.cdlib.mrt.inv.taskdb.TaskDb;
 import org.cdlib.mrt.inv.content.InvOwner;
@@ -118,7 +112,7 @@ public class InvService
             Identifier objectID)
         throws TException
     {
-        if (DEBUG) System.out.print("add entered");
+        log4j.debug("add entered");
         Connection connection = inventoryConfig.getConnection(false);
         String storageBase = inventoryConfig.getStorageBase();
         AddObject addObject = AddObject.getAddObject(
@@ -138,7 +132,7 @@ public class InvService
     {
         Connection connection = null;
         try {
-            if (DEBUG) System.out.print("add entered");
+            log4j.debug("add entered");
             connection = inventoryConfig.getConnection(false);
             String storageBase = inventoryConfig.getStorageBase();
             AddObject addObject = AddObject.getAddObject(
@@ -177,7 +171,7 @@ public class InvService
             int nodeNum)
         throws TException
     {
-        if (DEBUG) System.out.print("setFileNode entered:" + nodeNum);
+        log4j.debug("setFileNode entered:" + nodeNum);
         Connection connection = inventoryConfig.getConnection(false);
         
         
@@ -199,7 +193,7 @@ public class InvService
             Identifier objectID)
         throws TException
     {
-        if (DEBUG) System.out.print("getManifestUrl entered");
+        log4j.debug("getManifestUrl entered");
         Connection connection = inventoryConfig.getConnection(false);
         InvManifestUrl manifestUrl = InvManifestUrl.getInvManifestUrl(objectID, connection, logger);
         manifestUrl.process();
@@ -221,7 +215,7 @@ public class InvService
             Long version)
         throws TException
     {
-        if (DEBUG) System.out.print("getVersions entered");
+        log4j.debug("getVersions entered");
         Connection connection = null;
         try {
             connection = inventoryConfig.getConnection(false);
@@ -258,7 +252,7 @@ public class InvService
             String fileID)
         throws TException
     {
-        if (DEBUG) System.out.print("getVersions entered");
+        log4j.debug("getVersions entered");
         Connection connection = null;
         try {
             connection = inventoryConfig.getConnection(false);
@@ -291,7 +285,7 @@ public class InvService
             Identifier objectID)
         throws TException
     {
-        if (DEBUG) System.out.print("getVersions entered");
+        log4j.debug("getVersions entered");
         Connection connection = null;
         try {
             connection = inventoryConfig.getConnection(true);
@@ -332,7 +326,7 @@ public class InvService
             String localIDs)
         throws TException
     {
-        if (DEBUG) System.out.print("addPrimaryLocal entered");
+        log4j.debug("addPrimaryLocal entered");
         Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.addLocal(objectID, ownerID, localIDs, connection, logger);
         return state;
@@ -351,7 +345,7 @@ public class InvService
             Long to)
         throws TException
     {
-        if (DEBUG) System.out.print("addPrimaryLocal entered");
+        log4j.debug("addPrimaryLocal entered");
         DPRFileDB db = inventoryConfig.startDB(logger);
         AddLocalAfterTo alat = AddLocalAfterTo.getAddLocalAfterTo(after, to, db, this, logger);
         LocalAfterToState state =  alat.process();
@@ -363,7 +357,7 @@ public class InvService
             Identifier objectID)
         throws TException
     {
-        if (DEBUG) System.out.print("deletePrimary entered");
+        log4j.debug("deletePrimary entered");
         Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.deletePrimary(objectID, connection, logger);
         return state;
@@ -381,7 +375,7 @@ public class InvService
             String localID)
         throws TException
     {
-        if (DEBUG) System.out.print("getPrimary entered");
+        log4j.debug("getPrimary entered");
         Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.getPrimaryClose(ownerID, localID, connection, logger);
         return state;
@@ -397,7 +391,7 @@ public class InvService
             Identifier objectID)
         throws TException
     {
-        if (DEBUG) System.out.print("getPrimary entered");
+        log4j.debug("getPrimary entered");
         Connection connection = inventoryConfig.getConnection(false);
         LocalContainerState state =  LocalMap.getLocalsClose(objectID, connection, logger);
         return state;
@@ -420,7 +414,7 @@ public class InvService
     {
         Connection connection = null;
         try {
-            if (DEBUG) System.out.print("process entered");
+            log4j.debug("process entered");
             connection = inventoryConfig.getConnection(false);
             ProcessObject processObject = ProcessObject.getProcessObject(
                     Role.primary,
@@ -456,7 +450,7 @@ public class InvService
         Connection connection = null;
         BuildAudits buildAudits = null;
         try {
-            if (DEBUG) System.out.print("process entered");
+            log4j.debug("process entered");
             connection = inventoryConfig.getConnection(false);
             buildAudits = BuildAudits.getBuildAudits(
                 storageBase,
@@ -488,7 +482,7 @@ public class InvService
             Identifier objectID)
         throws TException
     {
-        if (DEBUG) System.out.print("delete entered");
+        log4j.debug("delete entered");
         Connection connection = inventoryConfig.getConnection(false);
         DeleteObject deleteObject = DeleteObject.getDeleteObject(
                 objectID, 
@@ -501,7 +495,7 @@ public class InvService
     public InvSelectState select(String sql)
         throws TException
     {
-        if (DEBUG) System.out.print("select entered");
+        log4j.debug("select entered");
         if (StringUtil.isEmpty(sql)) {
             throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "select sql required");
         }
@@ -621,13 +615,11 @@ public class InvService
             return jsonResponse;
             
         } catch (TException tex) {
-            System.out.println("addAdminSLA Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("addAdminSLA Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("addAdminSLA Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("addAdminSLA Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {
@@ -674,13 +666,11 @@ public class InvService
             return jsonResponse;
             
         } catch (TException tex) {
-            System.out.println("addAdminOwner Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("addAdminOwner Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("addAdminOwner Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("addAdminOwner Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {
@@ -725,13 +715,11 @@ public class InvService
             return jsonResponse;
             
         } catch (TException tex) {
-            System.out.println("addAdminCollection Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("addAdminCollection Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("addAdminCollection Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("addAdminCollection Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {
@@ -759,13 +747,11 @@ public class InvService
             return jsonResponse;
             
         } catch (TException tex) {
-            System.out.println("addAdminInit Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("addAdminInit Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("addAdminInit Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("addAdminInit Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {

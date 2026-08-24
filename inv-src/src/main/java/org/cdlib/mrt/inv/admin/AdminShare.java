@@ -30,24 +30,15 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.admin;
 
 
-import org.cdlib.mrt.inv.action.*;
-import org.cdlib.mrt.inv.content.InvCollection;
-import org.cdlib.mrt.inv.content.InvObject;
-import org.cdlib.mrt.inv.content.InvOwner;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdlib.mrt.cloud.ManifestSAX;
-
-import org.cdlib.mrt.utility.FileUtil;
-import org.cdlib.mrt.cloud.VersionMap;
 import org.cdlib.mrt.core.Identifier;
 
 import org.cdlib.mrt.inv.content.InvCollection;
@@ -60,7 +51,6 @@ import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
-import org.cdlib.mrt.utility.URLEncoder;
 import org.json.JSONObject;
 
 /**
@@ -73,7 +63,7 @@ public class AdminShare
     protected static final String NAME = "InvActionAbs";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
-    protected static final String  STATUS_PROCESSING = "processing";  
+    protected static final String  STATUS_PROCESSING = "processing";
     public enum AdminType { sla, owner, collection, init }
     public enum CollectionType { collection_public, collection_private }
 
@@ -300,7 +290,7 @@ public class AdminShare
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }
@@ -324,7 +314,7 @@ public class AdminShare
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }
@@ -377,7 +367,7 @@ public class AdminShare
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }

@@ -30,16 +30,12 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.extract;
 
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.List;
-import org.apache.tika.detect.Detector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tika.mime.MediaType;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.HTTPUtil;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
@@ -55,6 +51,7 @@ public class StoreFile
     private static final String NAME = "StoreERC";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     protected LoggerInf logger = null;
     protected String urlS = null;
@@ -146,7 +143,7 @@ public class StoreFile
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -168,7 +165,7 @@ public class StoreFile
             throw tex;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {

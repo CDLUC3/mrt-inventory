@@ -106,8 +106,7 @@ public class AdminInit
         } catch (Exception ex) {
                 // TODO Auto-generated catch block
                 
-                System.out.println("Exception:" + ex);
-                ex.printStackTrace();
+                log4j.error("Exception:" + ex, ex);
                 
         } finally {
             close(connection);
@@ -136,9 +135,7 @@ public class AdminInit
             
         } catch (Exception ex) {
                 // TODO Auto-generated catch block
-                
-                System.out.println("Exception:" + ex);
-                ex.printStackTrace();
+                log4j.error("Exception:" + ex, ex);
                 
         } finally {
             close(connection);
@@ -161,10 +158,7 @@ public class AdminInit
                 throw tex;
                 
         } catch (Exception ex) {
-                // TODO Auto-generated catch block
-                
-                System.out.println("Exception:" + ex);
-                ex.printStackTrace();
+                log4j.error("Exception:" + ex, ex);
                 throw new TException(ex);
                 
         }

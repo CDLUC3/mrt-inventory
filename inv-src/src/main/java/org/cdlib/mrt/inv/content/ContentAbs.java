@@ -30,25 +30,18 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.inv.content;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.json.JSONObject;
 
-import org.cdlib.mrt.core.DateState;
-import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.XMLUtil;
-import org.cdlib.mrt.utility.XSLTUtil;
 
 /**
  * Container class for DC content
@@ -59,6 +52,7 @@ public abstract class ContentAbs
     private static final String NAME = "ContentAbs";
     private static final String MESSAGE = NAME + ": ";
     private static boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger(); 
     
     public static final String OBJECTS = "inv_objects";
     public static final String VERSIONS = "inv_versions";

@@ -107,7 +107,7 @@ public class ZooManager
             this.conf = conf;
             setStartupZoo();
 	} catch (TException tex) {
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
 	    throw tex;
 	}
     }
@@ -171,7 +171,7 @@ public class ZooManager
             //this.queueNode = conf.getProperty("QueueName");
             this.queueTimeout = Integer.parseInt(conf.getProperty("QueueTimeout"));
             
-            if (DEBUG) System.out.println("Parms" + NL
+            log4j.debug("Parms" + NL
                     + " - " + PropertiesUtil.dumpProperties("zooparm", conf) + NL
                     + " - queueConnectionString=" + queueConnectionString + NL
                     //+ " - queueNode=" + queueNode + NL
@@ -224,9 +224,7 @@ public class ZooManager
 
         } catch (Exception ex) {
             String msg = MESSAGE + " Exception:" + ex;
-            logger.logError(msg, 3);
-            logger.logError(StringUtil.stackTrace(ex), 0);
-            ex.printStackTrace();
+            log4j.error(msg, ex);
             throw new TException.GENERAL_EXCEPTION(msg);
         }
     }
@@ -250,10 +248,8 @@ public class ZooManager
             return zooKeeper;
 
         } catch (Exception ex) {
+            log4j.error("Exception:" + ex, ex);
             String msg = MESSAGE + " Exception:" + ex;
-            logger.logError(msg, 3);
-            logger.logError(StringUtil.stackTrace(ex), 0);
-            ex.printStackTrace();
             throw new TException.GENERAL_EXCEPTION(msg);
         }
     }
@@ -267,7 +263,7 @@ public class ZooManager
             return ;
         }
         else {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE(ex);
         }
     }

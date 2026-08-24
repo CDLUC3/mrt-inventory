@@ -34,7 +34,6 @@ import java.util.Properties;
 
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 import org.json.JSONObject;
@@ -166,8 +165,7 @@ public class InvCollection
             setHarvestPrivilege(prop.getProperty("harvest_privilege"));
             setStorageTier(prop.getProperty("storage_tier"));
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.logError(StringUtil.stackTrace(ex), 2);
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -189,9 +187,7 @@ public class InvCollection
             if (prop.getProperty("storage_tier") != null) setStorageTier(prop.getProperty("storage_tier"));
             
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.logError(StringUtil.stackTrace(ex), 2);
-            throw new TException(ex);
+            log4j.error("Exception:" + ex, ex);
         }
     }
 

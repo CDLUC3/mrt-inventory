@@ -202,11 +202,11 @@ public class AdminSLA
             addMembers(slaObject, members);
             
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }
@@ -250,7 +250,7 @@ public class AdminSLA
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }
@@ -294,7 +294,7 @@ public class AdminSLA
             throw tex;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log4j.error("Exception:" + e, e);
             throw new TException.GENERAL_EXCEPTION(e);
         }
     }

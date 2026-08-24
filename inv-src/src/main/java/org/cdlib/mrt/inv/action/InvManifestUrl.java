@@ -101,7 +101,7 @@ public class InvManifestUrl
             }
  
             for (Properties local : props) {
-                if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("****test****", local));
+                log4j.debug(PropertiesUtil.dumpProperties("****test****", local));
                 String role = local.getProperty("role");
                 if ((role != null) && role.equals("primary")) {
                     prop = local;

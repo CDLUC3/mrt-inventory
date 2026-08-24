@@ -35,6 +35,8 @@ import org.cdlib.mrt.utility.TFrame;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.InvFormatter;
@@ -53,6 +55,7 @@ public class InvMainAddLocalCurl
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     private LoggerInf logger = null;
     private InvService service = null;
@@ -81,7 +84,7 @@ public class InvMainAddLocalCurl
             tFrame = new TFrame(propertyList, "InvLoad");
             LoggerInf logger = tFrame.getLogger();
             Properties storeLoadProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
             InvService service = InvService.getInvService(InventoryConfig.useYaml());
             String urlS = "http://uc3-mrt-inv-dev.cdlib.org:26121/mrtinv/primary";
             InvMainAddLocalCurl pl = new InvMainAddLocalCurl(service, urlS, logger);

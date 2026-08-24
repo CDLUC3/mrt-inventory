@@ -31,29 +31,22 @@ package org.cdlib.mrt.inv.extract;
 
 
 import org.cdlib.mrt.inv.content.*;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 
 import org.cdlib.mrt.cloud.VersionMap;
 import org.cdlib.mrt.core.FileComponent;
 import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.inv.extract.StoreERC;
-import org.cdlib.mrt.utility.DOMParser;
 import org.cdlib.mrt.utility.HTTPUtil;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.URLEncoder;
-import org.cdlib.mrt.utility.XMLUtil;
-import org.cdlib.mrt.utility.XSLTUtil;
 /**
  * Container class for DC content
  * @author dloy
@@ -65,6 +58,7 @@ public class StoreMeta
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
     private static final String METANAMES = "|producer/mrt-dc.xml|producer/mrt-eml.xml|";
+    protected static final Logger log4j = LogManager.getLogger();
     
     private VersionMap versionMap = null;
     private String storageBase = null;
@@ -94,7 +88,7 @@ public class StoreMeta
         InvMeta.Schema schema = InvMeta.Schema.valueOf(schemaS);
         InvMeta.Serialization serialization = InvMeta.Serialization.valueOf(serializationS);
         MatchMeta matchMeta = new MatchMeta(fileID, schema, serialization, metaVersion, stripHeader);
-        if (DEBUG) System.out.println("StoreMeta - addMatch:"
+        log4j.debug("StoreMeta - addMatch:"
                 + " - fileID=" + fileID
                 + " - schemaS=" + schema.toString()
                 + " - serializationS=" + serialization.toString()
@@ -137,16 +131,16 @@ public class StoreMeta
         try {
             List<FileComponent> components = versionMap.getVersionComponents(versionID);
             for (FileComponent component : components) {
-                if (DEBUG) System.out.println("StoreMeta: name=" + component.getIdentifier());
+                log4j.debug("StoreMeta: name=" + component.getIdentifier());
                 MatchMeta matchMeta = matchTable.get(component.getIdentifier());
                 if (matchMeta != null) {
-                    if (DEBUG) System.out.println("StoreMeta: add=" + component.getIdentifier());
+                    log4j.debug("StoreMeta: add=" + component.getIdentifier());
                     metaComponents.add(matchMeta);
                 }
             }
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -175,12 +169,12 @@ public class StoreMeta
                     + "/" + URLEncoder.encode(fileID, "utf-8")
                     + "?fixity=no"
                     ;
-            if (DEBUG) System.out.println(MESSAGE + "getInputStream url=" + urlS);
+            log4j.debug(MESSAGE + "getInputStream url=" + urlS);
             InputStream inStream = HTTPUtil.getObject(urlS,  EXTRACT_TIMEOUT, 3);
             return inStream;
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -199,11 +193,11 @@ public class StoreMeta
                     + "/" + URLEncoder.encode(fileID, "utf-8")
                     + "?fixity=no"
                     ;
-            if (DEBUG) System.out.println(MESSAGE + "getInputStream url=" + urlS);
+            log4j.debug(MESSAGE + "getInputStream url=" + urlS);
             return StoreExtract.getString(urlS, logger, 3);
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }

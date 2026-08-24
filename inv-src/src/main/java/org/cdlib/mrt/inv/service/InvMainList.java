@@ -7,29 +7,14 @@
 package org.cdlib.mrt.inv.service;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Properties;
-import java.util.Vector;
-
-import org.cdlib.mrt.inv.service.InvDBList;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 
-import org.cdlib.mrt.core.ComponentContent;
 import org.cdlib.mrt.utility.LoggerInf;
-import org.cdlib.mrt.core.Identifier;
-import org.cdlib.mrt.utility.TallyTable;
-import org.cdlib.mrt.utility.TFileLogger;
 import org.cdlib.mrt.utility.TFrame;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import org.cdlib.mrt.utility.FileUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.utility.PropertiesUtil;
 
 /**
@@ -44,6 +29,7 @@ public class InvMainList
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
+    protected static final Logger log4j = LogManager.getLogger();
 
     /**
      * Main method
@@ -59,7 +45,7 @@ public class InvMainList
                 "resources/InvMainList.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
             InvService service = InvService.getInvService(InventoryConfig.useYaml());
             LoggerInf logger = service.getLogger();
             String runPropS  = null;
@@ -78,15 +64,11 @@ public class InvMainList
             }
             Properties runProp = PropertiesUtil.loadFileProperties(runPropF);
             InvDBManifestList runList = new InvDBManifestList(runProp, service, logger);
-            if (DEBUG) System.out.println(runList.dump(MESSAGE));
+            log4j.debug(runList.dump(MESSAGE));
             runList.run();
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+            log4j.error("Exception:" + e, e);
         }
     }
 

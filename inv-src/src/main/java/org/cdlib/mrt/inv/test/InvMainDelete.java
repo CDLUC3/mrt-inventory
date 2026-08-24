@@ -15,6 +15,8 @@ package org.cdlib.mrt.inv.test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.cdlib.mrt.utility.TException;
@@ -42,6 +44,7 @@ public class InvMainDelete
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
 
     /**
      * Main method
@@ -56,7 +59,7 @@ public class InvMainDelete
                 "resources/InvMainDelete.properties"};
             tFrame = new TFrame(propertyList, "InvLoad");
             Properties storeLoadProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", storeLoadProp));
             InvService service = InvService.getInvService(InventoryConfig.useYaml());
             String objectIDS = get(storeLoadProp, "deleteObjectID");
             Identifier objectID = new Identifier(objectIDS);
@@ -64,7 +67,7 @@ public class InvMainDelete
             dump(MESSAGE, response, service.getLogger());
             service.shutdown();
             
-            if (DEBUG) System.out.println(MESSAGE 
+            log4j.debug(MESSAGE 
                     + "ObjectID:" + objectID.getValue() + "\n"
                     );
 

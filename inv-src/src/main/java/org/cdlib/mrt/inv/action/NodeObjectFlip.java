@@ -35,12 +35,8 @@ import java.util.List;
 import java.util.Properties;
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.core.DateState;
-import org.cdlib.mrt.inv.content.InvFile;
-import org.cdlib.mrt.inv.content.InvAudit;
-import org.cdlib.mrt.inv.content.InvNode;
 import org.cdlib.mrt.inv.content.InvNodeObject;
 import org.cdlib.mrt.inv.content.InvObject;
-import org.cdlib.mrt.inv.content.InvVersion;
 import org.cdlib.mrt.inv.service.Role;
 import org.cdlib.mrt.inv.utility.DBAdd;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
@@ -48,7 +44,6 @@ import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.URLEncoder;
 
 /**
  * Run fixity
@@ -105,7 +100,7 @@ public class NodeObjectFlip
             boolean doSQL)
         throws TException
     {
-        if (DEBUG) System.out.println("getNodeObjectFlip:"
+        log4j.debug("getNodeObjectFlip:"
                 + " - newPrimaryNodeID:" + newPrimaryNodeID
                 + " - objectID:" + objectID
         );
@@ -157,8 +152,7 @@ public class NodeObjectFlip
             String msg = MESSAGE + "Exception for entry id=" + objectID.getValue()
                     + " - Exception:" + ex
                     ;
-            System.out.println("EXception:" + msg);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             logger.logError(msg, 2);
             logger.logError(StringUtil.stackTrace(ex),3);
             try {
@@ -191,7 +185,7 @@ public class NodeObjectFlip
     protected void setObject()
         throws TException
     {
-        if (DEBUG) System.out.println("+++setObject entered");
+        log4j.debug("+++setObject entered");
         try {
             invObject = InvDBUtil.getObject(objectID, connection, logger);
             if (invObject == null) {
@@ -201,7 +195,7 @@ public class NodeObjectFlip
             }
             objectseq = invObject.getId();
             versionNumber = invObject.getVersionNumber();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("invObject", invObject.retrieveProp()));
+            log4j.debug(PropertiesUtil.dumpProperties("invObject", invObject.retrieveProp()));
             nodeObjects = InvDBUtil.getObjectNodes(objectseq, connection, logger);
             if (nodeObjects == null) {
                 throw new TException.INVALID_ARCHITECTURE(MESSAGE + "node not found for object:" + objectID.getValue()
@@ -236,7 +230,7 @@ public class NodeObjectFlip
         throws TException
     {
         try {
-            if (DEBUG) System.out.println("+++build entered" 
+            log4j.debug("+++build entered" 
                     + " - nodeObjects.size=" + nodeObjects.size()
                     );
             replicatedDate = getReplicatedDate(nodeObjects);
@@ -272,14 +266,14 @@ public class NodeObjectFlip
                 if (nodeObject.getRole() == Role.primary) {
                     primaryCnt++;
                     if (nodeObject.getNodesid() != newPrimaryNodeID) {
-                        if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("Confirm - primary not primary nodeid:" 
+                        log4j.debug(PropertiesUtil.dumpProperties("Confirm - primary not primary nodeid:" 
                                 + arkS,nodeObject.retrieveProp()));
                         errCnt++;
                     }
                 } else { // secondary
                     secondaryCnt++;
                     if (nodeObject.getNodesid() == newPrimaryNodeID) {
-                        if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("Confirm - secondary should be primary:" + arkS,
+                        log4j.debug(PropertiesUtil.dumpProperties("Confirm - secondary should be primary:" + arkS,
                                 nodeObject.retrieveProp()));
                         errCnt++;
                     }
@@ -288,7 +282,7 @@ public class NodeObjectFlip
             }
             
             if (primaryCnt == 0) {
-                if (DEBUG) System.out.println("Confirm - Primary not set:" + arkS);
+                log4j.debug("Confirm - Primary not set:" + arkS);
                 errCnt++;
             }
             
@@ -372,7 +366,7 @@ public class NodeObjectFlip
             throw new TException(tex);
                     
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }
@@ -419,11 +413,11 @@ public class NodeObjectFlip
                 );
             
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
                     
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
         }
     }

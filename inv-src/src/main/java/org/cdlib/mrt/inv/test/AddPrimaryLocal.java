@@ -6,42 +6,25 @@
 
 package org.cdlib.mrt.inv.test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.sql.Connection;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Vector;
-
-
-import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 
-import org.cdlib.mrt.core.ComponentContent;
 import org.cdlib.mrt.core.Identifier;
 import org.cdlib.mrt.inv.service.InvService;
-import org.cdlib.mrt.inv.service.PrimaryLocalState;
 import org.cdlib.mrt.inv.service.LocalContainerState;
-import org.cdlib.mrt.utility.TallyTable;
 import org.cdlib.mrt.utility.TException;
-import org.cdlib.mrt.utility.TFileLogger;
 import org.cdlib.mrt.utility.TFrame;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.content.InvAddLocalID;
 import org.cdlib.mrt.inv.service.InventoryConfig;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
 import org.cdlib.mrt.inv.utility.InvDBUtil;
 import org.cdlib.mrt.inv.utility.InvFormatter;
-import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
 
 /**
@@ -53,6 +36,7 @@ public class AddPrimaryLocal
 {
     private static final String NAME = "AddPrimaryLocal";
     private static final String MESSAGE = NAME + ": ";
+    protected static final Logger log4j = LogManager.getLogger(); 
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = false;
@@ -86,7 +70,7 @@ public class AddPrimaryLocal
             tFrame = new TFrame(propertyList, "InvLoad");
             LoggerInf logger = tFrame.getLogger();
             Properties invProp  = tFrame.getProperties();
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "main", invProp));
+            log4j.debug(PropertiesUtil.dumpProperties(MESSAGE + "main", invProp));
             InvService service = InvService.getInvService(InventoryConfig.useYaml());
             
             db = new DPRFileDB(logger, invProp);
@@ -97,11 +81,8 @@ public class AddPrimaryLocal
             
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+            log4j.error("Exception:" + e, e);
+            
         } finally {
             try {
                 db.shutDown();
@@ -139,13 +120,11 @@ public class AddPrimaryLocal
  
 	//Construct BufferedReader from InputStreamReader
         } catch (TException tex) {
-            System.out.println("Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {
@@ -159,7 +138,7 @@ public class AddPrimaryLocal
         throws TException
     {
         try {
-            if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("dump", local.getProp()));
+            log4j.debug(PropertiesUtil.dumpProperties("dump", local.getProp()));
             add(local.getObjectArk(), local.getOwnerArk(), local.getLocalIDs());
             cnt++;
             if ((cnt % 100) == 0) {

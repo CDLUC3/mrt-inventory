@@ -84,7 +84,7 @@ public class Versions
         throws TException
     {
         super(connection, logger);
-        if (DEBUG) System.out.print("getVersions entered");
+        log4j.debug("getVersions entered");
         this.objectID = objectID;
         this.specifiedVersion = specifiedVersion;
         this.state = new VersionsState(objectID);

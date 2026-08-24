@@ -33,6 +33,8 @@ package org.cdlib.mrt.inv.extract;
 
 import java.io.File;
 import java.util.ArrayList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.utility.FileUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
@@ -53,6 +55,7 @@ public class StoreExtract
     private static final String NAME = "StoreExtract";
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     protected LoggerInf logger = null;
     protected String collectionsS = null;
@@ -75,7 +78,7 @@ public class StoreExtract
                 
             } catch (TException.REQUESTED_ITEM_NOT_FOUND rinf) {
                 responseEx = rinf;
-                if (DEBUG) System.out.println("request fail(" + loop + "):"
+                log4j.debug("request fail(" + loop + "):"
                         + " exception=" + responseEx
                 );
                 sleep(loop, tries);
@@ -84,7 +87,7 @@ public class StoreExtract
             } catch (TException tex) {
                 if (tex.toString().contains("404")) {
                     responseEx = tex;
-                    if (DEBUG) System.out.println("contains fail(" + loop + "):"
+                    log4j.debug("contains fail(" + loop + "):"
                             + " exception=" + responseEx
                     );
                     sleep(loop, tries);
@@ -105,7 +108,7 @@ public class StoreExtract
         try {
             if (loop == tries) return; // skip last fail
             long dosleep = loop * 30000;
-            if (DEBUG) System.out.println("sleep:"
+            log4j.debug("sleep:"
                         + " loop=" + loop
                         + " tries=" + tries
                         + " dosleep=" + dosleep
@@ -141,7 +144,7 @@ public class StoreExtract
                     throw new TException.INVALID_OR_MISSING_PARM(MESSAGE 
                             + "getStoreCollection - logger missing");
                 }
-                if (DEBUG) System.out.println("getStoreCollection:" + urlS);
+                log4j.debug("getStoreCollection:" + urlS);
                 tempFile = FileUtil.url2TempFile(logger, urlS);
                 return FileUtil.file2String(tempFile);
 

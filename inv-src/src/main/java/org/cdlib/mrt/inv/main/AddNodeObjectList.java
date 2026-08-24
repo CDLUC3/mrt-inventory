@@ -39,6 +39,8 @@ import org.cdlib.mrt.utility.TFrame;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.inv.action.NodeObjectFlip;
 import org.cdlib.mrt.inv.utility.DPRFileDB;
@@ -59,6 +61,7 @@ public class AddNodeObjectList
 
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = false;
+    protected static final Logger log4j = LogManager.getLogger();
     
     private LoggerInf logger = null;
     protected DPRFileDB db = null;
@@ -149,13 +152,11 @@ public class AddNodeObjectList
             logger.logMessage("Start processing flip" + startDate, 0, true);
         
         } catch (TException tex) {
-            System.out.println("Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("Exception:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         }
@@ -181,11 +182,8 @@ public class AddNodeObjectList
             
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+                log4j.error(
+                    "Main: Encountered exception:" + e, e);
         }
     }
 
@@ -208,11 +206,8 @@ public class AddNodeObjectList
             
 
         } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(
-                    "Main: Encountered exception:" + e);
-                System.out.println(
-                        StringUtil.stackTrace(e));
+                log4j.error(
+                    "Main: Encountered exception:" + e, e);
         }
     }
 
@@ -246,13 +241,11 @@ public class AddNodeObjectList
  
 	//Construct BufferedReader from InputStreamReader
         } catch (TException tex) {
-            System.out.println("Exception:" + tex);
-            tex.printStackTrace();
+            log4j.error("TException:" + tex, tex);
             throw tex;
             
         } catch (Exception ex) {
-            System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.error("Exception:" + ex, ex);
             throw new TException(ex);
             
         } finally {
@@ -268,7 +261,7 @@ public class AddNodeObjectList
     {
         Connection connection = null;
         try {
-            if (DEBUG)System.out.println("\n\n#####Line(" + objcnt + "):" + line);
+            log4j.debug("\n\n#####Line(" + objcnt + "):" + line);
             connection = db.getConnection(false);
             Identifier objectID = new Identifier(line);
             NodeObjectFlip nof = NodeObjectFlip.getNodeObjectFlip(newPrimaryNodeID, 
