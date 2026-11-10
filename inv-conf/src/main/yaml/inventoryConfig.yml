@@ -1,58 +1,5 @@
 which-inv-info: "{!ENV: MERRITT_INV_INFO !DEFAULT: inv-info}"
   
-inv-info:
-  storageBase: "{!SSM: inventory/config/storeURI}"
-  state:
-    id: inv
-    name: UC3
-    description: "UC3 inventory micro-service"
-    baseURI: "{!SSM: inventory/config/baseURI}"
-  
-  zooserver:
-    #queueService: "uc3-mrtdocker-dev03.cdlib.org:2181"  
-    queueService: "{!SSM: inventory/zoo/queueService !DEFAULT: localhost:2181}"
-    queueName: "{!SSM: inventory/zoo/queueName}"
-    queueTimeout: "{!SSM: inventory/zoo/Timeout !DEFAULT: 3600000}"
-    lockName: "{!SSM: inventory/zoo/lockName !DEFAULT: /mrt.lock}"
-
-  zooclient:
-    zooPollMilli: "{!SSM: inventory/config/zoo/pollMilli !DEFAULT: 60000}"
-    zooThreadCount: "{!SSM: inventory/config/zoo/threadCount !DEFAULT: 5}"
-
-  fileLogger:
-    messageMaximumLevel: "{!SSM: inventory/config/log/messageMaximumLevel !DEFAULT: 5}"
-    messageMaximumError: "{!SSM: inventory/config/log/messageMaximumError !DEFAULT: 10}"
-    path: "{!ENV: LOG_INV !DEFAULT: /dpr2/mrtHomes/inv}"
-    name: inv
-    qualifier: yyMMdd
-    trace: 5
-    
-  admin:
-    #ownerOwner: "{!SSM: inventory/config/admin/ownerOwner !DEFAULT: none}"
-    #ownerCollection: "{!SSM: inventory/config/admin/ownerCollection !DEFAULT: none}"
-    #slaCollection: "{!SSM: inventory/config/admin/slaCollection !DEFAULT: none}"
-    #collectionCollection: "{!SSM: inventory/config/admin/collectionCollection !DEFAULT: none}"
-    #systemClasses: "{!SSM: inventory/config/admin/systemClasses !DEFAULT: none}"
-    
-    ownerOwner: ark:/13030/j2rn30xp
-    ownerCollection: ark:/13030/j2cc0900
-    slaCollection: ark:/13030/j2h41690
-    collectionCollection: ark:/13030/j27p88qw
-    systemClasses: ark:/13030/j2mw23mp
-    
-    #ownerOwner: ark:/99999/testownown
-    #ownerCollection: ark:/99999/testowncol
-    #slaCollection: ark:/99999/testslacol
-    #collectionCollection: ark:/99999/testcolcol
-    #systemClasses: ark:/99999/testsyscls
-
-  db:
-    user: "{!SSM: inv/readwrite/db-user}"
-    password: "{!SSM: inv/readwrite/db-password}"
-    host: "{!SSM: inv/db-host}"
-    name: "{!SSM: inv/db-name}"
-    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
-  
 inv-info-docker: &docker
   storageBase: "http://{!ENV: SVC_ACCESS !DEFAULT: store:8080/store}"
   state:
@@ -94,26 +41,6 @@ inv-info-docker: &docker
     password: password
     encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"   # schema won't load if it's utf8mb4
   
-inv-info-docker-dev: 
-  <<: *docker
-
-  db:
-    user: "{!SSM: inv/readwrite/db-user}"
-    password: "{!SSM: inv/readwrite/db-password}"
-    host: "{!SSM: inv/db-host}"
-    name: "{!SSM: inv/db-name}"
-    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
-
-inv-ecs-dev: 
-  <<: *docker
-
-  db:
-    user: "{!SSM: /uc3/mrt/ecs/billing/readwrite/db-user !DEFAULT: user}"
-    password: "{!SSM: /uc3/mrt/ecs/billing/readwrite/db-password !DEFAULT: password}"
-    host: "{!SSM: /uc3/mrt/ecs/billing/db-host !DEFAULT: db-container}"
-    name: "inv"
-    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"   # schema won't load if it's utf8mb4
-
 inv-ecs: 
   <<: *docker
 
@@ -122,4 +49,4 @@ inv-ecs:
     password: "{!SSM: inv/readwrite/db-password}"
     host: "{!SSM: inv/db-host}"
     name: "{!SSM: inv/db-name}"
-    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
+    encoding: "{!ENV: RDS_ENCODING !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
