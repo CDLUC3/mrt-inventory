@@ -1,4 +1,4 @@
-which-inv-info: "{!ENV: MERRITT_INV_INFO !DEFAULT: inv-info}"
+which-inv-info: "{!ENV: MERRITT_INV_INFO !DEFAULT: inv-info-docker}"
   
 inv-info-docker: &docker
   storageBase: "http://{!ENV: SVC_ACCESS !DEFAULT: store:8080/store}"
